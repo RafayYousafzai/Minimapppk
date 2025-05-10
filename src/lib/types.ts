@@ -19,6 +19,7 @@ export interface Product {
   longDescription?: string;
   images: string[]; // Array of image URLs, first one is primary
   price: number;
+  originalPrice?: number; // For sales/discounts
   category: string;
   rating: number; // Average rating, 0-5
   reviews: number; // Number of reviews
@@ -35,8 +36,9 @@ export interface CartItem {
   price: number; // Actual price considering selected variant
   quantity: number;
   selectedVariants?: { [variantType: string]: string }; // e.g. { Size: "M", Color: "Red" }
-  // Add available stock for this specific cart item (product/variant combination)
   availableStock: number; 
+  description?: string; // Optional: for AI product recommendations context
+  category?: string; // Optional: for AI product recommendations context
 }
 
 export interface FilterOptions {

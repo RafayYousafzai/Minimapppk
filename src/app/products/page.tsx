@@ -1,43 +1,73 @@
+
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import ProductCard from '@/components/products/ProductCard';
 import FilterSidebar from '@/components/products/FilterSidebar';
-import { mockProducts, getPriceRange } from '@/lib/mock-data';
+import * as productService from '@/services/productService'; // Updated import
 import type { Product } from '@/lib/types';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, X } from 'lucide-react';
+import { Search, X, Loader2 } from 'lucide-react';
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-
+import { Skeleton } from '@/components/ui/skeleton';
 
 const PRODUCTS_PER_PAGE = 8;
-const { min: globalMinPrice, max: globalMaxPrice } = getPriceRange();
 
 export default function ProductsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [globalMinPrice, setGlobalMinPrice] = useState(0);
+  const [globalMaxPrice, setGlobalMaxPrice] = useState(1000);
+
+
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
   const [localSearchTerm, setLocalSearchTerm] = useState(searchParams.get('search') || '');
-
+  
   const [filters, setFilters] = useState(() => {
-    const categories = searchParams.get('categories')?.split(',') || [];
-    const minPrice = parseFloat(searchParams.get('minPrice') || globalMinPrice.toString());
-    const maxPrice = parseFloat(searchParams.get('maxPrice') || globalMaxPrice.toString());
-    const minRating = parseInt(searchParams.get('minRating') || '0', 10);
+    const categories = searchParams.get('categories')?.split(',').filter(Boolean) || [];
+    // Prices and rating will be initialized after fetching price range
     return {
       categories,
-      priceRange: [minPrice, maxPrice] as [number, number],
-      minRating,
+      priceRange: [globalMinPrice, globalMaxPrice] as [number, number],
+      minRating: parseInt(searchParams.get('minRating') || '0', 10),
     };
   });
   
   const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1', 10));
 
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      const products = await productService.getAllProducts();
+      setAllProducts(products);
+      
+      const priceRangeData = await productService.getPriceRange();
+      setGlobalMinPrice(priceRangeData.min);
+      setGlobalMaxPrice(priceRangeData.max);
+
+      // Initialize filters with actual price range after fetching
+      setFilters(prevFilters => ({
+        ...prevFilters,
+        priceRange: [
+            parseFloat(searchParams.get('minPrice') || priceRangeData.min.toString()),
+            parseFloat(searchParams.get('maxPrice') || priceRangeData.max.toString())
+        ] as [number, number],
+      }));
+      setIsLoading(false);
+    };
+    fetchData();
+  }, []); // Fetch initial data on mount
+
+
   // Update URL when filters, searchTerm, or page change
   useEffect(() => {
+    if (isLoading) return; // Don't update URL while initial data is loading
+
     const params = new URLSearchParams();
     if (searchTerm) params.set('search', searchTerm);
     if (filters.categories.length > 0) params.set('categories', filters.categories.join(','));
@@ -46,21 +76,18 @@ export default function ProductsPage() {
     if (filters.minRating > 0) params.set('minRating', filters.minRating.toString());
     if (currentPage > 1) params.set('page', currentPage.toString());
     
-    // router.push(`/products?${params.toString()}`, { scroll: false }); // Using shallow routing
-    // Using window.history.pushState to avoid full page reloads and state loss in components
-    // Only update if params string actually changed to avoid infinite loops
     const currentPath = window.location.pathname + window.location.search;
     const newPath = `/products?${params.toString()}`;
     if (currentPath !== newPath) {
        window.history.pushState({}, '', newPath);
     }
-
-  }, [searchTerm, filters, currentPage, router]);
+  }, [searchTerm, filters, currentPage, router, globalMinPrice, globalMaxPrice, isLoading]);
 
 
   // Update state from URL on mount and back/forward navigation
   useEffect(() => {
     const handlePopState = () => {
+      if (isLoading) return; // Don't process popstate if initial data isn't loaded yet
       const params = new URLSearchParams(window.location.search);
       setSearchTerm(params.get('search') || '');
       setLocalSearchTerm(params.get('search') || '');
@@ -75,18 +102,20 @@ export default function ProductsPage() {
       setCurrentPage(parseInt(params.get('page') || '1', 10));
     };
 
-    // Initial load
-    handlePopState();
+    // Initial load sync with URL (after data is fetched)
+    if (!isLoading) {
+        handlePopState();
+    }
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
+  }, [isLoading, globalMinPrice, globalMaxPrice]);
 
 
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSearchTerm(localSearchTerm);
-    setCurrentPage(1); // Reset to first page on new search
+    setCurrentPage(1);
   };
   
   const clearSearch = () => {
@@ -101,12 +130,13 @@ export default function ProductsPage() {
     minRating: number;
   }) => {
     setFilters(newFilters);
-    setCurrentPage(1); // Reset to first page on filter change
+    setCurrentPage(1);
   }, []);
 
 
   const filteredProducts = useMemo(() => {
-    return mockProducts.filter((product) => {
+    if (isLoading) return [];
+    return allProducts.filter((product) => {
       const searchMatch = searchTerm
         ? product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -122,7 +152,7 @@ export default function ProductsPage() {
 
       return searchMatch && categoryMatch && priceMatch && ratingMatch;
     });
-  }, [searchTerm, filters]);
+  }, [searchTerm, filters, allProducts, isLoading]);
 
   const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
   const paginatedProducts = filteredProducts.slice(
@@ -136,10 +166,53 @@ export default function ProductsPage() {
        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
+  
+  if (isLoading) {
+    return (
+        <div className="flex flex-col lg:flex-row gap-8">
+            <div className="hidden lg:block lg:w-72 xl:w-80 space-y-6 p-4">
+                <Skeleton className="h-8 w-1/3 mb-4" />
+                {[...Array(3)].map((_, i) => (
+                    <div key={i} className="space-y-2 mb-4">
+                        <Skeleton className="h-6 w-1/2" />
+                        <Skeleton className="h-20 w-full" />
+                    </div>
+                ))}
+            </div>
+            <div className="flex-1">
+                <Skeleton className="h-10 w-full mb-6" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {[...Array(PRODUCTS_PER_PAGE)].map((_, i) => (
+                         <Card key={i} className="flex flex-col h-full">
+                            <Skeleton className="aspect-square w-full" />
+                            <div className="p-4 flex-grow space-y-2">
+                                <Skeleton className="h-6 w-3/4" />
+                                <Skeleton className="h-4 w-full" />
+                                <Skeleton className="h-4 w-1/2" />
+                            </div>
+                            <div className="p-4 pt-0">
+                                <Skeleton className="h-10 w-full" />
+                            </div>
+                        </Card>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+  }
+
 
   return (
     <div className="flex flex-col lg:flex-row gap-8">
-      <FilterSidebar onFilterChange={handleFilterChange} initialFilters={filters} />
+      <FilterSidebar 
+        onFilterChange={handleFilterChange} 
+        initialFilters={{ // Pass current filters based on fetched price range
+            categories: filters.categories,
+            priceRange: filters.priceRange,
+            minRating: filters.minRating,
+        }}
+        key={`${globalMinPrice}-${globalMaxPrice}`} // Re-mount FilterSidebar if global price range changes
+       />
       <div className="flex-1">
         <div className="mb-6">
           <form onSubmit={handleSearchSubmit} className="flex gap-2 items-center">
@@ -201,7 +274,6 @@ export default function ProductsPage() {
               </PaginationItem>
               {[...Array(totalPages)].map((_, i) => {
                 const pageNum = i + 1;
-                // Basic pagination display logic, can be improved for many pages
                 if (totalPages <= 5 || 
                     pageNum === 1 || 
                     pageNum === totalPages || 
@@ -236,3 +308,4 @@ export default function ProductsPage() {
     </div>
   );
 }
+

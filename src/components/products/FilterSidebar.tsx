@@ -1,17 +1,20 @@
+
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import StarRating from '@/components/ui/StarRating';
-import { X, ListFilter } from 'lucide-react';
-import { getAllCategories, getPriceRange } from '@/lib/mock-data';
+import { X, ListFilter, Loader2 } from 'lucide-react';
+import * as productService from '@/services/productService'; // Updated import
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Separator } from '../ui/separator';
+import { Skeleton } from '../ui/skeleton';
+
 
 interface FilterSidebarProps {
   onFilterChange: (filters: {
@@ -19,28 +22,61 @@ interface FilterSidebarProps {
     priceRange: [number, number];
     minRating: number;
   }) => void;
-  initialFilters: {
+  initialFilters: { // These are the URL-derived or parent-driven initial/current filters
     categories: string[];
     priceRange: [number, number];
     minRating: number;
   };
 }
 
-const availableCategories = getAllCategories();
-const { min: globalMinPrice, max: globalMaxPrice } = getPriceRange();
 
 const FilterSidebar: React.FC<FilterSidebarProps> = ({ onFilterChange, initialFilters }) => {
+  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
+  const [globalMinPrice, setGlobalMinPrice] = useState(0);
+  const [globalMaxPrice, setGlobalMaxPrice] = useState(1000);
+  const [isLoading, setIsLoading] = useState(true);
+
   const [selectedCategories, setSelectedCategories] = useState<string[]>(initialFilters.categories);
   const [priceRange, setPriceRange] = useState<[number, number]>(initialFilters.priceRange);
   const [minRating, setMinRating] = useState<number>(initialFilters.minRating);
+  
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   useEffect(() => {
-    // Update internal state if initialFilters change from URL
-    setSelectedCategories(initialFilters.categories);
-    setPriceRange(initialFilters.priceRange);
-    setMinRating(initialFilters.minRating);
-  }, [initialFilters]);
+    const fetchFilterData = async () => {
+      setIsLoading(true);
+      const [categories, priceRangeData] = await Promise.all([
+        productService.getAllCategories(),
+        productService.getPriceRange(),
+      ]);
+      setAvailableCategories(categories);
+      setGlobalMinPrice(priceRangeData.min);
+      setGlobalMaxPrice(priceRangeData.max);
+
+      // Ensure initialFilters.priceRange is within fetched global bounds
+      const initialMin = Math.max(priceRangeData.min, initialFilters.priceRange[0]);
+      const initialMax = Math.min(priceRangeData.max, initialFilters.priceRange[1]);
+      
+      setPriceRange([initialMin, initialMax]);
+      setSelectedCategories(initialFilters.categories);
+      setMinRating(initialFilters.minRating);
+
+      setIsLoading(false);
+    };
+    fetchFilterData();
+  }, []); // Fetch on mount
+
+   // Effect to sync local state if initialFilters prop changes (e.g. from URL popstate)
+  useEffect(() => {
+    if (!isLoading) { // Only sync after initial data load
+        setSelectedCategories(initialFilters.categories);
+        // Ensure the price range from props is within the global bounds
+        const newMin = Math.max(globalMinPrice, initialFilters.priceRange[0]);
+        const newMax = Math.min(globalMaxPrice, initialFilters.priceRange[1]);
+        setPriceRange([newMin, newMax]);
+        setMinRating(initialFilters.minRating);
+    }
+  }, [initialFilters, isLoading, globalMinPrice, globalMaxPrice]);
 
 
   const handleCategoryChange = (category: string) => {
@@ -74,29 +110,48 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ onFilterChange, initialFi
   };
 
   const handleRatingChange = (rating: number) => {
-    setMinRating(minRating === rating ? 0 : rating); // Toggle or set
+    setMinRating(minRating === rating ? 0 : rating); 
   };
 
   const applyFilters = () => {
     onFilterChange({
       categories: selectedCategories,
-      priceRange,
+      priceRange: [Math.max(globalMinPrice, priceRange[0]), Math.min(globalMaxPrice, priceRange[1])], // Ensure within global bounds
       minRating,
     });
-    setIsSheetOpen(false); // Close sheet on mobile after applying
+    setIsSheetOpen(false); 
   };
   
   const clearFilters = () => {
     setSelectedCategories([]);
     setPriceRange([globalMinPrice, globalMaxPrice]);
     setMinRating(0);
-    onFilterChange({
+    onFilterChange({ // Notify parent to clear filters
       categories: [],
       priceRange: [globalMinPrice, globalMaxPrice],
       minRating: 0,
     });
      setIsSheetOpen(false);
   };
+
+  if (isLoading) {
+    return (
+        <div className="hidden lg:block lg:w-72 xl:w-80 space-y-6 p-4 border rounded-lg shadow-sm bg-card">
+            <Skeleton className="h-8 w-1/3 mb-4" />
+            {[...Array(3)].map((_, i) => (
+                <div key={i} className="space-y-2 mb-6">
+                    <Skeleton className="h-6 w-1/2 mb-2" />
+                    <Skeleton className="h-4 w-full mb-1" />
+                    <Skeleton className="h-4 w-full mb-1" />
+                    <Skeleton className="h-4 w-3/4 mb-1" />
+                </div>
+            ))}
+             <Skeleton className="h-10 w-full mb-2" />
+             <Skeleton className="h-10 w-full" />
+        </div>
+    );
+  }
+
 
   const filterContent = (
     <div className="space-y-6 p-1">
@@ -127,8 +182,8 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ onFilterChange, initialFi
         <Slider
           min={globalMinPrice}
           max={globalMaxPrice}
-          step={1}
-          value={priceRange}
+          step={1} // Assuming prices are integers or step is small enough
+          value={priceRange} // Use local priceRange state
           onValueChange={(value) => handlePriceChange(value as [number, number])}
           className="mb-3"
         />
@@ -199,7 +254,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ onFilterChange, initialFi
             <SheetHeader className="p-4 border-b">
               <SheetTitle>Filter Products</SheetTitle>
             </SheetHeader>
-            <ScrollArea className="h-[calc(100vh-80px)]">
+            <ScrollArea className="h-[calc(100vh-80px)]"> {/* Adjust height */}
               <div className="p-4">{filterContent}</div>
             </ScrollArea>
           </SheetContent>
@@ -207,9 +262,9 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ onFilterChange, initialFi
       </div>
 
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:block lg:w-72 xl:w-80 space-y-6 p-4 border rounded-lg shadow-sm bg-card">
-        <h2 className="text-xl font-bold">Filters</h2>
-        <ScrollArea className="h-[calc(100vh-200px)] pr-3"> {/* Adjust height as needed */}
+      <aside className="hidden lg:block lg:w-72 xl:w-80 p-4 border rounded-lg shadow-sm bg-card">
+         <h2 className="text-xl font-bold mb-4">Filters</h2>
+        <ScrollArea className="h-[calc(100vh-220px)] pr-3"> {/* Adjust height as needed */}
          {filterContent}
         </ScrollArea>
       </aside>

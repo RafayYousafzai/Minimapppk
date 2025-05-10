@@ -1,16 +1,17 @@
-"use client"; // Needs to be client component for state management (quantity, variants)
+
+"use client"; 
 
 import { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'next/navigation';
-import { getProductById, mockProducts } from '@/lib/mock-data';
-import type { Product as ProductType, VariantOption } from '@/lib/types';
+import { getProductById, getProductsByCategory } from '@/services/productService'; // Updated import
+import type { Product as ProductType } from '@/lib/types';
 import ProductImageGallery from '@/components/products/ProductImageGallery';
 import QuantitySelector from '@/components/products/QuantitySelector';
 import VariantSelector from '@/components/products/VariantSelector';
 import StarRating from '@/components/ui/StarRating';
 import { Separator } from '@/components/ui/separator';
-import { AlertCircle, ShieldCheck } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { AlertCircle, ShieldCheck, Loader2 } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import AddToCartButton from '@/components/shared/AddToCartButton';
 import ProductCard from '@/components/products/ProductCard';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -19,30 +20,43 @@ export default function ProductDetailPage() {
   const params = useParams();
   const productId = params.id as string;
 
-  const [product, setProduct] = useState<ProductType | null | undefined>(undefined); // undefined for loading state
+  const [product, setProduct] = useState<ProductType | null | undefined>(undefined); // undefined for initial loading
+  const [relatedProducts, setRelatedProducts] = useState<ProductType[]>([]);
+  const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [selectedVariants, setSelectedVariants] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
     if (productId) {
-      const foundProduct = getProductById(productId);
-      setProduct(foundProduct);
-      // Initialize selected variants with the first option if variants exist
-      if (foundProduct?.variants) {
-        const initialVariants: { [key: string]: string } = {};
-        foundProduct.variants.forEach(variant => {
-          if (variant.options.length > 0) {
-            initialVariants[variant.type] = variant.options[0].value;
+      const fetchProductData = async () => {
+        setLoading(true);
+        const foundProduct = await getProductById(productId);
+        setProduct(foundProduct);
+
+        if (foundProduct) {
+          // Initialize selected variants
+          if (foundProduct.variants) {
+            const initialVariants: { [key: string]: string } = {};
+            foundProduct.variants.forEach(variant => {
+              if (variant.options.length > 0) {
+                initialVariants[variant.type] = variant.options[0].value;
+              }
+            });
+            setSelectedVariants(initialVariants);
           }
-        });
-        setSelectedVariants(initialVariants);
-      }
+          // Fetch related products
+          const fetchedRelatedProducts = await getProductsByCategory(foundProduct.category);
+          setRelatedProducts(fetchedRelatedProducts.filter(p => p.id !== foundProduct.id).slice(0, 4));
+        }
+        setLoading(false);
+      };
+      fetchProductData();
     }
   }, [productId]);
 
   const handleVariantSelect = (variantType: string, optionValue: string) => {
     setSelectedVariants(prev => ({ ...prev, [variantType]: optionValue }));
-    setQuantity(1); // Reset quantity when variant changes
+    setQuantity(1); 
   };
 
   const currentPrice = useMemo(() => {
@@ -62,8 +76,7 @@ export default function ProductDetailPage() {
     return price;
   }, [product, selectedVariants]);
 
-
-  if (product === undefined) { // Loading state
+  if (loading || product === undefined) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
@@ -98,8 +111,6 @@ export default function ProductDetailPage() {
     );
   }
 
-  const relatedProducts = mockProducts.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4);
-
   return (
     <div className="space-y-12">
       <section className="grid md:grid-cols-2 gap-8 lg:gap-12 items-start">
@@ -110,7 +121,9 @@ export default function ProductDetailPage() {
           
           <div className="flex items-center gap-4">
             <p className="text-3xl font-semibold text-primary">${currentPrice.toFixed(2)}</p>
-            {product.price > currentPrice && <p className="text-lg text-muted-foreground line-through">${product.price.toFixed(2)}</p>}
+            {product.originalPrice && product.originalPrice > currentPrice && (
+              <p className="text-lg text-muted-foreground line-through">${product.originalPrice.toFixed(2)}</p>
+            )}
           </div>
 
           {product.rating > 0 && (
@@ -179,7 +192,6 @@ export default function ProductDetailPage() {
                 <div><strong>Tags:</strong> {product.tags.join(', ')}</div>
               )}
               <div><strong>Stock:</strong> {product.stock}</div>
-              {/* Add more details as needed */}
             </div>
           </CardContent>
         </Card>
@@ -190,8 +202,8 @@ export default function ProductDetailPage() {
           <Separator className="my-8" />
           <h2 className="text-2xl font-semibold mb-6">Related Products</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {relatedProducts.map((relatedProduct) => (
-              <ProductCard key={relatedProduct.id} product={relatedProduct} />
+            {relatedProducts.map((relatedProd) => (
+              <ProductCard key={relatedProd.id} product={relatedProd} />
             ))}
           </div>
         </section>

@@ -1,5 +1,9 @@
-import type { Product } from './types';
 
+import type { Product } from './types';
+import * as productService from '@/services/productService';
+
+// This array is now primarily for seeding the database.
+// The application will fetch data from Firestore via productService.
 export const mockProducts: Product[] = [
   {
     id: '1',
@@ -173,24 +177,19 @@ export const mockProducts: Product[] = [
   },
 ];
 
-export const getProductById = (id: string): Product | undefined => {
-  return mockProducts.find(product => product.id === id);
-};
+// The following functions now delegate to productService to fetch from Firestore.
+export async function getProductById(id: string): Promise<Product | null | undefined> {
+  return productService.getProductById(id);
+}
 
-export const getProductsByCategory = (category: string): Product[] => {
-  return mockProducts.filter(product => product.category.toLowerCase() === category.toLowerCase());
-};
+export async function getProductsByCategory(category: string): Promise<Product[]> {
+  return productService.getProductsByCategory(category);
+}
 
-export const getAllCategories = (): string[] => {
-  const categories = new Set(mockProducts.map(p => p.category));
-  return Array.from(categories);
-};
+export async function getAllCategories(): Promise<string[]> {
+  return productService.getAllCategories();
+}
 
-export const getPriceRange = (): { min: number, max: number } => {
-  if (mockProducts.length === 0) return { min: 0, max: 0 };
-  const prices = mockProducts.map(p => p.price);
-  return {
-    min: Math.min(...prices),
-    max: Math.max(...prices),
-  };
-};
+export async function getPriceRange(): Promise<{ min: number, max: number }> {
+  return productService.getPriceRange();
+}
