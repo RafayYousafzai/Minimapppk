@@ -2,7 +2,7 @@
 import ProductCard from '@/components/products/ProductCard';
 import { Button } from '@/components/ui/button';
 import type { Product } from '@/lib/types';
-import { getFeaturedProducts, getAllProducts, getProductById, seedProducts, getAllCategories } from '@/services/productService';
+import { getFeaturedProducts, getAllProducts, seedProducts, getAllCategories } from '@/services/productService';
 import { ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -13,18 +13,10 @@ const Package2Icon = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 export default async function HomePage() {
-  // Seed data if no products exist (optional, for first run)
-  // This is a one-time operation, consider removing or placing behind a dev-only flag
-  // const allProductsCheck = await getAllProducts();
-  // if (allProductsCheck.length === 0) {
-  //   await seedProducts();
-  // }
-  
   // Fetch data from Firebase
   const featuredProducts = await getFeaturedProducts(4);
   
   // Determine a hero product. For simplicity, pick the first featured or a specific one.
-  // Or fetch a specific one if you have a "hero product" flag in your data.
   let heroProduct: Product | null = null;
   if (featuredProducts.length > 0) {
     heroProduct = featuredProducts[0]; // Default to the first featured product
@@ -40,9 +32,11 @@ export default async function HomePage() {
   // Fetch categories from Firebase
   const categories = await getAllCategories();
   const displayCategories = categories.slice(0, 4); // Show first 4 categories
+  
 
   return (
     <div className="space-y-12">
+
       {/* Hero Section */}
       {heroProduct && (
         <section className="bg-secondary rounded-lg shadow-md overflow-hidden">

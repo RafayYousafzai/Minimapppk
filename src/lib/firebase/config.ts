@@ -15,4 +15,6 @@ const firebaseConfig = {
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const db = getFirestore(app);
 
+console.log('Firebase initialized with projectId:', firebaseConfig.projectId);
+
 export { app, db };

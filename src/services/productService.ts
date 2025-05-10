@@ -11,11 +11,6 @@ const PRODUCTS_COLLECTION = 'products';
 /**
  * Seeds the Firestore database with initial product data from mock-data.ts.
  * This function should be called manually once to populate the database.
- * For example, you could temporarily add a button in a development page:
- * 
- * import { seedProducts } from '@/services/productService';
- * // ...
- * <button onClick={async () => { await seedProducts(); alert('Products seeded!'); }}>Seed Products</button>
  */
 export async function seedProducts(): Promise<void> {
   const batch = writeBatch(db);
@@ -58,11 +53,14 @@ export async function getAllProducts(): Promise<Product[]> {
   try {
     const productsCollectionRef = collection(db, PRODUCTS_COLLECTION);
     const querySnapshot = await getDocs(productsCollectionRef);
-    const products = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+    const products = querySnapshot.docs.map(doc => {
+      const data = doc.data();
+      return { id: doc.id, ...data } as Product;
+    });
     return products;
   } catch (error) {
     console.error('Error fetching all products:', error);
-    return []; // Return empty array or throw error as per desired error handling
+    return []; 
   }
 }
 
@@ -96,14 +94,11 @@ export async function getProductsByCategory(category: string): Promise<Product[]
 export async function getFeaturedProducts(count: number = 4): Promise<Product[]> {
    try {
     const productsCollectionRef = collection(db, PRODUCTS_COLLECTION);
-    // Example: order by rating (desc) and take top 'count'. 
-    // You might need to create an index in Firestore for this query.
     const q = query(productsCollectionRef, orderBy('rating', 'desc'), limit(count));
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
   } catch (error) {
     console.error('Error fetching featured products:', error);
-    // Fallback: get any 'count' products if specific query fails (e.g. due to missing index)
     try {
         const fallbackQuery = query(productsCollectionRef, limit(count));
         const fallbackSnapshot = await getDocs(fallbackQuery);
@@ -133,11 +128,11 @@ export async function getPriceRange(): Promise<{ min: number; max: number }> {
     if (products.length === 0) return { min: 0, max: 0 };
     const prices = products.map(p => p.price);
     return {
-      min: Math.floor(Math.min(...prices)), // Ensure integer values for slider if step is 1
-      max: Math.ceil(Math.max(...prices)),   // Ensure integer values
+      min: Math.floor(Math.min(...prices)), 
+      max: Math.ceil(Math.max(...prices)),   
     };
   } catch (error) {
     console.error('Error fetching price range:', error);
-    return { min: 0, max: 1000 }; // Default fallback
+    return { min: 0, max: 1000 }; 
   }
 }
