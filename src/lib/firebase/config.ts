@@ -15,6 +15,13 @@ const firebaseConfig = {
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const db = getFirestore(app);
 
-console.log('Firebase initialized with projectId:', firebaseConfig.projectId);
+// Log the project ID being used to help debug connection issues.
+if (typeof window === 'undefined') { // Log only on the server during initialization
+    console.log('[Firebase Config] Initializing with Project ID:', firebaseConfig.projectId || 'NOT SET');
+    if (!firebaseConfig.projectId) {
+        console.warn('[Firebase Config] WARNING: NEXT_PUBLIC_FIREBASE_PROJECT_ID is not set in your environment variables. Firestore will not work.');
+    }
+}
+
 
 export { app, db };

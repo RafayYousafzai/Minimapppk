@@ -2,10 +2,11 @@
 import ProductCard from '@/components/products/ProductCard';
 import { Button } from '@/components/ui/button';
 import type { Product } from '@/lib/types';
-import { getFeaturedProducts, getAllProducts, seedProducts, getAllCategories } from '@/services/productService';
+import { getFeaturedProducts, getAllProducts, getAllCategories } from '@/services/productService';
 import { ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import SeedButton from '@/components/dev/SeedButton'; // Import the new SeedButton
 
 // Placeholder icon, replace with actual icons if available
 const Package2Icon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -16,26 +17,36 @@ export default async function HomePage() {
   // Fetch data from Firebase
   const featuredProducts = await getFeaturedProducts(4);
   
-  // Determine a hero product. For simplicity, pick the first featured or a specific one.
   let heroProduct: Product | null = null;
   if (featuredProducts.length > 0) {
-    heroProduct = featuredProducts[0]; // Default to the first featured product
+    heroProduct = featuredProducts[0]; 
   } else {
-    // Fallback if no featured products, fetch any product as hero
     const allProds = await getAllProducts();
     if (allProds.length > 0) {
-        // Try to pick a product with multiple images for hero section
         heroProduct = allProds.find(p => p.images.length > 1) || allProds[0];
     }
   }
   
-  // Fetch categories from Firebase
   const categories = await getAllCategories();
-  const displayCategories = categories.slice(0, 4); // Show first 4 categories
+  const displayCategories = categories.slice(0, 4); 
   
 
   return (
     <div className="space-y-12">
+      
+      {/* Development Seed Button - remove or hide in production */}
+      <div className="my-4 p-4 border border-dashed border-destructive/50 rounded-lg bg-destructive/10">
+          <h3 className="text-lg font-semibold text-destructive">Developer Zone</h3>
+          <p className="text-sm text-muted-foreground mb-2">
+            Use this button to populate your Firestore database with mock product data if it's empty.
+            This should only be used in development.
+          </p>
+          <SeedButton />
+          <p className="text-xs text-muted-foreground mt-2">
+            If you encounter Firestore errors (like "INVALID_ARGUMENT"), please ensure your Firebase Project ID is correctly set in your <code>.env</code> file and Firestore is enabled in Native Mode in your Firebase project console.
+          </p>
+      </div>
+
 
       {/* Hero Section */}
       {heroProduct && (
