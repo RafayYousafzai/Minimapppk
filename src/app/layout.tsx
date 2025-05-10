@@ -7,9 +7,6 @@ import Footer from '@/components/layout/Footer';
 import { CartProvider } from '@/contexts/CartContext';
 import { Toaster } from '@/components/ui/toaster';
 
-const geistSans = GeistSans;
-const geistMono = GeistMono;
-
 export const metadata: Metadata = {
   title: 'ShopWave - Your Ultimate Shopping Destination',
   description: 'Discover a wide range of products at ShopWave. Quality, affordability, and style, all in one place.',
@@ -21,9 +18,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased flex flex-col min-h-screen`}
+        className={`font-sans antialiased flex flex-col min-h-screen`}
       >
         <CartProvider>
           <Header />
