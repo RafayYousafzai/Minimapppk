@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Search, X, Loader2 } from 'lucide-react';
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { Skeleton } from '@/components/ui/skeleton';
+import { Card } from '@/components/ui/card';
 
 const PRODUCTS_PER_PAGE = 8;
 
