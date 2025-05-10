@@ -11,22 +11,36 @@ import { useState, useEffect } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 const Header = () => {
-  const { getItemCount } = useCart();
+  const { getItemCount, cartInitialized } = useCart();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [searchQuery, setSearchQuery] = useState('');
+  
+  // Initialize searchQuery directly from URL's 'search' parameter
+  const initialSearchFromParams = searchParams.get('search') || '';
+  const [searchQuery, setSearchQuery] = useState(initialSearchFromParams);
+  
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
+  // Effect to update searchQuery if the 'search' URL parameter changes (e.g., back/forward navigation)
   useEffect(() => {
-    setSearchQuery(searchParams.get('query') || '');
+    setSearchQuery(searchParams.get('search') || '');
   }, [searchParams]);
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+    const trimmedQuery = searchQuery.trim();
+    if (trimmedQuery) {
+      router.push(`/products?search=${encodeURIComponent(trimmedQuery)}`);
     } else {
-      router.push('/products');
+      // If search query is empty, navigate to products page, removing search param if present
+      const currentPathname = window.location.pathname;
+      if (currentPathname === '/products') {
+         const newParams = new URLSearchParams(searchParams.toString());
+         newParams.delete('search');
+         router.push(`${currentPathname}?${newParams.toString()}`);
+      } else {
+        router.push('/products');
+      }
     }
     setIsSheetOpen(false); // Close mobile menu on search
   };
@@ -36,6 +50,8 @@ const Header = () => {
     { href: '/products', label: 'Products' },
     // Add more navigation items here if needed
   ];
+  
+  const currentItemCount = getItemCount();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -116,12 +132,12 @@ const Header = () => {
           <Link href="/cart" passHref legacyBehavior>
             <Button variant="outline" size="icon" className="relative">
               <ShoppingCart className="h-5 w-5" />
-              {getItemCount() > 0 && (
+              {cartInitialized && currentItemCount > 0 && (
                 <Badge
-                  variant="solid"
+                  variant="default" 
                   className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-primary text-primary-foreground"
                 >
-                  {getItemCount()}
+                  {currentItemCount}
                 </Badge>
               )}
               <span className="sr-only">Shopping Cart</span>
@@ -134,12 +150,12 @@ const Header = () => {
            <Link href="/cart" passHref legacyBehavior>
             <Button variant="ghost" size="icon" className="relative">
               <ShoppingCart className="h-6 w-6" />
-              {getItemCount() > 0 && (
+              {cartInitialized && currentItemCount > 0 && (
                 <Badge
-                  variant="solid"
+                  variant="default"
                   className="absolute -top-1 -right-1 h-4 w-4 rounded-full p-0 flex items-center justify-center text-xs bg-primary text-primary-foreground"
                 >
-                  {getItemCount()}
+                  {currentItemCount}
                 </Badge>
               )}
               <span className="sr-only">Shopping Cart</span>

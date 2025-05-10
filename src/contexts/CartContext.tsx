@@ -13,6 +13,7 @@ interface CartContextType {
   getItemCount: () => number;
   getTotalPrice: () => number;
   getCartItemById: (cartItemId: string) => CartItem | undefined;
+  cartInitialized: boolean;
 }
 
 export const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -35,17 +36,29 @@ const generateCartItemId = (productId: string, selectedVariants?: { [key: string
 
 
 export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
-  const [cartItems, setCartItems] = useState<CartItem[]>(() => {
-    if (typeof window !== 'undefined') {
-      const localData = localStorage.getItem('cartItems');
-      return localData ? JSON.parse(localData) : [];
-    }
-    return [];
-  });
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [cartInitialized, setCartInitialized] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem('cartItems', JSON.stringify(cartItems));
-  }, [cartItems]);
+    // This effect runs only on the client, after initial mount
+    try {
+      const localData = localStorage.getItem('cartItems');
+      if (localData) {
+        setCartItems(JSON.parse(localData));
+      }
+    } catch (error) {
+        console.error('Error loading cart items from localStorage:', error);
+        localStorage.removeItem('cartItems'); // Clear corrupted data
+    }
+    setCartInitialized(true); // Signal that hydration is complete and localStorage has been checked
+  }, []); // Empty dependency array: run once on mount
+
+  useEffect(() => {
+    // Persist to localStorage whenever cartItems changes, but only after initial hydration
+    if (cartInitialized) {
+      localStorage.setItem('cartItems', JSON.stringify(cartItems));
+    }
+  }, [cartItems, cartInitialized]);
 
   const addToCart = useCallback((product: Product, quantity: number, selectedVariants?: { [key: string]: string }): string => {
     const cartItemId = generateCartItemId(product.id, selectedVariants);
@@ -73,7 +86,6 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         return [
           ...prevItems,
           {
-            ...product, // Spreading product might bring too much, let's be specific
             id: cartItemId,
             productId: product.id,
             name: product.name,
@@ -81,13 +93,10 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
             price: itemPrice,
             quantity: Math.min(quantity, product.stock),
             selectedVariants,
-            availableStock: product.stock, // Assuming product.stock is for the specific variant combination or base product
-            // Remove fields not in CartItem from Product
-            description: product.description, // Keep description for cart display
-            category: product.category, // Keep category
-            // Remove longDescription, reviews, tags, etc. or ensure CartItem includes them if needed.
-            // For simplicity, CartItem is defined to include common Product fields.
-          } as CartItem, // Type assertion might be needed if Product has more fields than CartItem expects directly
+            availableStock: product.stock, 
+            description: product.description, 
+            category: product.category, 
+          } as CartItem, 
         ];
       }
     });
@@ -102,8 +111,11 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     setCartItems(prevItems =>
       prevItems.map(item => {
         if (item.id === cartItemId) {
-          const productDetails = mockProducts.find(p => p.id === item.productId);
-          const stockLimit = productDetails ? productDetails.stock : item.availableStock;
+          // It's generally better to fetch fresh product details if stock can change,
+          // but for this mock setup, we rely on availableStock stored in CartItem.
+          // If item.availableStock wasn't correctly set upon adding, this might be an issue.
+          // For now, assume item.availableStock is the authority for that specific item.
+          const stockLimit = item.availableStock;
           return { ...item, quantity: Math.max(1, Math.min(quantity, stockLimit)) };
         }
         return item;
@@ -116,12 +128,14 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   }, []);
 
   const getItemCount = useCallback(() => {
+    if (!cartInitialized) return 0; // Return 0 if cart is not yet initialized from localStorage
     return cartItems.reduce((count, item) => count + item.quantity, 0);
-  }, [cartItems]);
+  }, [cartItems, cartInitialized]);
 
   const getTotalPrice = useCallback(() => {
+    if (!cartInitialized) return 0; // Return 0 if cart is not yet initialized
     return cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
-  }, [cartItems]);
+  }, [cartItems, cartInitialized]);
 
   const getCartItemById = useCallback((cartItemId: string): CartItem | undefined => {
     return cartItems.find(item => item.id === cartItemId);
@@ -139,6 +153,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         getItemCount,
         getTotalPrice,
         getCartItemById,
+        cartInitialized,
       }}
     >
       {children}
