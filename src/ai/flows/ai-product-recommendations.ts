@@ -9,7 +9,7 @@ const ProductSchema = z.object({
   id: z.string().describe('The unique identifier of the product.'),
   name: z.string().describe('The name of the product.'),
   description: z.string().describe('A brief description of the product.'),
-  imageUrl: z.string().describe('URL of the product image.'),
+  imageUrl: z.string().describe("URL of the product image. Generate this as a placeholder image from 'https://picsum.photos/seed/PRODUCT_NAME_SLUG/200/200' where PRODUCT_NAME_SLUG is a URL-friendly version of the product name (e.g., 'classic-tee' for 'Classic Tee')."),
   price: z.number().describe('The price of the product.'),
 });
 
@@ -52,6 +52,7 @@ const productRecommendationPrompt = ai.definePrompt({
   {{/each}}
 
   Return a list of products that complement or are related to the items in the cart. Limit the number of recommendations to {{maxRecommendations}}.
+  For the 'imageUrl' field of each recommended product, you MUST generate a URL in the format 'https://picsum.photos/seed/PRODUCT_NAME_SLUG/200/200', where PRODUCT_NAME_SLUG is a unique, URL-friendly slug derived from the product's name (e.g., 'classic-tee' for 'Classic Tee'). Do NOT use any other domain or format for image URLs.
 
   Consider the following when making recommendations:
   - Products that are frequently bought together with the items in the cart.
