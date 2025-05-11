@@ -1,18 +1,18 @@
 
-import type { Product, VariantOption } from '@/lib/types';
+import type { Product, VariantOption, Review } from '@/lib/types';
 import type { ProductFormData } from '@/lib/productFormTypes';
+import type { ReviewFormData } from '@/lib/reviewFormSchema';
 import { db } from '@/lib/firebase/config';
 import { collection, doc, getDoc, getDocs, writeBatch, query, where, limit, orderBy, addDoc, serverTimestamp, Timestamp, updateDoc, FieldValue } from 'firebase/firestore';
 import { mockProducts as productsToSeed } from '@/lib/mock-data'; 
 
 const PRODUCTS_COLLECTION = 'products';
+const REVIEWS_SUBCOLLECTION = 'reviews';
 
 export async function seedProducts(): Promise<void> {
   const batch = writeBatch(db);
   const productsCollectionRef = collection(db, PRODUCTS_COLLECTION);
 
-  // Check if the first product from the seed list already exists to prevent re-seeding.
-  // This is a simple check; more robust checks might involve checking all product IDs or a version flag.
   if (productsToSeed.length > 0) {
     const firstProductCheckRef = doc(productsCollectionRef, productsToSeed[0].id);
     const firstProductSnap = await getDoc(firstProductCheckRef);
@@ -21,7 +21,6 @@ export async function seedProducts(): Promise<void> {
       return;
     }
   } else {
-    // If mockProducts is empty, check if the collection has any documents at all.
     const existingProductsSnapshot = await getDocs(query(productsCollectionRef, limit(1)));
     if (!existingProductsSnapshot.empty) {
       console.log('Products collection already contains data. Skipping seed.');
@@ -30,15 +29,13 @@ export async function seedProducts(): Promise<void> {
   }
   
   productsToSeed.forEach((product) => {
-    const docRef = doc(productsCollectionRef, product.id); // Use predefined ID for mock data
+    const docRef = doc(productsCollectionRef, product.id); 
     const productData = { ...product } as any; 
-    // Firestore doesn't like 'undefined' values, so remove them.
     Object.keys(productData).forEach(key => {
       if (productData[key] === undefined) {
         delete productData[key];
       }
     });
-    // Add createdAt timestamp for new seed data
     if (!productData.createdAt) {
         productData.createdAt = serverTimestamp();
     }
@@ -58,7 +55,6 @@ export async function addProduct(data: ProductFormData): Promise<string> {
   try {
     const productsCollectionRef = collection(db, PRODUCTS_COLLECTION);
     
-    // Ensure rating and reviews have default values
     const productToSave: Omit<Product, 'id'> & { createdAt: FieldValue, updatedAt?: FieldValue } = {
       name: data.name,
       description: data.description,
@@ -68,9 +64,9 @@ export async function addProduct(data: ProductFormData): Promise<string> {
       originalPrice: data.originalPrice || undefined,
       category: data.category,
       stock: data.stock,
-      tags: data.tags || [], // Assuming Zod transform handles string to array
-      rating: 0, // Default rating for new products
-      reviews: 0, // Default reviews for new products
+      tags: data.tags || [],
+      rating: 0, 
+      reviews: 0, 
       variants: data.variants?.map(variant => ({
         type: variant.type,
         options: variant.options.map(option => ({
@@ -104,13 +100,10 @@ export async function updateProduct(productId: string, data: ProductFormData): P
       originalPrice: data.originalPrice || undefined,
       category: data.category,
       stock: data.stock,
-      tags: data.tags || [], // Assuming Zod transform handles string to array
-      // Rating and reviews are typically not updated directly through this form
+      tags: data.tags || [],
       variants: data.variants?.map(variant => ({
         type: variant.type,
         options: variant.options.map(option => ({
-          // For existing options, you might want to preserve their IDs if they have them.
-          // This simple update replaces all options. More complex logic needed to diff/merge.
           id: option.id || `${variant.type.toLowerCase().replace(/\s+/g, '-')}-${option.value.toLowerCase().replace(/\s+/g, '-')}-${Math.random().toString(36).substring(2, 9)}`,
           value: option.value,
           additionalPrice: option.additionalPrice || 0,
@@ -119,7 +112,6 @@ export async function updateProduct(productId: string, data: ProductFormData): P
       updatedAt: serverTimestamp(),
     };
     
-    // Remove undefined fields before updating
     Object.keys(productToUpdate).forEach(key => {
         if (productToUpdate[key as keyof typeof productToUpdate] === undefined) {
             delete productToUpdate[key as keyof typeof productToUpdate];
@@ -137,13 +129,11 @@ export async function updateProduct(productId: string, data: ProductFormData): P
 export async function getAllProducts(): Promise<Product[]> {
   try {
     const productsCollectionRef = collection(db, PRODUCTS_COLLECTION);
-    // Order by 'createdAt' descending by default. If 'createdAt' doesn't exist on some docs, they might appear last or cause errors.
-    // Ensure 'createdAt' is consistently populated, e.g., via serverTimestamp() on add.
     const q = query(productsCollectionRef, orderBy('createdAt', 'desc'));
     const querySnapshot = await getDocs(q);
+    console.log(`Fetched ${querySnapshot.docs.length} products from Firestore.`);
     const products = querySnapshot.docs.map(docSnap => {
       const data = docSnap.data();
-      // Convert Firestore Timestamp to Date object for easier handling in client components if necessary
       let createdAtDate = data.createdAt;
       if (data.createdAt && typeof data.createdAt.seconds === 'number') {
         createdAtDate = (data.createdAt as Timestamp).toDate();
@@ -162,7 +152,6 @@ export async function getAllProducts(): Promise<Product[]> {
     return products;
   } catch (error) {
     console.error('Error fetching all products:', error);
-    // Check if the error is due to missing 'createdAt' field for ordering
     if (error instanceof Error && error.message.includes("firestore/indexes")) {
         console.warn("Firestore index for ordering by 'createdAt' might be missing. Please check your Firebase console.");
     }
@@ -231,14 +220,10 @@ export async function getFeaturedProducts(count: number = 4): Promise<Product[]>
    try {
     const productsCollectionRef = collection(db, PRODUCTS_COLLECTION);
     let q;
-    // Try ordering by rating. If 'rating' field is not indexed or doesn't exist on all docs, this might fail.
-    // Firestore requires an index for queries with orderBy and range/equality filters on different fields.
-    // For simplicity, we'll try rating, then fall back.
     try {
         q = query(productsCollectionRef, orderBy('rating', 'desc'), limit(count));
         const testSnapshot = await getDocs(q); 
          if (testSnapshot.empty && count > 0) {
-            // If no products have 'rating' or 'rating' field doesn't exist widely
             console.warn("No products found when ordering by rating for featured products. Falling back.");
             throw new Error("No products with rating, trying createdAt or general limit.");
         }
@@ -248,7 +233,6 @@ export async function getFeaturedProducts(count: number = 4): Promise<Product[]>
     }
     
     const querySnapshot = await getDocs(q);
-    // If still empty after trying rating and createdAt, fetch any 'count' products.
     if (querySnapshot.empty && count > 0) {
         console.warn("No products found with rating or createdAt ordering. Fetching any products.");
         const fallbackQuery = query(productsCollectionRef, limit(count));
@@ -303,5 +287,54 @@ export async function getPriceRange(): Promise<{ min: number; max: number }> {
   } catch (error) {
     console.error('Error fetching price range:', error);
     return { min: 0, max: 1000 }; 
+  }
+}
+
+// --- Review Functions ---
+
+export async function addReview(productId: string, reviewData: ReviewFormData): Promise<string> {
+  try {
+    const reviewCollectionRef = collection(db, PRODUCTS_COLLECTION, productId, REVIEWS_SUBCOLLECTION);
+    const newReview: Omit<Review, 'id' | 'productId'> = {
+      ...reviewData,
+      createdAt: serverTimestamp(),
+    };
+    const docRef = await addDoc(reviewCollectionRef, newReview);
+
+    // IMPORTANT: For a production app, you would also update the product's average rating
+    // and review count here, likely using a Firebase Transaction or a Cloud Function
+    // to ensure atomicity and consistency.
+    // For simplicity, this step is omitted for now. The product's top-level rating/reviews fields
+    // will not be live-updated by this client-side addReview function.
+
+    return docRef.id;
+  } catch (error) {
+    console.error(`Error adding review for product ${productId}:`, error);
+    throw new Error('Failed to add review.');
+  }
+}
+
+export async function getReviewsByProductId(productId: string): Promise<Review[]> {
+  try {
+    const reviewsCollectionRef = collection(db, PRODUCTS_COLLECTION, productId, REVIEWS_SUBCOLLECTION);
+    const q = query(reviewsCollectionRef, orderBy('createdAt', 'desc'));
+    const querySnapshot = await getDocs(q);
+    
+    return querySnapshot.docs.map(docSnap => {
+      const data = docSnap.data();
+      let createdAtDate = data.createdAt;
+      if (data.createdAt && typeof data.createdAt.seconds === 'number') {
+        createdAtDate = (data.createdAt as Timestamp).toDate();
+      }
+      return {
+        id: docSnap.id,
+        productId: productId,
+        ...data,
+        createdAt: createdAtDate,
+      } as Review;
+    });
+  } catch (error) {
+    console.error(`Error fetching reviews for product ${productId}:`, error);
+    return [];
   }
 }

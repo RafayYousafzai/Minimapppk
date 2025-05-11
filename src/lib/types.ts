@@ -1,4 +1,6 @@
 
+import type { Timestamp } from 'firebase/firestore';
+
 export interface VariantOption {
   id: string;
   value: string; // e.g., "S", "M", "Red", "Blue"
@@ -22,7 +24,7 @@ export interface Product {
   originalPrice?: number; // For sales/discounts
   category: string;
   rating: number; // Average rating, 0-5
-  reviews: number; // Number of reviews
+  reviews: number; // Number of reviews (count)
   stock: number; // Total stock or stock for default variant
   tags?: string[];
   variants?: ProductVariant[];
@@ -92,4 +94,13 @@ export interface Order {
   createdAt: { seconds: number, nanoseconds: number } | Date; // Firestore timestamp or Date object
   orderNotes?: string;
   paymentMethod: "cod"; // Assuming only COD for now
+}
+
+export interface Review {
+  id: string;
+  productId: string;
+  reviewerName: string;
+  rating: number; // 1-5 stars
+  comment: string;
+  createdAt: Timestamp | Date;
 }

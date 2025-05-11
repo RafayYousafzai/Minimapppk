@@ -1,9 +1,9 @@
 
 "use client"; 
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams } from 'next/navigation';
-import { getProductById, getProductsByCategory } from '@/services/productService'; // Updated import
+import { getProductById, getProductsByCategory } from '@/services/productService'; 
 import type { Product as ProductType } from '@/lib/types';
 import ProductImageGallery from '@/components/products/ProductImageGallery';
 import QuantitySelector from '@/components/products/QuantitySelector';
@@ -15,16 +15,20 @@ import { Card, CardContent } from '@/components/ui/card';
 import AddToCartButton from '@/components/shared/AddToCartButton';
 import ProductCard from '@/components/products/ProductCard';
 import { Skeleton } from '@/components/ui/skeleton';
+import ReviewList from '@/components/reviews/ReviewList';
+import ReviewForm from '@/components/reviews/ReviewForm';
 
 export default function ProductDetailPage() {
   const params = useParams();
   const productId = params.id as string;
 
-  const [product, setProduct] = useState<ProductType | null | undefined>(undefined); // undefined for initial loading
+  const [product, setProduct] = useState<ProductType | null | undefined>(undefined); 
   const [relatedProducts, setRelatedProducts] = useState<ProductType[]>([]);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [selectedVariants, setSelectedVariants] = useState<{ [key: string]: string }>({});
+  const [refreshReviewsSignal, setRefreshReviewsSignal] = useState(0);
+
 
   useEffect(() => {
     if (productId) {
@@ -34,7 +38,6 @@ export default function ProductDetailPage() {
         setProduct(foundProduct);
 
         if (foundProduct) {
-          // Initialize selected variants
           if (foundProduct.variants) {
             const initialVariants: { [key: string]: string } = {};
             foundProduct.variants.forEach(variant => {
@@ -44,7 +47,6 @@ export default function ProductDetailPage() {
             });
             setSelectedVariants(initialVariants);
           }
-          // Fetch related products
           const fetchedRelatedProducts = await getProductsByCategory(foundProduct.category);
           setRelatedProducts(fetchedRelatedProducts.filter(p => p.id !== foundProduct.id).slice(0, 4));
         }
@@ -75,6 +77,12 @@ export default function ProductDetailPage() {
     }
     return price;
   }, [product, selectedVariants]);
+
+  const handleReviewSubmitted = useCallback(() => {
+    setRefreshReviewsSignal(prev => prev + 1);
+    // Optionally, re-fetch product data if reviews impact product.rating / product.reviews
+    // For now, this is handled by the seed data or a separate update mechanism.
+  }, []);
 
   if (loading || product === undefined) {
     return (
@@ -120,9 +128,9 @@ export default function ProductDetailPage() {
           <h1 className="text-3xl md:text-4xl font-bold">{product.name}</h1>
           
           <div className="flex items-center gap-4">
-            <p className="text-3xl font-semibold text-primary">${currentPrice.toFixed(2)}</p>
+            <p className="text-3xl font-semibold text-primary">₨{currentPrice.toFixed(2)}</p>
             {product.originalPrice && product.originalPrice > currentPrice && (
-              <p className="text-lg text-muted-foreground line-through">${product.originalPrice.toFixed(2)}</p>
+              <p className="text-lg text-muted-foreground line-through">₨{product.originalPrice.toFixed(2)}</p>
             )}
           </div>
 
@@ -195,6 +203,14 @@ export default function ProductDetailPage() {
             </div>
           </CardContent>
         </Card>
+      </section>
+
+      <Separator />
+
+      <section className="space-y-6">
+        <h2 className="text-2xl font-semibold">Customer Reviews</h2>
+        <ReviewList productId={productId} refreshReviewsSignal={refreshReviewsSignal} />
+        <ReviewForm productId={productId} onReviewSubmit={handleReviewSubmitted} />
       </section>
 
       {relatedProducts.length > 0 && (
