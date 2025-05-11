@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -6,22 +7,22 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useCart } from '@/hooks/useCart';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'; // Added usePathname
 import { useState, useEffect } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { cn } from '@/lib/utils';
 
 const Header = () => {
   const { getItemCount, cartInitialized } = useCart();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname(); // Get current path
   
-  // Initialize searchQuery directly from URL's 'search' parameter
   const initialSearchFromParams = searchParams.get('search') || '';
   const [searchQuery, setSearchQuery] = useState(initialSearchFromParams);
   
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
-  // Effect to update searchQuery if the 'search' URL parameter changes (e.g., back/forward navigation)
   useEffect(() => {
     setSearchQuery(searchParams.get('search') || '');
   }, [searchParams]);
@@ -32,23 +33,23 @@ const Header = () => {
     if (trimmedQuery) {
       router.push(`/products?search=${encodeURIComponent(trimmedQuery)}`);
     } else {
-      // If search query is empty, navigate to products page, removing search param if present
-      const currentPathname = window.location.pathname;
-      if (currentPathname === '/products') {
+      const currentPath = window.location.pathname;
+      if (currentPath === '/products') {
          const newParams = new URLSearchParams(searchParams.toString());
          newParams.delete('search');
-         router.push(`${currentPathname}?${newParams.toString()}`);
+         router.push(`${currentPath}?${newParams.toString()}`);
       } else {
         router.push('/products');
       }
     }
-    setIsSheetOpen(false); // Close mobile menu on search
+    setIsSheetOpen(false); 
   };
 
   const navItems = [
     { href: '/', label: 'Home' },
     { href: '/products', label: 'Products' },
-    // Add more navigation items here if needed
+    { href: '/cart', label: 'Cart' },
+    { href: '/checkout', label: 'Checkout' },
   ];
   
   const currentItemCount = getItemCount();
@@ -56,7 +57,6 @@ const Header = () => {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between px-4 md:px-6">
-        {/* Mobile Menu */}
         <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
           <SheetTrigger asChild>
             <Button variant="outline" size="icon" className="md:hidden">
@@ -78,7 +78,10 @@ const Header = () => {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="text-muted-foreground hover:text-foreground"
+                  className={cn(
+                    "hover:text-foreground",
+                    pathname === item.href ? "text-foreground font-semibold" : "text-muted-foreground"
+                  )}
                   onClick={() => setIsSheetOpen(false)}
                 >
                   {item.label}
@@ -100,7 +103,6 @@ const Header = () => {
           </SheetContent>
         </Sheet>
 
-        {/* Desktop Logo & Navigation */}
         <Link href="/" className="hidden md:flex items-center gap-2">
           <Package2Icon className="h-6 w-6 text-primary" />
           <span className="text-xl font-bold">ShopWave</span>
@@ -110,21 +112,23 @@ const Header = () => {
             <Link
               key={item.href}
               href={item.href}
-              className="text-foreground/70 transition-colors hover:text-foreground"
+              className={cn(
+                 "transition-colors hover:text-foreground",
+                 pathname === item.href ? "text-foreground" : "text-foreground/70"
+              )}
             >
               {item.label}
             </Link>
           ))}
         </nav>
 
-        {/* Search and Cart - Desktop */}
-        <div className="hidden md:flex items-center gap-4">
-          <form onSubmit={handleSearch} className="relative">
+        <div className="flex items-center gap-4">
+          <form onSubmit={handleSearch} className="relative hidden md:block">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
               placeholder="Search products..."
-              className="pl-10 w-64"
+              className="pl-10 w-48 lg:w-64"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -136,24 +140,6 @@ const Header = () => {
                 <Badge
                   variant="default" 
                   className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-primary text-primary-foreground"
-                >
-                  {currentItemCount}
-                </Badge>
-              )}
-              <span className="sr-only">Shopping Cart</span>
-            </Button>
-          </Link>
-        </div>
-
-        {/* Cart Icon - Mobile (always visible except when menu open) */}
-        <div className="md:hidden">
-           <Link href="/cart" passHref legacyBehavior>
-            <Button variant="ghost" size="icon" className="relative">
-              <ShoppingCart className="h-6 w-6" />
-              {cartInitialized && currentItemCount > 0 && (
-                <Badge
-                  variant="default"
-                  className="absolute -top-1 -right-1 h-4 w-4 rounded-full p-0 flex items-center justify-center text-xs bg-primary text-primary-foreground"
                 >
                   {currentItemCount}
                 </Badge>
