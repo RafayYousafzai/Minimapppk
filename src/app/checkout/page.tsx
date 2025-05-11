@@ -13,13 +13,15 @@ import { Checkbox } from "@/components/ui/checkbox";
 import BillingDetailsForm from "@/components/checkout/BillingDetailsForm";
 import ShippingDetailsForm from "@/components/checkout/ShippingDetailsForm";
 import OrderSummaryCard from "@/components/checkout/OrderSummaryCard";
-import { AlertCircle, ShoppingCart } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useState } from "react";
+import { db } from "@/lib/firebase/config"; // Import Firestore instance
+import { collection, addDoc, serverTimestamp } from "firebase/firestore"; // Import Firestore functions
 
 export default function CheckoutPage() {
-  const { cartItems, clearCart, getItemCount } = useCart();
+  const { cartItems, clearCart, getItemCount, getTotalPrice } = useCart();
   const { toast } = useToast();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -34,7 +36,6 @@ export default function CheckoutPage() {
       shipToDifferentAddress: false,
       paymentMethod: "cod",
       agreeToTerms: false,
-      // Explicitly set optionals to undefined or empty strings if needed
       billingCompanyName: "",
       billingStreetAddress2: "",
       shippingFirstName: "",
@@ -52,24 +53,47 @@ export default function CheckoutPage() {
 
   async function onSubmit(data: CheckoutFormData) {
     setIsSubmitting(true);
-    // In a real application, you would send this data to your backend to process the order.
-    // For now, we'll simulate an order placement.
-    console.log("Checkout Data:", data);
+    
+    const orderData = {
+      ...data,
+      cartItems: cartItems.map(item => ({ // Store a snapshot of cart items
+        productId: item.productId,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        selectedVariants: item.selectedVariants || null, // Ensure null if undefined
+        image: item.image,
+      })),
+      orderTotal: getTotalPrice() + (getItemCount() > 0 ? 250.00 : 0), // Calculate total based on summary
+      orderStatus: "pending", // Initial order status
+      createdAt: serverTimestamp(), // Firestore server-side timestamp
+    };
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    try {
+      // Add a new document with a generated ID to the "orders" collection
+      const docRef = await addDoc(collection(db, "orders"), orderData);
+      console.log("Order placed with ID: ", docRef.id);
 
-    toast({
-      title: "Order Placed Successfully!",
-      description: "Thank you for your purchase. Your order details have been recorded.",
-      variant: "default", 
-    });
-    clearCart();
-    router.push("/order-confirmation"); // Redirect to an order confirmation page (to be created)
-    setIsSubmitting(false);
+      toast({
+        title: "Order Placed Successfully!",
+        description: `Thank you for your purchase. Your order ID is ${docRef.id}.`,
+        variant: "default",
+      });
+      clearCart();
+      router.push("/order-confirmation"); 
+    } catch (error) {
+      console.error("Error placing order: ", error);
+      toast({
+        title: "Error Placing Order",
+        description: "There was an issue processing your order. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
-  if (getItemCount() === 0 && !isSubmitting) { // Don't show if submitting (already past this check)
+  if (getItemCount() === 0 && !isSubmitting) { 
     return (
       <div className="text-center py-12">
         <ShoppingCart className="mx-auto h-16 w-16 text-muted-foreground mb-6" />
@@ -99,7 +123,7 @@ export default function CheckoutPage() {
                 <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                   <FormControl>
                     <Checkbox
-                      checked={field.value}
+                      checked={field.value || false}
                       onCheckedChange={field.onChange}
                     />
                   </FormControl>
@@ -127,6 +151,7 @@ export default function CheckoutPage() {
                       placeholder="Notes about your order, e.g. special notes for delivery."
                       className="resize-none"
                       {...field}
+                      value={field.value ?? ""}
                     />
                   </FormControl>
                   <FormMessage />
