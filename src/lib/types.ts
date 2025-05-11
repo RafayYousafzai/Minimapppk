@@ -47,3 +47,47 @@ export interface FilterOptions {
   maxPrice: number;
   minRating: number;
 }
+
+export type OrderStatus = "pending" | "processing" | "shipped" | "delivered" | "cancelled";
+
+export interface OrderItem {
+  productId: string;
+  name: string;
+  price: number;
+  quantity: number;
+  selectedVariants?: { [key: string]: string } | null;
+  image: string;
+}
+
+export interface Order {
+  id: string;
+  billingFirstName: string;
+  billingLastName: string;
+  billingEmail: string;
+  billingPhone: string;
+  billingStreetAddress1: string;
+  billingCity: string;
+  billingPostcode: string;
+  billingCountry: string;
+  billingState: string;
+  billingCompanyName?: string;
+  billingStreetAddress2?: string;
+  
+  shipToDifferentAddress: boolean;
+  shippingFirstName?: string;
+  shippingLastName?: string;
+  shippingCompanyName?: string;
+  shippingCountry?: string;
+  shippingStreetAddress1?: string;
+  shippingStreetAddress2?: string;
+  shippingCity?: string;
+  shippingState?: string;
+  shippingPostcode?: string;
+
+  cartItems: OrderItem[];
+  orderTotal: number;
+  orderStatus: OrderStatus;
+  createdAt: { seconds: number, nanoseconds: number } | Date; // Firestore timestamp or Date object
+  orderNotes?: string;
+  paymentMethod: "cod"; // Assuming only COD for now
+}
