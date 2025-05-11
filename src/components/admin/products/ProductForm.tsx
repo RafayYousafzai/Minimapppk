@@ -12,37 +12,78 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { PlusCircle, Trash2, XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { addProduct } from "@/services/productService";
+import { addProduct, updateProduct } from "@/services/productService";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-// Combobox (if available and chosen) or Select for categories
-// For now, using simple input for category
+import { useState, useEffect } from "react";
+import type { Product } from "@/lib/types"; // Import Product type
 
 interface ProductFormProps {
-  initialData?: ProductFormData; // For editing later
+  initialData?: Product; // Use Product type for initialData from DB
   existingCategories: string[];
+  productId?: string; // Pass productId if editing
 }
 
-const ProductForm: React.FC<ProductFormProps> = ({ initialData, existingCategories }) => {
+// Helper to transform Product to ProductFormData
+const transformProductToFormData = (product: Product): ProductFormData => {
+  return {
+    name: product.name,
+    description: product.description,
+    longDescription: product.longDescription || "",
+    images: product.images.map(url => ({ url })),
+    price: product.price,
+    originalPrice: product.originalPrice ?? undefined,
+    category: product.category,
+    stock: product.stock,
+    tags: product.tags ? product.tags.join(', ') : "", // Convert array to comma-separated string
+    variants: product.variants?.map(v => ({
+      type: v.type,
+      options: v.options.map(o => ({
+        id: o.id, // Keep existing ID for options
+        value: o.value,
+        additionalPrice: o.additionalPrice || 0,
+      })),
+    })) || [],
+  };
+};
+
+
+const ProductForm: React.FC<ProductFormProps> = ({ initialData, existingCategories, productId }) => {
   const { toast } = useToast();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const formDefaultValues = initialData 
+    ? transformProductToFormData(initialData) 
+    : {
+        name: "",
+        description: "",
+        longDescription: "",
+        images: [{ url: "" }],
+        price: 0,
+        originalPrice: undefined,
+        category: "",
+        stock: 0,
+        tags: "", 
+        variants: [],
+      };
+
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productFormSchema),
-    defaultValues: initialData || {
-      name: "",
-      description: "",
-      longDescription: "",
-      images: [{ url: "" }],
-      price: 0,
-      originalPrice: undefined,
-      category: "",
-      stock: 0,
-      tags: "", // Will be transformed to array by Zod schema
-      variants: [],
-    },
+    defaultValues: formDefaultValues,
   });
+
+  // Reset form if initialData changes (e.g., when navigating between add/edit or different edit items)
+  useEffect(() => {
+    if (initialData) {
+      form.reset(transformProductToFormData(initialData));
+    } else {
+      form.reset({
+        name: "", description: "", longDescription: "", images: [{ url: "" }],
+        price: 0, originalPrice: undefined, category: "", stock: 0, tags: "", variants: [],
+      });
+    }
+  }, [initialData, form]);
+
 
   const { fields: imageFields, append: appendImage, remove: removeImage } = useFieldArray({
     control: form.control,
@@ -57,24 +98,26 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, existingCategori
   async function onSubmit(data: ProductFormData) {
     setIsSubmitting(true);
     try {
-      // console.log("Form Data to submit:", data); // Log data before sending
-      // const transformedData = {
-      //   ...data,
-      //   tags: typeof data.tags === 'string' ? data.tags.split(',').map(tag => tag.trim()).filter(Boolean) : (data.tags || []),
-      // };
-      // console.log("Transformed Data for addProduct:", transformedData);
-
-      const productId = await addProduct(data); // Zod transform handles tags
-      toast({
-        title: "Product Added",
-        description: `Product "${data.name}" (ID: ${productId}) has been successfully added.`,
-      });
+      if (productId && initialData) { // If productId exists, it's an update
+        await updateProduct(productId, data);
+        toast({
+          title: "Product Updated",
+          description: `Product "${data.name}" has been successfully updated.`,
+        });
+      } else { // Otherwise, it's a new product
+        const newProductId = await addProduct(data);
+        toast({
+          title: "Product Added",
+          description: `Product "${data.name}" (ID: ${newProductId}) has been successfully added.`,
+        });
+      }
       router.push("/admin/products");
+      router.refresh(); // Refresh server components on the products page
     } catch (error) {
-      console.error("Failed to add product:", error);
+      console.error("Failed to save product:", error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Could not add product. Please try again.",
+        description: error instanceof Error ? error.message : `Could not ${productId ? 'update' : 'add'} product. Please try again.`,
         variant: "destructive",
       });
     } finally {
@@ -119,7 +162,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, existingCategori
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Long Description (Optional)</FormLabel>
-                  <FormControl><Textarea placeholder="Detailed information about the product." {...field} rows={5} /></FormControl>
+                  <FormControl><Textarea placeholder="Detailed information about the product." {...field} value={field.value ?? ""} rows={5} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -279,7 +322,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, existingCategori
             Cancel
           </Button>
           <Button type="submit" disabled={isSubmitting} className="bg-primary hover:bg-primary/90">
-            {isSubmitting ? 'Saving...' : (initialData ? 'Save Changes' : 'Add Product')}
+            {isSubmitting ? 'Saving...' : (productId ? 'Save Changes' : 'Add Product')}
           </Button>
         </div>
       </form>
@@ -297,13 +340,19 @@ interface OptionsFieldArrayProps {
 const OptionsFieldArray: React.FC<OptionsFieldArrayProps> = ({ control, variantIndex }) => {
   const { fields, append, remove } = useFieldArray({
     control,
-    name: `variants.${variantIndex}.options` as const, // Ensure name is correctly typed
+    name: `variants.${variantIndex}.options` as const, 
   });
 
   return (
     <div className="space-y-3">
       {fields.map((optionField, optionIndex) => (
         <div key={optionField.id} className="grid grid-cols-1 md:grid-cols-3 gap-3 items-start p-3 border rounded-md bg-background">
+           {/* Hidden field for option ID to preserve it on edit */}
+          <Controller
+            name={`variants.${variantIndex}.options.${optionIndex}.id`}
+            control={control}
+            render={({ field }) => <input type="hidden" {...field} />}
+          />
           <FormField
             control={control}
             name={`variants.${variantIndex}.options.${optionIndex}.value`}
@@ -340,7 +389,7 @@ const OptionsFieldArray: React.FC<OptionsFieldArrayProps> = ({ control, variantI
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => append({ value: "", additionalPrice: 0 } as VariantOptionFormData)}
+                onClick={() => append({ id: '', value: "", additionalPrice: 0 } as VariantOptionFormData & {id?: string})} // Add id field to new option
                 className="mt-2"
                 >
                 <PlusCircle className="mr-2 h-4 w-4" /> Add Option

@@ -1,3 +1,4 @@
+
 export interface VariantOption {
   id: string;
   value: string; // e.g., "S", "M", "Red", "Blue"
@@ -26,6 +27,7 @@ export interface Product {
   tags?: string[];
   variants?: ProductVariant[];
   createdAt?: { seconds: number, nanoseconds: number } | Date; // Firestore timestamp or Date object for sorting
+  updatedAt?: { seconds: number, nanoseconds: number } | Date; // Firestore timestamp or Date object
 }
 
 export interface CartItem {

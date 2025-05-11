@@ -118,10 +118,10 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ initialProducts }) => {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem onClick={() => alert(`Editing product ${product.name}. Edit page to be implemented.`)}>
-                         {/* <Link href={`/admin/products/edit/${product.id}`}> */}
+                      <DropdownMenuItem asChild>
+                         <Link href={`/admin/products/edit/${product.id}`}>
                             <Edit className="mr-2 h-4 w-4" /> Edit Product
-                         {/* </Link> */}
+                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={() => handleDeleteProduct(product.id)} className="text-destructive focus:text-destructive focus:bg-destructive/10">

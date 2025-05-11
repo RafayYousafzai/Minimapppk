@@ -2,6 +2,7 @@
 import { z } from 'zod';
 
 export const variantOptionFormSchema = z.object({
+  id: z.string().optional(), // Optional ID, useful for preserving IDs during edit
   value: z.string().min(1, "Option value is required (e.g., S, Red)"),
   additionalPrice: z.coerce
     .number({ invalid_type_error: "Additional price must be a number" })
@@ -48,4 +49,3 @@ export const productFormSchema = z.object({
 });
 
 export type ProductFormData = z.infer<typeof productFormSchema>;
-
