@@ -1,7 +1,7 @@
 
 import { db } from '@/lib/firebase/config';
 import type { Order, OrderStatus } from '@/lib/types';
-import { collection, getDocs, doc, updateDoc, Timestamp, orderBy, query, limit as firestoreLimit, where, getCountFromServer } from 'firebase/firestore'; // Renamed limit to firestoreLimit
+import { collection, getDocs, doc, updateDoc, Timestamp, orderBy, query, limit as firestoreLimit, where, getCountFromServer, getDoc } from 'firebase/firestore'; // Renamed limit to firestoreLimit, added getDoc
 
 const ORDERS_COLLECTION = 'orders';
 
@@ -31,6 +31,33 @@ export async function getAllOrders(): Promise<Order[]> {
     return [];
   }
 }
+
+export async function getOrderById(orderId: string): Promise<Order | null> {
+  try {
+    const orderDocRef = doc(db, ORDERS_COLLECTION, orderId);
+    const docSnap = await getDoc(orderDocRef);
+
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      let createdAtDate = data.createdAt;
+      if (data.createdAt && typeof data.createdAt.seconds === 'number') {
+        createdAtDate = (data.createdAt as Timestamp).toDate();
+      }
+      return {
+        id: docSnap.id,
+        ...data,
+        createdAt: createdAtDate,
+      } as Order;
+    } else {
+      console.log(`No order found with ID: ${orderId}`);
+      return null;
+    }
+  } catch (error) {
+    console.error(`Error fetching order with ID ${orderId}:`, error);
+    throw new Error('Failed to fetch order details.');
+  }
+}
+
 
 export async function updateOrderStatus(orderId: string, newStatus: OrderStatus): Promise<void> {
   try {
