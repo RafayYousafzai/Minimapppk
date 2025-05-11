@@ -1,4 +1,3 @@
-
 "use client";
 
 import type { UseFormReturn } from "react-hook-form";
@@ -36,7 +35,7 @@ const BillingDetailsForm: React.FC<BillingDetailsFormProps> = ({ form }) => {
             <FormItem>
               <FormLabel>First name *</FormLabel>
               <FormControl>
-                <Input placeholder="John" {...field} />
+                <Input placeholder="John" {...field} value={field.value ?? ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -49,7 +48,7 @@ const BillingDetailsForm: React.FC<BillingDetailsFormProps> = ({ form }) => {
             <FormItem>
               <FormLabel>Last name *</FormLabel>
               <FormControl>
-                <Input placeholder="Doe" {...field} />
+                <Input placeholder="Doe" {...field} value={field.value ?? ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -63,7 +62,7 @@ const BillingDetailsForm: React.FC<BillingDetailsFormProps> = ({ form }) => {
           <FormItem>
             <FormLabel>Company name (optional)</FormLabel>
             <FormControl>
-              <Input placeholder="Acme Corp" {...field} />
+              <Input placeholder="Acme Corp" {...field} value={field.value ?? ""} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -100,7 +99,7 @@ const BillingDetailsForm: React.FC<BillingDetailsFormProps> = ({ form }) => {
           <FormItem>
             <FormLabel>Street address *</FormLabel>
             <FormControl>
-              <Input placeholder="House number and street name" {...field} />
+              <Input placeholder="House number and street name" {...field} value={field.value ?? ""} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -113,7 +112,7 @@ const BillingDetailsForm: React.FC<BillingDetailsFormProps> = ({ form }) => {
           <FormItem>
             <FormLabel>Apartment, suite, unit, etc. (optional)</FormLabel>
             <FormControl>
-              <Input placeholder="Apartment, suite, unit, etc." {...field} />
+              <Input placeholder="Apartment, suite, unit, etc." {...field} value={field.value ?? ""} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -126,7 +125,7 @@ const BillingDetailsForm: React.FC<BillingDetailsFormProps> = ({ form }) => {
           <FormItem>
             <FormLabel>Town / City *</FormLabel>
             <FormControl>
-              <Input placeholder="Karachi" {...field} />
+              <Input placeholder="Karachi" {...field} value={field.value ?? ""} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -163,7 +162,7 @@ const BillingDetailsForm: React.FC<BillingDetailsFormProps> = ({ form }) => {
           <FormItem>
             <FormLabel>Postcode / ZIP *</FormLabel>
             <FormControl>
-              <Input placeholder="75500" {...field} />
+              <Input placeholder="75500" {...field} value={field.value ?? ""} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -176,7 +175,7 @@ const BillingDetailsForm: React.FC<BillingDetailsFormProps> = ({ form }) => {
           <FormItem>
             <FormLabel>Phone *</FormLabel>
             <FormControl>
-              <Input type="tel" placeholder="+92 300 1234567" {...field} />
+              <Input type="tel" placeholder="+92 300 1234567" {...field} value={field.value ?? ""} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -189,7 +188,7 @@ const BillingDetailsForm: React.FC<BillingDetailsFormProps> = ({ form }) => {
           <FormItem>
             <FormLabel>Email address *</FormLabel>
             <FormControl>
-              <Input type="email" placeholder="john.doe@example.com" {...field} />
+              <Input type="email" placeholder="john.doe@example.com" {...field} value={field.value ?? ""} />
             </FormControl>
             <FormMessage />
           </FormItem>
