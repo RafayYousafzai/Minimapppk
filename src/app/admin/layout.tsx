@@ -1,7 +1,7 @@
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Package2 } from 'lucide-react';
+import { Package2, ShoppingBag, PackagePlus, Tags } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'ShopWave Admin',
@@ -21,10 +21,16 @@ export default function AdminLayout({
             <Package2 className="h-6 w-6 text-primary" />
             <span className="text-xl font-bold">ShopWave Admin</span>
           </Link>
-          <nav className="flex items-center gap-6 text-sm font-medium">
-            <Link href="/admin/orders" className="text-foreground/70 hover:text-foreground transition-colors">
-              Orders
+          <nav className="flex items-center gap-4 text-sm font-medium md:gap-6">
+            <Link href="/admin/orders" className="text-foreground/70 hover:text-foreground transition-colors flex items-center gap-1">
+              <ShoppingBag className="h-4 w-4" /> Orders
             </Link>
+            <Link href="/admin/products" className="text-foreground/70 hover:text-foreground transition-colors flex items-center gap-1">
+              <PackagePlus className="h-4 w-4" /> Products
+            </Link>
+            {/* <Link href="/admin/categories" className="text-foreground/70 hover:text-foreground transition-colors flex items-center gap-1">
+              <Tags className="h-4 w-4" /> Categories
+            </Link> */}
             {/* Add more admin navigation links here as needed */}
           </nav>
         </div>

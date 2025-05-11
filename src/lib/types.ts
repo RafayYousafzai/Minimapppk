@@ -1,4 +1,3 @@
-
 export interface VariantOption {
   id: string;
   value: string; // e.g., "S", "M", "Red", "Blue"
@@ -26,6 +25,7 @@ export interface Product {
   stock: number; // Total stock or stock for default variant
   tags?: string[];
   variants?: ProductVariant[];
+  createdAt?: { seconds: number, nanoseconds: number } | Date; // Firestore timestamp or Date object for sorting
 }
 
 export interface CartItem {

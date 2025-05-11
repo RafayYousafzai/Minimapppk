@@ -1,25 +1,18 @@
 
-// 'use server' // Keep this commented out for now, can be used if functions are called from Server Actions
-
-import type { Product } from '@/lib/types';
+import type { Product, VariantOption } from '@/lib/types';
+import type { ProductFormData } from '@/lib/productFormTypes';
 import { db } from '@/lib/firebase/config';
-import { collection, doc, getDoc, getDocs, writeBatch, query, where, limit, orderBy } from 'firebase/firestore';
-import { mockProducts as productsToSeed } from '@/lib/mock-data'; // For seeding
+import { collection, doc, getDoc, getDocs, writeBatch, query, where, limit, orderBy, addDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { mockProducts as productsToSeed } from '@/lib/mock-data'; 
 
 const PRODUCTS_COLLECTION = 'products';
 
-/**
- * Seeds the Firestore database with initial product data from mock-data.ts.
- * This function should be called manually once to populate the database.
- */
 export async function seedProducts(): Promise<void> {
   const batch = writeBatch(db);
   const productsCollectionRef = collection(db, PRODUCTS_COLLECTION);
 
-  // Check if products already exist to avoid duplicates (optional, simple check)
   const existingProductsSnapshot = await getDocs(query(productsCollectionRef, limit(1)));
   if (!existingProductsSnapshot.empty && productsToSeed.length > 0) {
-    // Check if a product with the first ID already exists. If so, assume seeded.
     const firstProductCheck = await getDoc(doc(productsCollectionRef, productsToSeed[0].id));
     if (firstProductCheck.exists()) {
       console.log('Products collection already seems to contain data. Skipping seed.');
@@ -29,12 +22,10 @@ export async function seedProducts(): Promise<void> {
   
   productsToSeed.forEach((product) => {
     const docRef = doc(productsCollectionRef, product.id);
-    // Ensure all fields are serializable and handle undefined values appropriately
-    const productData = { ...product };
-    // Firestore cannot store undefined values. Convert them to null or remove them.
+    const productData = { ...product } as any; 
     Object.keys(productData).forEach(key => {
-      if (productData[key as keyof Product] === undefined) {
-        delete productData[key as keyof Product];
+      if (productData[key] === undefined) {
+        delete productData[key];
       }
     });
     batch.set(docRef, productData);
@@ -49,13 +40,59 @@ export async function seedProducts(): Promise<void> {
   }
 }
 
+export async function addProduct(data: ProductFormData): Promise<string> {
+  try {
+    const productsCollectionRef = collection(db, PRODUCTS_COLLECTION);
+    
+    const productToSave: Omit<Product, 'id' | 'rating' | 'reviews'> & { createdAt: any } = {
+      name: data.name,
+      description: data.description,
+      longDescription: data.longDescription || '',
+      images: data.images.map(img => img.url),
+      price: data.price,
+      originalPrice: data.originalPrice || undefined,
+      category: data.category,
+      stock: data.stock,
+      tags: data.tags || [],
+      rating: 0, // Default rating
+      reviews: 0, // Default reviews
+      variants: data.variants?.map(variant => ({
+        type: variant.type,
+        options: variant.options.map(option => ({
+          // Generate a simple unique ID for options. For more robust needs, consider UUIDs or Firestore auto-IDs if options were subcollections.
+          id: `${variant.type.toLowerCase().replace(/\s+/g, '-')}-${option.value.toLowerCase().replace(/\s+/g, '-')}-${Math.random().toString(36).substring(2, 9)}`,
+          value: option.value,
+          additionalPrice: option.additionalPrice || 0,
+        } as VariantOption)), 
+      })) || [],
+      createdAt: serverTimestamp(),
+    };
+
+    const docRef = await addDoc(productsCollectionRef, productToSave);
+    return docRef.id;
+  } catch (error) {
+    console.error('Error adding product:', error);
+    throw new Error('Failed to add product.');
+  }
+}
+
+
 export async function getAllProducts(): Promise<Product[]> {
   try {
     const productsCollectionRef = collection(db, PRODUCTS_COLLECTION);
-    const querySnapshot = await getDocs(productsCollectionRef);
-    const products = querySnapshot.docs.map(doc => {
-      const data = doc.data();
-      return { id: doc.id, ...data } as Product;
+    const q = query(productsCollectionRef, orderBy('createdAt', 'desc'));
+    const querySnapshot = await getDocs(q);
+    const products = querySnapshot.docs.map(docSnap => {
+      const data = docSnap.data();
+      let createdAtDate = data.createdAt;
+      if (data.createdAt && typeof data.createdAt.seconds === 'number') {
+        createdAtDate = (data.createdAt as Timestamp).toDate();
+      }
+      return { 
+        id: docSnap.id, 
+        ...data,
+        createdAt: createdAtDate, // Ensure it's a Date object if needed, or keep as Firestore Timestamp
+      } as Product;
     });
     return products;
   } catch (error) {
@@ -94,18 +131,29 @@ export async function getProductsByCategory(category: string): Promise<Product[]
 export async function getFeaturedProducts(count: number = 4): Promise<Product[]> {
    try {
     const productsCollectionRef = collection(db, PRODUCTS_COLLECTION);
-    const q = query(productsCollectionRef, orderBy('rating', 'desc'), limit(count));
+    // Attempt to order by rating if available, otherwise by creation date
+    let q;
+    try {
+        q = query(productsCollectionRef, orderBy('rating', 'desc'), limit(count));
+        const testSnapshot = await getDocs(q); // Test if ordering by rating works
+         if (testSnapshot.empty && count > 0) { // If rating field doesn't exist or no products have it, try another way
+            throw new Error("No products with rating, trying createdAt");
+        }
+    } catch (ratingOrderError) {
+        // Fallback to ordering by 'createdAt' if 'rating' is not consistently available or causes error
+        console.warn("Warning: Could not order by rating, falling back to createdAt for featured products.", ratingOrderError);
+        q = query(productsCollectionRef, orderBy('createdAt', 'desc'), limit(count));
+    }
+    
     const querySnapshot = await getDocs(q);
+    if (querySnapshot.empty && count > 0) { // If still empty, try fetching any 'count' products
+        const fallbackQuery = query(productsCollectionRef, limit(count));
+        const fallbackSnapshot = await getDocs(fallbackQuery);
+        return fallbackSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+    }
     return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
   } catch (error) {
     console.error('Error fetching featured products:', error);
-    try {
-        const fallbackQuery = query(productsCollectionRef, limit(count));
-        const fallbackSnapshot = await getDocs(fallbackQuery);
-        if (!fallbackSnapshot.empty) return fallbackSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
-    } catch (fallbackError) {
-        console.error('Error fetching fallback featured products:', fallbackError);
-    }
     return [];
   }
 }
@@ -114,7 +162,8 @@ export async function getFeaturedProducts(count: number = 4): Promise<Product[]>
 export async function getAllCategories(): Promise<string[]> {
   try {
     const products = await getAllProducts();
-    const categories = new Set(products.map(p => p.category));
+    if (!products || products.length === 0) return [];
+    const categories = new Set(products.map(p => p.category).filter(Boolean)); // filter(Boolean) removes undefined/null/empty strings
     return Array.from(categories);
   } catch (error) {
     console.error('Error fetching all categories:', error);
