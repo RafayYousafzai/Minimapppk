@@ -43,8 +43,9 @@ export const productFormSchema = z.object({
     .optional()
     .transform(val => val ? val.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) : []),
   variants: z.array(productVariantFormSchema)
-    .optional()
-    .max(5, "You can add a maximum of 5 variant types."),
+    .max(5, "You can add a maximum of 5 variant types.")
+    .optional(),
 });
 
 export type ProductFormData = z.infer<typeof productFormSchema>;
+
