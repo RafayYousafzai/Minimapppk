@@ -1,7 +1,7 @@
 
 import { db } from '@/lib/firebase/config';
 import type { Order, OrderStatus } from '@/lib/types';
-import { collection, getDocs, doc, updateDoc, Timestamp, orderBy, query, limit, where,getCountFromServer } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, Timestamp, orderBy, query, limit as firestoreLimit, where, getCountFromServer } from 'firebase/firestore'; // Renamed limit to firestoreLimit
 
 const ORDERS_COLLECTION = 'orders';
 
@@ -82,7 +82,10 @@ export async function getActiveCustomersCount(): Promise<number> {
     const querySnapshot = await getDocs(ordersCollectionRef);
     const customerEmails = new Set<string>();
     querySnapshot.forEach(docSnap => {
-      customerEmails.add(docSnap.data().billingEmail);
+      const email = docSnap.data().billingEmail;
+      if (email && typeof email === 'string') {
+        customerEmails.add(email);
+      }
     });
     return customerEmails.size;
   } catch (error) {
@@ -95,7 +98,7 @@ export async function getActiveCustomersCount(): Promise<number> {
 export async function getRecentOrders(count: number = 5): Promise<Order[]> {
   try {
     const ordersCollectionRef = collection(db, ORDERS_COLLECTION);
-    const q = query(ordersCollectionRef, orderBy('createdAt', 'desc'), limit(count));
+    const q = query(ordersCollectionRef, orderBy('createdAt', 'desc'), firestoreLimit(count));
     const querySnapshot = await getDocs(q);
     const orders = querySnapshot.docs.map(docSnap => {
       const data = docSnap.data();
@@ -115,5 +118,3 @@ export async function getRecentOrders(count: number = 5): Promise<Order[]> {
     return [];
   }
 }
-
-```
