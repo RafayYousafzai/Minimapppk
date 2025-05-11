@@ -1,10 +1,19 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { LineChart, ShoppingBag, Users } from 'lucide-react';
+import { LineChart, ShoppingBag, Users, PackageSearch } from 'lucide-react';
 import Link from 'next/link';
+import { getTotalRevenue, getTotalOrdersCount, getActiveCustomersCount, getRecentOrders } from '@/services/orderService';
+import type { Order } from '@/lib/types';
+import { format } from 'date-fns';
+import OrderStatusBadge from '@/components/admin/orders/OrderStatusBadge';
 
-export default function AdminDashboardPage() {
+export default async function AdminDashboardPage() {
+  const totalRevenue = await getTotalRevenue();
+  const totalOrdersCount = await getTotalOrdersCount();
+  const activeCustomersCount = await getActiveCustomersCount();
+  const recentOrders: Order[] = await getRecentOrders(5);
+
   return (
     <div className="space-y-8">
       <section>
@@ -21,22 +30,22 @@ export default function AdminDashboardPage() {
             <LineChart className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">₨1,234,567</div>
+            <div className="text-2xl font-bold">₨{totalRevenue.toFixed(2)}</div>
             <p className="text-xs text-muted-foreground">
-              +20.1% from last month
+              From completed orders
             </p>
           </CardContent>
         </Card>
 
         <Card className="shadow-md">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Orders</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
             <ShoppingBag className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+2350</div>
+            <div className="text-2xl font-bold">{totalOrdersCount}</div>
             <p className="text-xs text-muted-foreground">
-              +180.1% from last month
+              All-time orders
             </p>
             <Button size="sm" variant="outline" className="mt-4" asChild>
               <Link href="/admin/orders">Manage Orders</Link>
@@ -50,24 +59,46 @@ export default function AdminDashboardPage() {
             <Users className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+573</div>
+            <div className="text-2xl font-bold">{activeCustomersCount}</div>
             <p className="text-xs text-muted-foreground">
-              +21 since last hour
+              Unique customers from orders
             </p>
           </CardContent>
         </Card>
       </section>
 
-      {/* Placeholder for more dashboard components */}
       <section>
-        <Card>
+        <Card className="shadow-md">
           <CardHeader>
             <CardTitle>Recent Activity</CardTitle>
             <CardDescription>Overview of the latest store events.</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground">Recent activity feed will be shown here...</p>
-            {/* Example: List of recent orders, new user registrations, etc. */}
+            {recentOrders.length > 0 ? (
+              <ul className="space-y-4">
+                {recentOrders.map((order) => (
+                  <li key={order.id} className="flex items-center justify-between p-3 bg-secondary/50 rounded-md">
+                    <div className="flex items-center gap-3">
+                      <PackageSearch className="h-6 w-6 text-primary" />
+                      <div>
+                        <p className="font-medium">Order #{order.id.substring(0, 8)}...</p>
+                        <p className="text-sm text-muted-foreground">
+                          {order.billingFirstName} {order.billingLastName} - ₨{order.orderTotal.toFixed(2)}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end">
+                      <OrderStatusBadge status={order.orderStatus} />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {order.createdAt instanceof Date ? format(order.createdAt, 'MMM d, yyyy, h:mm a') : 'Invalid Date'}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-muted-foreground">No recent activity to display.</p>
+            )}
           </CardContent>
         </Card>
       </section>
