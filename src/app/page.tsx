@@ -1,12 +1,13 @@
 
 import ProductCard from '@/components/products/ProductCard';
 import { Button } from '@/components/ui/button';
-import type { Product } from '@/lib/types';
-import { getFeaturedProducts, getAllProducts, getAllCategories } from '@/services/productService';
+import type { Product, Review } from '@/lib/types';
+import { getFeaturedProducts, getAllProducts, getAllCategories, getRecentReviews } from '@/services/productService';
 import { ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import SeedButton from '@/components/dev/SeedButton'; // Import the new SeedButton
+import SeedButton from '@/components/dev/SeedButton';
+import TestimonialSection from '@/components/home/TestimonialSection'; // Import the new TestimonialSection
 
 // Placeholder icon, replace with actual icons if available
 const Package2Icon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -29,12 +30,13 @@ export default async function HomePage() {
   
   const categories = await getAllCategories();
   const displayCategories = categories.slice(0, 4); 
+
+  const recentReviews: Review[] = await getRecentReviews(3); // Fetch 3 recent reviews for testimonials
   
 
   return (
     <div className="space-y-12">
       
-      {/* Development Seed Button - remove or hide in production */}
       <div className="my-4 p-4 border border-dashed border-destructive/50 rounded-lg bg-destructive/10">
           <h3 className="text-lg font-semibold text-destructive">Developer Zone</h3>
           <p className="text-sm text-muted-foreground mb-2">
@@ -43,7 +45,7 @@ export default async function HomePage() {
           </p>
           <SeedButton />
           <p className="text-xs text-muted-foreground mt-2">
-            If you encounter Firestore errors (like "INVALID_ARGUMENT"), please ensure your Firebase Project ID is correctly set in your <code>.env</code> file and Firestore is enabled in Native Mode in your Firebase project console.
+            If you encounter Firestore errors (like "INVALID_ARGUMENT"), please ensure your Firebase Project ID is correctly set in your <code>.env</code> file, Firestore is enabled in Native Mode in your Firebase project console, and necessary indexes are created (check console logs for hints).
           </p>
       </div>
 
@@ -96,6 +98,11 @@ export default async function HomePage() {
             ))}
           </div>
         </section>
+      )}
+
+      {/* Testimonial Section */}
+      {recentReviews.length > 0 && (
+        <TestimonialSection reviews={recentReviews} />
       )}
 
       {/* Categories Section */}

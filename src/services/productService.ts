@@ -3,7 +3,7 @@ import type { Product, VariantOption, Review } from '@/lib/types';
 import type { ProductFormData } from '@/lib/productFormTypes';
 import type { ReviewFormData } from '@/lib/reviewFormSchema';
 import { db } from '@/lib/firebase/config';
-import { collection, doc, getDoc, getDocs, writeBatch, query, where, limit, orderBy, addDoc, serverTimestamp, Timestamp, updateDoc, FieldValue } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, writeBatch, query, where, limit as firestoreLimit, orderBy, addDoc, serverTimestamp, Timestamp, updateDoc, FieldValue, collectionGroup } from 'firebase/firestore';
 import { mockProducts as productsToSeed } from '@/lib/mock-data'; 
 
 const PRODUCTS_COLLECTION = 'products';
@@ -13,18 +13,24 @@ export async function seedProducts(): Promise<void> {
   const batch = writeBatch(db);
   const productsCollectionRef = collection(db, PRODUCTS_COLLECTION);
 
-  if (productsToSeed.length > 0) {
-    const firstProductCheckRef = doc(productsCollectionRef, productsToSeed[0].id);
-    const firstProductSnap = await getDoc(firstProductCheckRef);
-    if (firstProductSnap.exists()) {
-      console.log('Products collection already seems to contain data (found first mock product by ID). Skipping seed.');
-      return;
+  // Check if products already exist to prevent re-seeding
+  const existingProductsSnapshot = await getDocs(query(productsCollectionRef, firestoreLimit(1)));
+  if (!existingProductsSnapshot.empty) {
+    // More robust check: verify if specific mock product IDs exist
+    let seeded = false;
+    if (productsToSeed.length > 0) {
+        const firstProductCheckRef = doc(productsCollectionRef, productsToSeed[0].id);
+        const firstProductSnap = await getDoc(firstProductCheckRef);
+        if (firstProductSnap.exists()) {
+            seeded = true;
+        }
     }
-  } else {
-    const existingProductsSnapshot = await getDocs(query(productsCollectionRef, limit(1)));
-    if (!existingProductsSnapshot.empty) {
-      console.log('Products collection already contains data. Skipping seed.');
-      return;
+    if (seeded) {
+        console.log('Products collection already seems to contain data (found first mock product by ID). Skipping seed.');
+        return;
+    } else if (!productsToSeed.length && !existingProductsSnapshot.empty) {
+        console.log('Products collection contains data (and no mock products to check against). Skipping seed.');
+        return;
     }
   }
   
@@ -154,6 +160,8 @@ export async function getAllProducts(): Promise<Product[]> {
     console.error('Error fetching all products:', error);
     if (error instanceof Error && error.message.includes("firestore/indexes")) {
         console.warn("Firestore index for ordering by 'createdAt' might be missing. Please check your Firebase console.");
+    } else if (error instanceof Error && error.message.includes("INVALID_ARGUMENT")) {
+        console.error("Firebase Firestore Error: INVALID_ARGUMENT. This often means your Firestore Project ID is not correctly configured in .env or your Firestore rules are denying access. Ensure NEXT_PUBLIC_FIREBASE_PROJECT_ID is set and matches your project in the Firebase console, and that Firestore is in Native mode.");
     }
     return []; 
   }
@@ -221,7 +229,7 @@ export async function getFeaturedProducts(count: number = 4): Promise<Product[]>
     const productsCollectionRef = collection(db, PRODUCTS_COLLECTION);
     let q;
     try {
-        q = query(productsCollectionRef, orderBy('rating', 'desc'), limit(count));
+        q = query(productsCollectionRef, orderBy('rating', 'desc'), firestoreLimit(count));
         const testSnapshot = await getDocs(q); 
          if (testSnapshot.empty && count > 0) {
             console.warn("No products found when ordering by rating for featured products. Falling back.");
@@ -229,13 +237,13 @@ export async function getFeaturedProducts(count: number = 4): Promise<Product[]>
         }
     } catch (ratingOrderError) {
         console.warn("Warning: Could not order by rating for featured products, falling back to createdAt.", ratingOrderError);
-        q = query(productsCollectionRef, orderBy('createdAt', 'desc'), limit(count));
+        q = query(productsCollectionRef, orderBy('createdAt', 'desc'), firestoreLimit(count));
     }
     
     const querySnapshot = await getDocs(q);
     if (querySnapshot.empty && count > 0) {
         console.warn("No products found with rating or createdAt ordering. Fetching any products.");
-        const fallbackQuery = query(productsCollectionRef, limit(count));
+        const fallbackQuery = query(productsCollectionRef, firestoreLimit(count));
         const fallbackSnapshot = await getDocs(fallbackQuery);
         return fallbackSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
     }
@@ -295,17 +303,16 @@ export async function getPriceRange(): Promise<{ min: number; max: number }> {
 export async function addReview(productId: string, reviewData: ReviewFormData): Promise<string> {
   try {
     const reviewCollectionRef = collection(db, PRODUCTS_COLLECTION, productId, REVIEWS_SUBCOLLECTION);
-    const newReview: Omit<Review, 'id' | 'productId'> = {
-      ...reviewData,
+    const newReview: Omit<Review, 'id' | 'productId' | 'createdAt'> & { createdAt: FieldValue } = {
+      reviewerName: reviewData.reviewerName,
+      rating: reviewData.rating,
+      comment: reviewData.comment,
       createdAt: serverTimestamp(),
     };
     const docRef = await addDoc(reviewCollectionRef, newReview);
 
-    // IMPORTANT: For a production app, you would also update the product's average rating
-    // and review count here, likely using a Firebase Transaction or a Cloud Function
-    // to ensure atomicity and consistency.
-    // For simplicity, this step is omitted for now. The product's top-level rating/reviews fields
-    // will not be live-updated by this client-side addReview function.
+    // TODO: For a production app, update the product's average rating and review count
+    // using a Firebase Transaction or a Cloud Function.
 
     return docRef.id;
   } catch (error) {
@@ -335,6 +342,39 @@ export async function getReviewsByProductId(productId: string): Promise<Review[]
     });
   } catch (error) {
     console.error(`Error fetching reviews for product ${productId}:`, error);
+    return [];
+  }
+}
+
+export async function getRecentReviews(count: number): Promise<Review[]> {
+  try {
+    const reviewsRef = collectionGroup(db, REVIEWS_SUBCOLLECTION);
+    const q = query(reviewsRef, orderBy('createdAt', 'desc'), firestoreLimit(count));
+    const querySnapshot = await getDocs(q);
+
+    const reviews: Review[] = [];
+    querySnapshot.forEach(docSnap => {
+      const data = docSnap.data();
+      const productId = docSnap.ref.parent.parent?.id || 'unknown_product';
+      let createdAtDate = data.createdAt;
+      if (data.createdAt && typeof data.createdAt.seconds === 'number') {
+        createdAtDate = (data.createdAt as Timestamp).toDate();
+      }
+      reviews.push({
+        id: docSnap.id,
+        productId: productId,
+        reviewerName: data.reviewerName,
+        rating: data.rating,
+        comment: data.comment,
+        createdAt: createdAtDate,
+      } as Review);
+    });
+    return reviews;
+  } catch (error) {
+    console.error("Error fetching recent reviews:", error);
+    if (error instanceof Error && (error.message.includes("indexes") || error.message.includes("INVALID_ARGUMENT"))) {
+        console.warn("Firestore index for collection group 'reviews' ordered by 'createdAt' (desc) might be missing. Please check your Firebase console. The error was:", error.message);
+    }
     return [];
   }
 }
