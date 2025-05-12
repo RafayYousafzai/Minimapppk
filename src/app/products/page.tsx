@@ -1,174 +1,160 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import ProductCard from '@/components/products/ProductCard';
-import FilterSidebar from '@/components/products/FilterSidebar';
-import * as productService from '@/services/productService';
-import type { Product } from '@/lib/types';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Search, X, Loader2 } from 'lucide-react';
-import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { Skeleton } from '@/components/ui/skeleton';
-import { Card } from '@/components/ui/card';
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import ProductCard from "@/components/products/ProductCard";
+import FilterSidebar from "@/components/products/FilterSidebar";
+import * as productService from "@/services/productService";
+import type { Product } from "@/lib/types";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Search, X, Loader2 } from "lucide-react";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Card } from "@/components/ui/card";
+import { Suspense } from "react";
 
 const PRODUCTS_PER_PAGE = 8;
 
-export default function ProductsPage() {
+function ProductsContent() {
   const router = useRouter();
-  const searchParams = useSearchParams(); // searchParams will be a new object instance on URL change
+  const searchParams = useSearchParams(); // This is now properly wrapped in Suspense
 
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [globalMinPrice, setGlobalMinPrice] = useState(0);
-  const [globalMaxPrice, setGlobalMaxPrice] = useState(1000); // Initial sensible default
+  const [globalMaxPrice, setGlobalMaxPrice] = useState(1000);
 
-  // State for actual filtering
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filters, setFilters] = useState<{
-    categories: string[];
-    priceRange: [number, number];
-    minRating: number;
-  }>({
-    categories: [],
-    priceRange: [0, 1000], // Initial sensible default
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filters, setFilters] = useState({
+    categories: [] as string[],
+    priceRange: [0, 1000] as [number, number],
     minRating: 0,
   });
   const [currentPage, setCurrentPage] = useState(1);
-  
-  // State for the search input field on this page
-  const [localSearchTerm, setLocalSearchTerm] = useState('');
+  const [localSearchTerm, setLocalSearchTerm] = useState("");
 
-
-  // Effect 1: Fetch initial data (all products, categories, price range)
+  // Effect 1: Fetch initial data
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
-      const products = await productService.getAllProducts();
-      setAllProducts(products);
-      
-      const priceRangeData = await productService.getPriceRange();
-      setGlobalMinPrice(priceRangeData.min);
-      setGlobalMaxPrice(priceRangeData.max);
+      try {
+        const products = await productService.getAllProducts();
+        setAllProducts(products);
 
-      // Initialize filters and search term based on current URL after global prices are fetched
-      const currentUrlParams = new URLSearchParams(searchParams.toString());
-      setSearchTerm(currentUrlParams.get('search') || '');
-      setLocalSearchTerm(currentUrlParams.get('search') || '');
-      setFilters({
-        categories: currentUrlParams.get('categories')?.split(',').filter(Boolean) || [],
-        priceRange: [
-            parseFloat(currentUrlParams.get('minPrice') || priceRangeData.min.toString()),
-            parseFloat(currentUrlParams.get('maxPrice') || priceRangeData.max.toString())
-        ] as [number, number],
-        minRating: parseInt(currentUrlParams.get('minRating') || '0', 10),
-      });
-      setCurrentPage(parseInt(currentUrlParams.get('page') || '1', 10));
-      
-      setIsLoading(false);
+        const priceRangeData = await productService.getPriceRange();
+        setGlobalMinPrice(priceRangeData.min);
+        setGlobalMaxPrice(priceRangeData.max);
+
+        const currentUrlParams = new URLSearchParams(searchParams.toString());
+        setSearchTerm(currentUrlParams.get("search") || "");
+        setLocalSearchTerm(currentUrlParams.get("search") || "");
+        setFilters({
+          categories:
+            currentUrlParams.get("categories")?.split(",").filter(Boolean) ||
+            [],
+          priceRange: [
+            parseFloat(
+              currentUrlParams.get("minPrice") || priceRangeData.min.toString()
+            ),
+            parseFloat(
+              currentUrlParams.get("maxPrice") || priceRangeData.max.toString()
+            ),
+          ] as [number, number],
+          minRating: parseInt(currentUrlParams.get("minRating") || "0", 10),
+        });
+        setCurrentPage(parseInt(currentUrlParams.get("page") || "1", 10));
+      } finally {
+        setIsLoading(false);
+      }
     };
     fetchData();
-  }, []); // Runs once on mount
+  }, [searchParams]);
 
-  // Effect 2: Sync URL query parameters TO component state (when URL changes externally or via popstate)
-  useEffect(() => {
-    if (isLoading) return; // Don't run if initial data is still loading
-
-    // searchParams object from useSearchParams() is the source of truth for current URL state
-    setSearchTerm(searchParams.get('search') || '');
-    setLocalSearchTerm(searchParams.get('search') || ''); // Keep local input in sync
-    setFilters({
-      categories: searchParams.get('categories')?.split(',').filter(Boolean) || [],
-      priceRange: [
-        parseFloat(searchParams.get('minPrice') || globalMinPrice.toString()),
-        parseFloat(searchParams.get('maxPrice') || globalMaxPrice.toString())
-      ] as [number, number],
-      minRating: parseInt(searchParams.get('minRating') || '0', 10),
-    });
-    setCurrentPage(parseInt(searchParams.get('page') || '1', 10));
-
-    // Optional: keep popstate for explicit back/forward, though searchParams dep should cover most
-    const handlePopState = () => {
-        // Re-sync from window.location.search as searchParams might not update for popstate alone
-        // in some edge cases or if history API was used manually elsewhere.
-        const paramsFromPop = new URLSearchParams(window.location.search);
-        setSearchTerm(paramsFromPop.get('search') || '');
-        setLocalSearchTerm(paramsFromPop.get('search') || '');
-        setFilters({
-            categories: paramsFromPop.get('categories')?.split(',').filter(Boolean) || [],
-            priceRange: [
-                parseFloat(paramsFromPop.get('minPrice') || globalMinPrice.toString()),
-                parseFloat(paramsFromPop.get('maxPrice') || globalMaxPrice.toString())
-            ] as [number, number],
-            minRating: parseInt(paramsFromPop.get('minRating') || '0', 10),
-        });
-        setCurrentPage(parseInt(paramsFromPop.get('page') || '1', 10));
-    };
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-
-  }, [searchParams, isLoading, globalMinPrice, globalMaxPrice]); // React to searchParams changes
-
-  // Effect 3: Sync component state (searchTerm, filters, currentPage) TO URL
+  // Effect 2: Sync URL to state
   useEffect(() => {
     if (isLoading) return;
 
     const params = new URLSearchParams();
-    if (searchTerm) params.set('search', searchTerm);
-    if (filters.categories.length > 0) params.set('categories', filters.categories.join(','));
-    
-    // Only add price/rating to URL if they differ from default (global) values
-    if (filters.priceRange[0] !== globalMinPrice) params.set('minPrice', filters.priceRange[0].toString());
-    if (filters.priceRange[1] !== globalMaxPrice) params.set('maxPrice', filters.priceRange[1].toString());
-    if (filters.minRating > 0) params.set('minRating', filters.minRating.toString());
-    if (currentPage > 1) params.set('page', currentPage.toString());
-    
-    const newQueryString = params.toString();
-    const newPath = `/products${newQueryString ? `?${newQueryString}` : ''}`;
-    
-    if (window.location.pathname + window.location.search !== newPath) {
-       router.push(newPath, { scroll: false }); // Use router.push
-    }
-  }, [searchTerm, filters, currentPage, router, globalMinPrice, globalMaxPrice, isLoading]);
+    if (searchTerm) params.set("search", searchTerm);
+    if (filters.categories.length > 0)
+      params.set("categories", filters.categories.join(","));
+    if (filters.priceRange[0] !== globalMinPrice)
+      params.set("minPrice", filters.priceRange[0].toString());
+    if (filters.priceRange[1] !== globalMaxPrice)
+      params.set("maxPrice", filters.priceRange[1].toString());
+    if (filters.minRating > 0)
+      params.set("minRating", filters.minRating.toString());
+    if (currentPage > 1) params.set("page", currentPage.toString());
 
+    const newQueryString = params.toString();
+    const newPath = `/products${newQueryString ? `?${newQueryString}` : ""}`;
+
+    if (window.location.pathname + window.location.search !== newPath) {
+      router.push(newPath, { scroll: false });
+    }
+  }, [
+    searchTerm,
+    filters,
+    currentPage,
+    router,
+    globalMinPrice,
+    globalMaxPrice,
+    isLoading,
+  ]);
 
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setSearchTerm(localSearchTerm); // Update searchTerm, which Effect 3 will push to URL
+    setSearchTerm(localSearchTerm);
     setCurrentPage(1);
   };
-  
+
   const clearSearch = () => {
-    setLocalSearchTerm('');
-    setSearchTerm(''); // Update searchTerm, which Effect 3 will push to URL
+    setLocalSearchTerm("");
+    setSearchTerm("");
     setCurrentPage(1);
   };
 
-  const handleFilterChange = useCallback((newFilters: {
-    categories: string[];
-    priceRange: [number, number];
-    minRating: number;
-  }) => {
-    setFilters(newFilters); // Update filters, which Effect 3 will push to URL
-    setCurrentPage(1);
-  }, []);
-
+  const handleFilterChange = useCallback(
+    (newFilters: {
+      categories: string[];
+      priceRange: [number, number];
+      minRating: number;
+    }) => {
+      setFilters(newFilters);
+      setCurrentPage(1);
+    },
+    []
+  );
 
   const filteredProducts = useMemo(() => {
-    if (isLoading || !allProducts) return []; // Added !allProducts check
+    if (isLoading || !allProducts) return [];
     return allProducts.filter((product) => {
       const searchMatch = searchTerm
         ? product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (product.tags && product.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())))
+          product.description
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          (product.tags &&
+            product.tags.some((tag) =>
+              tag.toLowerCase().includes(searchTerm.toLowerCase())
+            ))
         : true;
       const categoryMatch =
         filters.categories.length > 0
           ? filters.categories.includes(product.category)
           : true;
       const priceMatch =
-        product.price >= filters.priceRange[0] && product.price <= filters.priceRange[1];
+        product.price >= filters.priceRange[0] &&
+        product.price <= filters.priceRange[1];
       const ratingMatch = product.rating >= filters.minRating;
 
       return searchMatch && categoryMatch && priceMatch && ratingMatch;
@@ -183,56 +169,60 @@ export default function ProductsPage() {
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page); // Update currentPage, which Effect 3 will push to URL
-       window.scrollTo({ top: 0, behavior: 'smooth' });
+      setCurrentPage(page);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
-  
+
   if (isLoading) {
     return (
-        <div className="flex flex-col lg:flex-row gap-8">
-            <div className="hidden lg:block lg:w-72 xl:w-80 space-y-6 p-4">
-                <Skeleton className="h-8 w-1/3 mb-4" />
-                {[...Array(3)].map((_, i) => (
-                    <div key={i} className="space-y-2 mb-4">
-                        <Skeleton className="h-6 w-1/2" />
-                        <Skeleton className="h-20 w-full" />
-                    </div>
-                ))}
+      <div className="flex flex-col lg:flex-row gap-8">
+        <div className="hidden lg:block lg:w-72 xl:w-80 space-y-6 p-4">
+          <Skeleton className="h-8 w-1/3 mb-4" />
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="space-y-2 mb-4">
+              <Skeleton className="h-6 w-1/2" />
+              <Skeleton className="h-20 w-full" />
             </div>
-            <div className="flex-1">
-                <Skeleton className="h-10 w-full mb-6" />
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {[...Array(PRODUCTS_PER_PAGE)].map((_, i) => (
-                         <Card key={i} className="flex flex-col h-full">
-                            <Skeleton className="aspect-square w-full" />
-                            <div className="p-4 flex-grow space-y-2">
-                                <Skeleton className="h-6 w-3/4" />
-                                <Skeleton className="h-4 w-full" />
-                                <Skeleton className="h-4 w-1/2" />
-                            </div>
-                            <div className="p-4 pt-0">
-                                <Skeleton className="h-10 w-full" />
-                            </div>
-                        </Card>
-                    ))}
-                </div>
-            </div>
+          ))}
         </div>
+        <div className="flex-1">
+          <Skeleton className="h-10 w-full mb-6" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+            {[...Array(PRODUCTS_PER_PAGE)].map((_, i) => (
+              <Card key={i} className="flex flex-col h-full">
+                <Skeleton className="aspect-square w-full" />
+                <div className="p-4 flex-grow space-y-2">
+                  <Skeleton className="h-6 w-3/4" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-1/2" />
+                </div>
+                <div className="p-4 pt-0">
+                  <Skeleton className="h-10 w-full" />
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </div>
     );
   }
 
-
   return (
     <div className="flex flex-col lg:flex-row gap-8">
-      <FilterSidebar 
-        onFilterChange={handleFilterChange} 
-        initialFilters={filters} // Pass current filters state
-        key={`${globalMinPrice}-${globalMaxPrice}-${filters.categories.join(',')}-${filters.minRating}-${filters.priceRange.join(',')}`} // More robust key
-       />
+      <FilterSidebar
+        onFilterChange={handleFilterChange}
+        initialFilters={filters}
+        key={`${globalMinPrice}-${globalMaxPrice}-${filters.categories.join(
+          ","
+        )}-${filters.minRating}-${filters.priceRange.join(",")}`}
+      />
       <div className="flex-1">
         <div className="mb-6">
-          <form onSubmit={handleSearchSubmit} className="flex gap-2 items-center">
+          <form
+            onSubmit={handleSearchSubmit}
+            className="flex gap-2 items-center"
+          >
             <div className="relative flex-grow">
               <Input
                 type="search"
@@ -254,13 +244,18 @@ export default function ProductsPage() {
                 </Button>
               )}
             </div>
-            <Button type="submit" variant="outline" className="bg-accent hover:bg-accent/90 text-accent-foreground">
+            <Button
+              type="submit"
+              variant="outline"
+              className="bg-accent hover:bg-accent/90 text-accent-foreground"
+            >
               <Search className="h-5 w-5 mr-0 md:mr-2" />
               <span className="hidden md:inline">Search</span>
             </Button>
           </form>
           <p className="text-sm text-muted-foreground mt-2">
-            Showing {paginatedProducts.length} of {filteredProducts.length} products.
+            Showing {paginatedProducts.length} of {filteredProducts.length}{" "}
+            products.
           </p>
         </div>
 
@@ -286,37 +281,54 @@ export default function ProductsPage() {
               <PaginationItem>
                 <PaginationPrevious
                   href="#"
-                  onClick={(e) => { e.preventDefault(); handlePageChange(currentPage - 1); }}
-                  className={currentPage === 1 ? "pointer-events-none opacity-50" : undefined}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handlePageChange(currentPage - 1);
+                  }}
+                  className={
+                    currentPage === 1
+                      ? "pointer-events-none opacity-50"
+                      : undefined
+                  }
                 />
               </PaginationItem>
               {[...Array(totalPages)].map((_, i) => {
                 const pageNum = i + 1;
-                if (totalPages <= 5 || 
-                    pageNum === 1 || 
-                    pageNum === totalPages || 
-                    (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)) {
+                if (
+                  totalPages <= 5 ||
+                  pageNum === 1 ||
+                  pageNum === totalPages ||
+                  (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
+                ) {
                   return (
                     <PaginationItem key={pageNum}>
                       <PaginationLink
                         href="#"
-                        onClick={(e) => { e.preventDefault(); handlePageChange(pageNum); }}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handlePageChange(pageNum);
+                        }}
                         isActive={currentPage === pageNum}
                       >
                         {pageNum}
                       </PaginationLink>
                     </PaginationItem>
                   );
-                } else if ((pageNum === currentPage - 2 && pageNum > 1) || (pageNum === currentPage + 2 && pageNum < totalPages)) {
-                  return <PaginationEllipsis key={`ellipsis-${pageNum}`} />;
                 }
                 return null;
               })}
               <PaginationItem>
                 <PaginationNext
                   href="#"
-                  onClick={(e) => { e.preventDefault(); handlePageChange(currentPage + 1); }}
-                  className={currentPage === totalPages ? "pointer-events-none opacity-50" : undefined}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handlePageChange(currentPage + 1);
+                  }}
+                  className={
+                    currentPage === totalPages
+                      ? "pointer-events-none opacity-50"
+                      : undefined
+                  }
                 />
               </PaginationItem>
             </PaginationContent>
@@ -327,3 +339,16 @@ export default function ProductsPage() {
   );
 }
 
+export default function ProductsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex justify-center items-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      }
+    >
+      <ProductsContent />
+    </Suspense>
+  );
+}

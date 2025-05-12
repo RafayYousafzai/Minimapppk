@@ -1,4 +1,8 @@
-import type {NextConfig} from 'next';
+// @ts-check
+
+/** @type {import('next').NextConfig} */
+
+import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -11,19 +15,19 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'picsum.photos',
-        port: '',
-        pathname: '/**',
+        protocol: "https",
+        hostname: "picsum.photos",
+        port: "",
+        pathname: "/**",
       },
       {
-        protocol: 'https',
-        hostname: 'example.com',
-        port: '',
-        pathname: '/images/**',
+        protocol: "https",
+        hostname: "example.com",
+        port: "",
+        pathname: "/images/**",
       },
     ],
   },
 };
 
-export default nextConfig;
+module.exports = nextConfig
