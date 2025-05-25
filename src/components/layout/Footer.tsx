@@ -1,33 +1,145 @@
-
-import Link from 'next/link';
-import { Facebook, Instagram, Twitter } from 'lucide-react';
+import Link from "next/link"
+import { Facebook, Instagram, Twitter, Heart, Sparkles, Mail, Phone, MapPin } from "lucide-react"
 
 const Footer = () => {
   return (
-    <footer className="border-t bg-secondary text-secondary-foreground">
-      <div className="container mx-auto py-8 px-4 md:px-6">
-        <div className="flex flex-col md:flex-row justify-between items-center">
-          <p className="text-sm text-center md:text-left">
-            &copy; {new Date().getFullYear()} ShopWave. All rights reserved.
-          </p>
-          <div className="flex gap-4 mt-4 md:mt-0">
-            <Link href="#" aria-label="Facebook" className="text-secondary-foreground hover:text-primary transition-colors">
-              <Facebook className="h-6 w-6" />
-            </Link>
-            <Link href="#" aria-label="Instagram" className="text-secondary-foreground hover:text-primary transition-colors">
-              <Instagram className="h-6 w-6" />
-            </Link>
-            <Link href="#" aria-label="Twitter" className="text-secondary-foreground hover:text-primary transition-colors">
-              <Twitter className="h-6 w-6" />
-            </Link>
+    <footer className="relative overflow-hidden bg-gradient-to-br from-purple-600 via-pink-500 to-purple-700 text-white">
+      {/* Decorative background elements */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute top-10 left-10 w-20 h-20 bg-white rounded-full animate-pulse"></div>
+        <div className="absolute top-32 right-20 w-16 h-16 bg-pink-300 rounded-full animate-bounce"></div>
+        <div className="absolute bottom-20 left-1/4 w-12 h-12 bg-yellow-300 rounded-full animate-pulse"></div>
+        <div className="absolute bottom-32 right-1/3 w-8 h-8 bg-white rounded-full animate-bounce"></div>
+      </div>
+
+      <div className="relative container mx-auto py-12 px-4 md:px-6">
+        {/* Main Footer Content */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+          {/* Brand Section */}
+          <div className="md:col-span-2 space-y-4">
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+                <Heart className="w-6 h-6 text-purple-600 fill-purple-600" />
+              </div>
+              <h3 className="text-2xl font-bold">ShopWave</h3>
+              <Sparkles className="w-5 h-5 text-yellow-300" />
+            </div>
+            <p className="text-purple-100 leading-relaxed max-w-md">
+              Your favorite destination for cute and trendy products! We bring you the latest styles with love and care.
+              ✨
+            </p>
+            <div className="flex items-center gap-2 text-purple-100">
+              <Heart className="w-4 h-4 fill-pink-300 text-pink-300" />
+              <span className="text-sm">Made with love for our amazing customers</span>
+            </div>
+          </div>
+
+          {/* Quick Links */}
+          <div className="space-y-4">
+            <h4 className="text-lg font-bold flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-yellow-300" />
+              Quick Links
+            </h4>
+            <div className="space-y-2">
+              {["About Us", "Products", "Contact", "FAQ", "Shipping"].map((link) => (
+                <Link
+                  key={link}
+                  href="#"
+                  className="block text-purple-100 hover:text-white hover:translate-x-1 transition-all duration-300"
+                >
+                  {link}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Contact Info */}
+          <div className="space-y-4">
+            <h4 className="text-lg font-bold flex items-center gap-2">
+              <Heart className="w-4 h-4 fill-pink-300 text-pink-300" />
+              Get in Touch
+            </h4>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 text-purple-100">
+                <Mail className="w-4 h-4" />
+                <span className="text-sm">hello@shopwave.com</span>
+              </div>
+              <div className="flex items-center gap-3 text-purple-100">
+                <Phone className="w-4 h-4" />
+                <span className="text-sm">+1 (555) 123-4567</span>
+              </div>
+              <div className="flex items-center gap-3 text-purple-100">
+                <MapPin className="w-4 h-4" />
+                <span className="text-sm">123 Fashion St, Style City</span>
+              </div>
+            </div>
           </div>
         </div>
-        <p className="text-xs mt-4 text-muted-foreground text-center">
-          Designed by an Expert AI Designer
-        </p>
-      </div>
-    </footer>
-  );
-};
 
-export default Footer;
+        {/* Social Media & Newsletter */}
+        <div className="border-t border-white/20 pt-8 mb-8">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+            <div className="text-center md:text-left">
+              <h4 className="text-lg font-bold mb-2 flex items-center justify-center md:justify-start gap-2">
+                <Sparkles className="w-4 h-4 text-yellow-300" />
+                Follow Our Journey
+              </h4>
+              <p className="text-purple-100 text-sm">Stay updated with our latest collections and exclusive offers!</p>
+            </div>
+            <div className="flex gap-4">
+              {[
+                { icon: Facebook, label: "Facebook", href: "#" },
+                { icon: Instagram, label: "Instagram", href: "#" },
+                { icon: Twitter, label: "Twitter", href: "#" },
+              ].map(({ icon: Icon, label, href }) => (
+                <Link
+                  key={label}
+                  href={href}
+                  aria-label={label}
+                  className="group w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white hover:scale-110 transition-all duration-300 shadow-lg"
+                >
+                  <Icon className="h-5 w-5 text-white group-hover:text-purple-600 transition-colors" />
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Section */}
+        <div className="border-t border-white/20 pt-6">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="flex items-center gap-2 text-purple-100">
+              <Heart className="w-4 h-4 fill-pink-300 text-pink-300 animate-pulse" />
+              <p className="text-sm">&copy; {new Date().getFullYear()} ShopWave. All rights reserved.</p>
+            </div>
+            <div className="flex items-center gap-4 text-xs text-purple-200">
+              <Link href="#" className="hover:text-white transition-colors">
+                Privacy Policy
+              </Link>
+              <span>•</span>
+              <Link href="#" className="hover:text-white transition-colors">
+                Terms of Service
+              </Link>
+              <span>•</span>
+              <Link href="#" className="hover:text-white transition-colors">
+                Returns
+              </Link>
+            </div>
+          </div>
+          <div className="text-center mt-4">
+            <p className="text-xs text-purple-200 flex items-center justify-center gap-2">
+              <Sparkles className="w-3 h-3 text-yellow-300" />
+              Designed with love by an Expert AI Designer
+              <Heart className="w-3 h-3 fill-pink-300 text-pink-300" />
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom gradient decoration */}
+      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-pink-400 via-purple-400 to-pink-400"></div>
+    </footer>
+  )
+}
+
+export default Footer

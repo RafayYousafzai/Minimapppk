@@ -12,7 +12,6 @@ import { Search, X, Loader2 } from "lucide-react";
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
@@ -229,10 +228,10 @@ function ProductsContent() {
                 placeholder="Search products by name, description, or tags..."
                 value={localSearchTerm}
                 onChange={(e) => setLocalSearchTerm(e.target.value)}
-                className="pr-10"
+                className="pr-10 bg-white border-none"
                 suppressHydrationWarning
               />
-              {localSearchTerm && (
+              {/* {localSearchTerm && (
                 <Button
                   type="button"
                   variant="ghost"
@@ -242,7 +241,7 @@ function ProductsContent() {
                 >
                   <X className="h-4 w-4" />
                 </Button>
-              )}
+              )} */}
             </div>
             <Button
               type="submit"
