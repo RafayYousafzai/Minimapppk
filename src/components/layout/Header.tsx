@@ -1,45 +1,54 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Suspense } from "react"; // Add this import
-import Link from "next/link";
+import React, { useState } from "react";
+import {
+  Navbar,
+  NavbarBrand,
+  NavbarContent,
+  NavbarItem,
+  NavbarMenuToggle,
+  NavbarMenu,
+  NavbarMenuItem,
+  Button,
+  Input,
+  Chip,
+  Divider,
+} from "@heroui/react";
 import {
   ShoppingCart,
   Search,
-  Menu,
-  UserCircle,
   PackageSearch,
   Package2Icon as LogoIcon,
+  Home,
+  ListIcon,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/hooks/useCart";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-  SheetClose,
-} from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
-// Create a separate component for the search params logic
-function SearchParamsComponent() {
-  const searchParams = useSearchParams();
+const Header = () => {
+  const { getItemCount, cartInitialized } = useCart();
   const router = useRouter();
   const pathname = usePathname();
-  const [inputValue, setInputValue] = useState(
+  const searchParams = useSearchParams();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [searchValue, setSearchValue] = useState(
     searchParams.get("search") || ""
   );
 
-  useEffect(() => {
-    setInputValue(searchParams.get("search") || "");
-  }, [searchParams]);
+  const navItems = [
+    { href: "/", label: "Home", icon: <Home /> },
+    { href: "/products", label: "Products", icon: <ListIcon /> },
+    { href: "/track-order", label: "Track Order", icon: <PackageSearch /> },
+  ];
 
-  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
+  const currentItemCount = getItemCount();
+
+  const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    const trimmedQuery = inputValue.trim();
+    const trimmedQuery = searchValue.trim();
+
     if (trimmedQuery) {
       router.push(`/products?search=${encodeURIComponent(trimmedQuery)}`);
     } else {
@@ -48,103 +57,55 @@ function SearchParamsComponent() {
         newParams.delete("search");
         router.push(`${pathname}?${newParams.toString()}`);
       } else {
-        router.push("/products"); // Use router.push instead of pathname
+        router.push("/products");
       }
+    }
+
+    if (isMenuOpen) {
+      setIsMenuOpen(false);
     }
   };
 
-  return { inputValue, setInputValue, handleSearch };
-}
-
-const Header = () => {
-  const { getItemCount, cartInitialized } = useCart();
-  const pathname = usePathname();
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
-
-  const navItems = [
-    { href: "/", label: "Home" },
-    { href: "/products", label: "Products" },
-    { href: "/track-order", label: "Track Order", icon: <PackageSearch /> },
-  ];
-
-  const secondaryNavItems = [
-    { href: "/checkout", label: "Checkout" },
-    { href: "/admin", label: "Admin" },
-  ];
-
-  const currentItemCount = getItemCount();
-
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-primary text-primary-foreground">
-      <div className="container flex h-16 items-center justify-between px-4 md:px-6">
-        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-          <SheetTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden text-primary-foreground hover:bg-primary/80 hover:text-primary-foreground"
-            >
-              <Menu className="h-6 w-6" />
-              <span className="sr-only">Toggle navigation menu</span>
-            </Button>
-          </SheetTrigger>
-          <SheetContent
-            side="left"
-            className="pt-12 bg-background text-foreground"
-          >
-            <nav className="grid gap-6 text-lg font-medium">
-              <SheetClose asChild>
-                <Link
-                  href="/"
-                  className="flex items-center gap-2 text-lg font-semibold mb-4 text-primary"
-                >
-                  <LogoIcon className="h-6 w-6" />
-                  <span className="font-bold">ShopWave</span>
-                </Link>
-              </SheetClose>
-              {navItems.concat(secondaryNavItems).map((item) => (
-                <SheetClose asChild key={item.href}>
-                  <Link
-                    href={item.href}
-                    className={cn(
-                      "hover:text-foreground flex items-center gap-2",
-                      pathname === item.href
-                        ? "text-foreground font-semibold"
-                        : "text-muted-foreground"
-                    )}
-                  >
-                    {item.icon &&
-                      React.cloneElement(item.icon as React.ReactElement<any>, {
-                        className: "h-5 w-5",
-                      })}
-                    {item.label}
-                  </Link>
-                </SheetClose>
-              ))}
-            </nav>
-            <Suspense fallback={<div>Loading search...</div>}>
-              <SearchForm />
-            </Suspense>
-          </SheetContent>
-        </Sheet>
+    <Navbar
+      isBordered
+      isMenuOpen={isMenuOpen}
+      onMenuOpenChange={setIsMenuOpen}
+      className="bg-primary text-primary-foreground"
+    >
+      <NavbarContent className="sm:hidden" justify="start">
+        <NavbarMenuToggle
+          aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+          className="text-primary-foreground"
+        />
+      </NavbarContent>
 
-        <Link
-          href="/"
-          className="hidden md:flex items-center gap-2 text-primary-foreground"
-        >
-          <LogoIcon className="h-6 w-6" />
-          <span className="text-xl font-bold">ShopWave</span>
+      <NavbarContent className="sm:hidden pr-3" justify="center">
+        <Link href="/" className="flex items-center">
+          <NavbarBrand>
+            <LogoIcon className="h-6 w-6" />
+            <p className="font-bold text-inherit ml-2">ShopWave</p>
+          </NavbarBrand>
         </Link>
-        <nav className="hidden md:flex items-center gap-4 lg:gap-6 text-sm font-medium">
-          {navItems.map((item) => (
+      </NavbarContent>
+
+      <NavbarContent className="hidden sm:flex gap-4" justify="center">
+        <Link href="/" className="flex items-center">
+          <NavbarBrand className="mr-6">
+            <LogoIcon className="h-6 w-6" />
+            <p className="font-bold text-inherit ml-2">ShopWave</p>
+          </NavbarBrand>
+        </Link>
+
+        {navItems.map((item) => (
+          <NavbarItem key={item.href} isActive={pathname === item.href}>
             <Link
-              key={item.href}
               href={item.href}
               className={cn(
-                "transition-colors hover:text-primary-foreground/80 flex items-center gap-1.5",
+                "flex items-center gap-1.5",
                 pathname === item.href
                   ? "text-primary-foreground font-semibold"
-                  : "text-primary-foreground/70"
+                  : "text-primary-foreground/70 hover:text-primary-foreground/80"
               )}
             >
               {item.icon &&
@@ -153,94 +114,89 @@ const Header = () => {
                 })}
               {item.label}
             </Link>
-          ))}
-        </nav>
+          </NavbarItem>
+        ))}
+      </NavbarContent>
 
-        <div className="flex items-center gap-3 md:gap-4">
-          <Suspense
-            fallback={
-              <div className="w-36 md:w-48 lg:w-64 h-9 bg-background/20"></div>
-            }
-          >
-            <DesktopSearchForm />
-          </Suspense>
-          {secondaryNavItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "hidden md:block text-sm font-medium transition-colors hover:text-primary-foreground/80",
-                pathname === item.href
-                  ? "text-primary-foreground font-semibold"
-                  : "text-primary-foreground/70"
-              )}
+      <NavbarContent justify="end">
+        <NavbarItem className="hidden sm:flex">
+          <form onSubmit={handleSearch} className="flex items-center">
+            <Input
+              placeholder="Search..."
+              color="secondary"
+              size="sm"
+              startContent={<Search className="h-4 w-4" />}
+              type="search"
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              classNames={{
+                inputWrapper:
+                  "bg-background/20 text-primary-foreground rounded-lg",
+              }}
+            />
+          </form>
+        </NavbarItem>
+
+        <NavbarItem>
+          {cartInitialized && currentItemCount > 0 && (
+            <Chip
+              size="sm"
+              color="danger"
+              className="bg-pink-500 rounded-full z-30 absolute top-1 right-2"
             >
+              {currentItemCount}
+            </Chip>
+          )}
+          <Button
+            as={Link}
+            href="/cart"
+            isIconOnly
+            variant="light"
+            className="text-primary-foreground relative"
+          >
+            <ShoppingCart className="h-5 w-5" />
+          </Button>
+        </NavbarItem>
+      </NavbarContent>
+
+      <NavbarMenu className="bg-primary/95 text-primary-foreground">
+        <NavbarMenuItem className="mt-4">
+          <form onSubmit={handleSearch} className="flex gap-2">
+            <Input
+              placeholder="Search products..."
+              className="text-black placeholder:text-gray-800"
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              variant="flat"
+              color="secondary"
+              classNames={{
+                inputWrapper: "bg-background text-foreground rounded-lg",
+              }}
+            />
+            <Button type="submit" variant="flat" isIconOnly aria-label="Search">
+              <Search className="h-5 w-5" />
+            </Button>
+          </form>
+        </NavbarMenuItem>
+        <Divider className="my-2 border-gray-600" />
+        {[...navItems].map((item, index) => (
+          <NavbarMenuItem key={`${item.href}-${index}`}>
+            <Link
+              className="text-white w-full flex items-center gap-2 my-1"
+              href={item.href}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              {item.icon &&
+                React.cloneElement(item.icon as React.ReactElement<any>, {
+                  className: "h-5 w-5",
+                })}
               {item.label}
             </Link>
-          ))}
-
-          <Link href="/cart" passHref legacyBehavior>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="relative h-9 w-9 text-primary-foreground hover:bg-primary/80 hover:text-primary-foreground"
-            >
-              <ShoppingCart className="h-5 w-5" />
-              {cartInitialized && currentItemCount > 0 && (
-                <Badge
-                  variant="destructive"
-                  className="absolute -top-1 -right-1 h-4 w-4 rounded-full p-0 flex items-center justify-center text-xs"
-                >
-                  {currentItemCount}
-                </Badge>
-              )}
-              <span className="sr-only">Shopping Cart</span>
-            </Button>
-          </Link>
-        </div>
-      </div>
-    </header>
+          </NavbarMenuItem>
+        ))}
+      </NavbarMenu>
+    </Navbar>
   );
 };
-
-// Mobile search form component
-function SearchForm() {
-  const { inputValue, setInputValue, handleSearch } = SearchParamsComponent();
-
-  return (
-    <form onSubmit={handleSearch} className="mt-6 flex gap-2">
-      <Input
-        type="search"
-        placeholder="Search products..."
-        value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
-        className="flex-1"
-      />
-      <SheetClose asChild>
-        <Button type="submit" variant="outline" size="icon" aria-label="Search">
-          <Search className="h-5 w-5" />
-        </Button>
-      </SheetClose>
-    </form>
-  );
-}
-
-// Desktop search form component
-function DesktopSearchForm() {
-  const { inputValue, setInputValue, handleSearch } = SearchParamsComponent();
-
-  return (
-    <form onSubmit={handleSearch} className="relative hidden sm:block">
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-      <Input
-        type="search"
-        placeholder="Search..."
-        className="pl-10 w-36 md:w-48 lg:w-64 h-9 bg-background/20 text-primary-foreground placeholder:text-primary-foreground/60 border-primary-foreground/30 focus:bg-background/30"
-        value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
-      />
-    </form>
-  );
-}
 
 export default Header;
