@@ -25,7 +25,7 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${GeistSans.variable} ${GeistMono.variable}`}
     >
-      <body className={`font-sans antialiased flex flex-col min-h-screen`}>
+      <body className={`font-sans antialiased flex flex-col min-h-screen `}>
         <CartProvider>
           <Providers>
             <Header />
