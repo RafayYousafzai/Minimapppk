@@ -108,10 +108,10 @@ const Header = () => {
                   : "text-primary-foreground/70 hover:text-primary-foreground/80"
               )}
             >
-              {item.icon &&
+              {/* {item.icon &&
                 React.cloneElement(item.icon as React.ReactElement<any>, {
                   className: "h-4 w-4",
-                })}
+                })} */}
               {item.label}
             </Link>
           </NavbarItem>

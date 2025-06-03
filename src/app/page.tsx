@@ -30,7 +30,7 @@ const CategoryIcon = ({ category }: { category: string }) => {
 
 export default async function HomePage() {
   // Fetch data from Firebase
-  const featuredProducts = await getFeaturedProducts(4);
+  const featuredProducts = await getFeaturedProducts(16);
 
   let heroProduct: Product | null = null;
   if (featuredProducts.length > 0) {
@@ -74,70 +74,20 @@ export default async function HomePage() {
       </div> */}
 
       <div className="mx-auto px-4 space-y-16 pb-16">
-        {/* Hero Section */}
-        {/* {heroProduct && (
-          <section className="relative overflow-hidden">
-            <div className="bg-gradient-to-r from-purple-400 via-pink-400 to-purple-500 rounded-md shadow-2xl overflow-hidden">
-              <div className="absolute inset-0 bg-black/10"></div>
-              <div className="relative grid md:grid-cols-2 gap-8 items-center p-8 md:p-12">
-                <div className="order-2 md:order-1 text-white z-10">
-                  <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
-                    <Star className="w-4 h-4 fill-yellow-300 text-yellow-300" />
-                    <span className="text-sm font-medium">
-                      Featured Product
-                    </span>
-                  </div>
-                  <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-                    Discover
-                    <span className="block text-yellow-300">
-                      {heroProduct.name}
-                    </span>
-                  </h1>
-                  <p className="text-lg md:text-xl text-purple-100 mb-8 leading-relaxed">
-                    {heroProduct.description} Check out our latest arrival and
-                    fall in love! ✨
-                  </p>
-                  <Link href={`/products/${heroProduct.id}`}>
-                    <Button
-                      size="lg"
-                      className="bg-white text-purple-600 hover:bg-purple-50 rounded-full px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-                    >
-                      Shop Now <ArrowRight className="ml-2 h-5 w-5" />
-                    </Button>
-                  </Link>
-                </div>
-                <div className="order-1 md:order-2 relative">
-                  <div className="relative h-80 md:h-96 rounded-2xl overflow-hidden group shadow-2xl">
-                    <Image
-                      src={heroProduct.images[0] || "/placeholder.svg"}
-                      alt={heroProduct.name}
-                      fill
-                      priority
-                      className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-                      data-ai-hint="product lifestyle"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-purple-900/20 to-transparent"></div>
-                  </div>
-     
-                  <div className="absolute -top-4 -right-4 w-8 h-8 bg-yellow-300 rounded-full animate-bounce"></div>
-                  <div className="absolute -bottom-4 -left-4 w-6 h-6 bg-pink-300 rounded-full animate-pulse"></div>
-                </div>
-              </div>
-            </div>
-          </section>
-        )} */}
-
         {/* Featured Products Section */}
         {featuredProducts.length > 0 && (
           <section>
             <div className="text-center mb-12">
               <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
-                ✨ Best Seller Products ✨
+                Best Seller Products
               </h2>
-              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                Discover our most loved items that customers can't get enough
-                of!
-              </p>
+
+              <div className="inline-flex items-center gap-2   px-6 py-2 mb-6">
+                <span className="text-purple-700 font-semibold">
+                  Most loved products
+                </span>
+                <Heart className="w-5 h-5 text-purple-500 fill-purple-500" />
+              </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
@@ -162,13 +112,6 @@ export default async function HomePage() {
                 </Button>
               </Link>
             </div>
-          </section>
-        )}
-
-        {/* Testimonial Section */}
-        {recentReviews.length > 0 && (
-          <section className="bg-white/60 backdrop-blur-sm rounded-3xl p-8 md:p-12 shadow-xl">
-            <TestimonialSection reviews={recentReviews} />
           </section>
         )}
 
@@ -201,6 +144,64 @@ export default async function HomePage() {
                   </div>
                 </Link>
               ))}
+            </div>
+          </section>
+        )}
+
+        {/* Testimonial Section */}
+        {recentReviews.length > 0 && (
+          <TestimonialSection reviews={recentReviews} />
+        )}
+
+        {/* Hero Section */}
+        {heroProduct && (
+          <section className="relative overflow-hidden">
+            <div className="bg-gradient-to-r from-purple-400 via-pink-300 to-purple-500 rounded-3xl  overflow-hidden">
+              <div className="absolute inset-0 bg-black/10 rounded-3xl"></div>
+              <div className="relative grid md:grid-cols-2 gap-8 items-center p-8 md:p-12">
+                <div className="order-2 md:order-1 text-white z-10">
+                  {/* <div className="inline-flex items-center gap-2   backdrop-blur-sm rounded-full px-4 py-2 mb-6">
+                    <Star className="w-4 h-4 fill-yellow-300 text-yellow-300" />
+                    <span className="text-sm font-medium">
+                      Featured Product
+                    </span>
+                  </div> */}
+                  <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+                    Discover
+                    <span className="block text-yellow-300">
+                      {heroProduct.name}
+                    </span>
+                  </h1>
+                  <p className="text-lg md:text-xl text-purple-100 mb-8 leading-relaxed">
+                    {heroProduct.description} Check out our latest arrival and
+                    fall in love! ✨
+                  </p>
+                  <Link href={`/products/${heroProduct.id}`}>
+                    <Button
+                      size="lg"
+                      className="bg-white text-purple-600 hover:bg-purple-50 rounded-full px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                    >
+                      Shop Now <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                  </Link>
+                </div>
+                <div className="order-1 md:order-2 relative">
+                  <div className="relative h-80 md:h-96 rounded-2xl overflow-hidden group shadow-2xl">
+                    <Image
+                      src={heroProduct.images[0] || "/placeholder.svg"}
+                      alt={heroProduct.name}
+                      fill
+                      priority
+                      className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                      data-ai-hint="product lifestyle"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-purple-900/20 to-transparent"></div>
+                  </div>
+
+                  <div className="absolute -top-4 -right-4 w-8 h-8 bg-yellow-300 rounded-full animate-bounce"></div>
+                  <div className="absolute -bottom-4 -left-4 w-6 h-6 bg-pink-300 rounded-full animate-pulse"></div>
+                </div>
+              </div>
             </div>
           </section>
         )}

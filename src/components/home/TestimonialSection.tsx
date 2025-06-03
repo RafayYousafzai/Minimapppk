@@ -1,7 +1,7 @@
-import type { Review } from '@/lib/types';
-import TestimonialCard from './TestimonialCard';
-import { Separator } from '@/components/ui/separator';
-import { Heart, Sparkles } from 'lucide-react';
+import type { Review } from "@/lib/types";
+import TestimonialCard from "./TestimonialCard";
+import { Separator } from "@/components/ui/separator";
+import { Heart, Sparkles } from "lucide-react";
 
 interface TestimonialSectionProps {
   reviews: Review[];
@@ -14,20 +14,19 @@ const TestimonialSection: React.FC<TestimonialSectionProps> = ({ reviews }) => {
 
   return (
     <section className="py-16">
-      <div className="container mx-auto px-4 md:px-6">
+      <div className="   mx-auto ">
         <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-100 to-pink-100 rounded-full px-6 py-2 mb-6">
-            <Heart className="w-5 h-5 text-purple-500 fill-purple-500" />
-            <span className="text-purple-700 font-semibold">Customer Love</span>
-            <Sparkles className="w-5 h-5 text-pink-500" />
-          </div>
-          
           <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
-            💕 What Our Customers Say
+            What Our Customers Say
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            Real reviews from real customers who absolutely love our products and can't stop raving about them! ✨
-          </p>
+          <div className="inline-flex items-center gap-2   px-6 py-2 mb-6">
+            <span className="text-purple-700 font-semibold">Customer Love</span>
+            <Heart className="w-5 h-5 text-purple-500 fill-purple-500" />
+          </div>
+          {/* <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            Real reviews from real customers who absolutely love our products
+            and can't stop raving about them!
+          </p> */}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
