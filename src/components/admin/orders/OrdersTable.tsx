@@ -21,11 +21,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, FileText, Undo2 } from 'lucide-react'; // Added Undo2 for refund
+import { MoreHorizontal, FileText, Undo2, Loader2 } from 'lucide-react';
 import OrderStatusBadge from './OrderStatusBadge';
 import OrderStatusSelector from './OrderStatusSelector';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
+import { useToast } from '@/hooks/use-toast';
+import { updateOrderStatus } from '@/services/orderService';
+import ClientFormattedDate from './ClientFormattedDate';
 
 interface OrdersTableProps {
   initialOrders: Order[];
@@ -33,6 +36,8 @@ interface OrdersTableProps {
 
 const OrdersTable: React.FC<OrdersTableProps> = ({ initialOrders }) => {
   const [orders, setOrders] = useState<Order[]>(initialOrders);
+  const [isRefunding, setIsRefunding] = useState<Record<string, boolean>>({});
+  const { toast } = useToast();
 
   const handleStatusUpdate = (orderId: string, newStatus: OrderStatus) => {
     setOrders(prevOrders => 
@@ -41,6 +46,28 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ initialOrders }) => {
       )
     );
   };
+
+  const handleRefundOrder = async (orderId: string) => {
+    setIsRefunding(prev => ({ ...prev, [orderId]: true }));
+    try {
+      await updateOrderStatus(orderId, 'cancelled');
+      toast({
+        title: "Order Refunded (Status Updated)",
+        description: `Order ${orderId} status has been changed to 'cancelled'.`,
+      });
+      handleStatusUpdate(orderId, 'cancelled'); // Update local state
+    } catch (error) {
+      console.error("Failed to refund order (update status):", error);
+      toast({
+        title: "Refund Failed",
+        description: "Could not update order status to cancelled. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRefunding(prev => ({ ...prev, [orderId]: false }));
+    }
+  };
+
 
   if (orders.length === 0) {
     return (
@@ -85,9 +112,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ initialOrders }) => {
                     <div className="text-xs text-muted-foreground">{order.billingEmail}</div>
                 </TableCell>
                 <TableCell>
-                  {order.createdAt instanceof Date 
-                    ? format(order.createdAt, 'MMM d, yyyy, h:mm a')
-                    : 'Invalid Date'}
+                  <ClientFormattedDate date={order.createdAt} />
                 </TableCell>
                 <TableCell className="text-right">₨{order.orderTotal.toFixed(2)}</TableCell>
                 <TableCell className="text-center">
@@ -103,9 +128,9 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ initialOrders }) => {
                 <TableCell className="text-right">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0">
+                      <Button variant="ghost" className="h-8 w-8 p-0" disabled={isRefunding[order.id]}>
                         <span className="sr-only">Open menu</span>
-                        <MoreHorizontal className="h-4 w-4" />
+                        {isRefunding[order.id] ? <Loader2 className="h-4 w-4 animate-spin" /> : <MoreHorizontal className="h-4 w-4" />}
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
@@ -117,11 +142,12 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ initialOrders }) => {
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem 
-                        onClick={() => alert(`Initiate refund process for order ${order.id}. (This is a placeholder - actual refund logic to be implemented.)`)}
-                        disabled={order.orderStatus === 'cancelled' || order.orderStatus === 'delivered'}
+                        onClick={() => handleRefundOrder(order.id)}
+                        disabled={order.orderStatus === 'cancelled' || order.orderStatus === 'delivered' || isRefunding[order.id]}
                         className="text-orange-600 focus:text-orange-700 focus:bg-orange-50"
                       >
-                        <Undo2 className="mr-2 h-4 w-4" /> Refund Order
+                        {isRefunding[order.id] ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Undo2 className="mr-2 h-4 w-4" />}
+                        {isRefunding[order.id] ? 'Refunding...' : 'Refund Order'}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
