@@ -133,6 +133,7 @@ const Header = () => {
                 inputWrapper:
                   "bg-background/20 text-primary-foreground rounded-lg",
               }}
+              spellCheck={false} // Explicitly set spellCheck
             />
           </form>
         </NavbarItem>
@@ -172,6 +173,7 @@ const Header = () => {
               classNames={{
                 inputWrapper: "bg-background text-foreground rounded-lg",
               }}
+              spellCheck={false} // Explicitly set spellCheck here too
             />
             <Button type="submit" variant="flat" isIconOnly aria-label="Search">
               <Search className="h-5 w-5" />
