@@ -104,3 +104,20 @@ export interface Review {
   comment: string;
   createdAt: Timestamp | Date;
 }
+
+// Customer related types
+export interface CustomerSummary {
+  id: string; // email used as ID
+  email: string;
+  name: string; // Combined First + Last name
+  totalOrders: number;
+  totalSpent: number;
+  lastOrderDate: Date | null;
+  firstOrderDate: Date | null;
+  avatarFallback: string; // Initials for avatar
+}
+
+export interface CustomerDetails {
+  summary: CustomerSummary;
+  orders: Order[];
+}
