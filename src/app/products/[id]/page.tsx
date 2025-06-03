@@ -1,34 +1,47 @@
+"use client";
 
-"use client"; 
-
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useParams } from 'next/navigation';
-import { getProductById, getProductsByCategory } from '@/services/productService'; 
-import type { Product as ProductType } from '@/lib/types';
-import ProductImageGallery from '@/components/products/ProductImageGallery';
-import QuantitySelector from '@/components/products/QuantitySelector';
-import VariantSelector from '@/components/products/VariantSelector';
-import StarRating from '@/components/ui/StarRating';
-import { Separator } from '@/components/ui/separator';
-import { AlertCircle, ShieldCheck, Loader2 } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import AddToCartButton from '@/components/shared/AddToCartButton';
-import ProductCard from '@/components/products/ProductCard';
-import { Skeleton } from '@/components/ui/skeleton';
-import ReviewList from '@/components/reviews/ReviewList';
-import ReviewForm from '@/components/reviews/ReviewForm';
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { useParams } from "next/navigation";
+import {
+  getProductById,
+  getProductsByCategory,
+} from "@/services/productService";
+import type { Product as ProductType } from "@/lib/types";
+import ProductImageGallery from "@/components/products/ProductImageGallery";
+import QuantitySelector from "@/components/products/QuantitySelector";
+import VariantSelector from "@/components/products/VariantSelector";
+import StarRating from "@/components/ui/StarRating";
+import { Separator } from "@/components/ui/separator";
+import {
+  ExclamationTriangleIcon,
+  ShieldCheckIcon,
+  ArrowPathIcon,
+} from "@heroicons/react/24/outline";
+import {
+  CheckBadgeIcon,
+  TruckIcon,
+} from "@heroicons/react/24/solid";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import AddToCartButton from "@/components/shared/AddToCartButton";
+import { Skeleton } from "@/components/ui/skeleton";
+import ReviewList from "@/components/reviews/ReviewList";
+import ReviewForm from "@/components/reviews/ReviewForm";
 
 export default function ProductDetailPage() {
   const params = useParams();
   const productId = params.id as string;
 
-  const [product, setProduct] = useState<ProductType | null | undefined>(undefined); 
+  const [product, setProduct] = useState<ProductType | null | undefined>(
+    undefined
+  );
   const [relatedProducts, setRelatedProducts] = useState<ProductType[]>([]);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
-  const [selectedVariants, setSelectedVariants] = useState<{ [key: string]: string }>({});
+  const [selectedVariants, setSelectedVariants] = useState<{
+    [key: string]: string;
+  }>({});
   const [refreshReviewsSignal, setRefreshReviewsSignal] = useState(0);
-
 
   useEffect(() => {
     if (productId) {
@@ -40,15 +53,21 @@ export default function ProductDetailPage() {
         if (foundProduct) {
           if (foundProduct.variants) {
             const initialVariants: { [key: string]: string } = {};
-            foundProduct.variants.forEach(variant => {
+            foundProduct.variants.forEach((variant) => {
               if (variant.options.length > 0) {
                 initialVariants[variant.type] = variant.options[0].value;
               }
             });
             setSelectedVariants(initialVariants);
           }
-          const fetchedRelatedProducts = await getProductsByCategory(foundProduct.category);
-          setRelatedProducts(fetchedRelatedProducts.filter(p => p.id !== foundProduct.id).slice(0, 4));
+          const fetchedRelatedProducts = await getProductsByCategory(
+            foundProduct.category
+          );
+          setRelatedProducts(
+            fetchedRelatedProducts
+              .filter((p) => p.id !== foundProduct.id)
+              .slice(0, 4)
+          );
         }
         setLoading(false);
       };
@@ -57,18 +76,20 @@ export default function ProductDetailPage() {
   }, [productId]);
 
   const handleVariantSelect = (variantType: string, optionValue: string) => {
-    setSelectedVariants(prev => ({ ...prev, [variantType]: optionValue }));
-    setQuantity(1); 
+    setSelectedVariants((prev) => ({ ...prev, [variantType]: optionValue }));
+    setQuantity(1);
   };
 
   const currentPrice = useMemo(() => {
     if (!product) return 0;
     let price = product.price;
     if (product.variants && Object.keys(selectedVariants).length > 0) {
-      product.variants.forEach(variant => {
+      product.variants.forEach((variant) => {
         const selectedOptionValue = selectedVariants[variant.type];
         if (selectedOptionValue) {
-          const option = variant.options.find(opt => opt.value === selectedOptionValue);
+          const option = variant.options.find(
+            (opt) => opt.value === selectedOptionValue
+          );
           if (option?.additionalPrice) {
             price += option.additionalPrice;
           }
@@ -79,28 +100,37 @@ export default function ProductDetailPage() {
   }, [product, selectedVariants]);
 
   const handleReviewSubmitted = useCallback(() => {
-    setRefreshReviewsSignal(prev => prev + 1);
-    // Optionally, re-fetch product data if reviews impact product.rating / product.reviews
-    // For now, this is handled by the seed data or a separate update mechanism.
+    setRefreshReviewsSignal((prev) => prev + 1);
   }, []);
 
   if (loading || product === undefined) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
-          <div>
-            <Skeleton className="w-full aspect-square rounded-lg" />
-            <div className="grid grid-cols-5 gap-2 mt-4">
-              {[...Array(4)].map((_, i) => <Skeleton key={i} className="w-full aspect-square rounded-md" />)}
+      <div className="min-h-screen backdrop-blur-sm bg-white/50 rounded-2xl">
+        <div className="container mx-auto px-4 py-12">
+          <div className="grid lg:grid-cols-2 gap-12 xl:gap-16">
+            <div className="space-y-6">
+              <Skeleton className="w-full aspect-square rounded-2xl" />
+              <div className="grid grid-cols-5 gap-3">
+                {[...Array(4)].map((_, i) => (
+                  <Skeleton
+                    key={i}
+                    className="w-full aspect-square rounded-xl"
+                  />
+                ))}
+              </div>
             </div>
-          </div>
-          <div className="space-y-4">
-            <Skeleton className="h-10 w-3/4" />
-            <Skeleton className="h-6 w-1/4" />
-            <Skeleton className="h-5 w-1/2" />
-            <Skeleton className="h-20 w-full" />
-            <Skeleton className="h-10 w-1/3" />
-            <Skeleton className="h-12 w-full" />
+            <div className="space-y-8">
+              <div className="space-y-4">
+                <Skeleton className="h-12 w-3/4" />
+                <Skeleton className="h-8 w-1/3" />
+                <Skeleton className="h-6 w-1/2" />
+              </div>
+              <Skeleton className="h-24 w-full" />
+              <div className="space-y-4">
+                <Skeleton className="h-12 w-1/2" />
+                <Skeleton className="h-14 w-full" />
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -109,121 +139,259 @@ export default function ProductDetailPage() {
 
   if (!product) {
     return (
-      <div className="text-center py-12">
-        <AlertCircle className="mx-auto h-12 w-12 text-destructive mb-4" />
-        <h2 className="text-2xl font-semibold">Product Not Found</h2>
-        <p className="text-muted-foreground">
-          The product you are looking for does not exist or may have been removed.
-        </p>
+      <div className="min-h-screen backdrop-blur-sm bg-white/30 rounded-2xl flex items-center justify-center">
+        <div className="text-center py-12 px-6">
+          <div className="mx-auto w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mb-6">
+            <ExclamationTriangleIcon className="w-12 h-12 text-red-600" />
+          </div>
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            Product Not Found
+          </h2>
+          <p className="text-lg text-gray-600 max-w-md mx-auto">
+            The product you are looking for does not exist or may have been
+            removed.
+          </p>
+        </div>
       </div>
     );
   }
 
+  const discountPercentage =
+    product.originalPrice && product.originalPrice > currentPrice
+      ? Math.round(
+          ((product.originalPrice - currentPrice) / product.originalPrice) * 100
+        )
+      : 0;
+
   return (
-    <div className="space-y-12">
-      <section className="grid md:grid-cols-2 gap-8 lg:gap-12 items-start">
-        <ProductImageGallery images={product.images} altText={product.name} />
-        
-        <div className="space-y-6">
-          <h1 className="text-3xl md:text-4xl font-bold">{product.name}</h1>
-          
-          <div className="flex items-center gap-4">
-            <p className="text-3xl font-semibold text-primary">₨{currentPrice.toFixed(2)}</p>
-            {product.originalPrice && product.originalPrice > currentPrice && (
-              <p className="text-lg text-muted-foreground line-through">₨{product.originalPrice.toFixed(2)}</p>
-            )}
-          </div>
-
-          {product.rating > 0 && (
-            <div className="flex items-center gap-2">
-              <StarRating rating={product.rating} size={20} />
-              <span className="text-sm text-muted-foreground">({product.reviews} reviews)</span>
+    <div className="min-h-screen  backdrop-blur-sm bg-white/60 rounded-2xl">
+      <div className="container mx-auto px-4 py-8 lg:py-12">
+        <div className="space-y-16">
+          {/* Main Product Section */}
+          <section className="grid lg:grid-cols-2 gap-12 xl:gap-16 items-start">
+            <div className="sticky top-8">
+              <ProductImageGallery
+                images={product.images}
+                altText={product.name}
+              />
             </div>
-          )}
-          
-          <p className="text-muted-foreground leading-relaxed">{product.description}</p>
 
-          {product.variants && product.variants.map(variant => (
-            <VariantSelector
-              key={variant.type}
-              variant={variant}
-              selectedOptionValue={selectedVariants[variant.type]}
-              onOptionSelect={handleVariantSelect}
-            />
-          ))}
+            <div className="space-y-8">
+              {/* Product Header */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <Badge variant="secondary" className="text-sm font-medium">
+                    {product.category}
+                  </Badge>
+                  {product.stock < 10 && product.stock > 0 && (
+                    <Badge variant="destructive" className="text-sm">
+                      Only {product.stock} left
+                    </Badge>
+                  )}
+                </div>
 
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <QuantitySelector
-              quantity={quantity}
-              onQuantityChange={setQuantity}
-              maxQuantity={product.stock}
-            />
-            <AddToCartButton 
-              product={product} 
-              quantity={quantity} 
-              selectedVariants={selectedVariants}
-              className="w-full sm:w-auto"
-              size="lg"
-            />
-          </div>
-           <p className="text-sm text-muted-foreground">
-            {product.stock > 0 ? `${product.stock} items in stock` : 'Out of stock'}
-           </p>
+                <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">
+                  {product.name}
+                </h1>
 
-          <div className="border p-4 rounded-lg space-y-2 bg-secondary/30">
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="h-5 w-5 text-primary" />
-              <span className="font-medium">Secure Checkout</span>
-            </div>
-            <p className="text-xs text-muted-foreground">Guaranteed safe and secure transactions.</p>
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="h-5 w-5 text-primary" />
-              <span className="font-medium">Easy Returns</span>
-            </div>
-            <p className="text-xs text-muted-foreground">30-day return policy on all orders.</p>
-          </div>
-        </div>
-      </section>
-      
-      <Separator />
+                {product.rating > 0 && (
+                  <div className="flex items-center gap-3">
+                    <StarRating rating={product.rating} size={24} />
+                    <span className="text-lg text-gray-600">
+                      {product.rating.toFixed(1)} ({product.reviews} reviews)
+                    </span>
+                  </div>
+                )}
+              </div>
 
-      <section className="space-y-6">
-        <h2 className="text-2xl font-semibold">Product Details</h2>
-        <Card>
-          <CardContent className="pt-6">
-            <p className="text-muted-foreground leading-relaxed">
-              {product.longDescription || product.description}
-            </p>
-            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-              <div><strong>Category:</strong> {product.category}</div>
-              {product.tags && product.tags.length > 0 && (
-                <div><strong>Tags:</strong> {product.tags.join(', ')}</div>
+              {/* Pricing */}
+              <div className="space-y-2">
+                <div className="flex items-baseline gap-4">
+                  <span className="text-4xl font-bold text-gray-900">
+                    ₨{currentPrice.toFixed(2)}
+                  </span>
+                  {product.originalPrice &&
+                    product.originalPrice > currentPrice && (
+                      <>
+                        <span className="text-2xl text-gray-500 line-through">
+                          ₨{product.originalPrice.toFixed(2)}
+                        </span>
+                        <Badge
+                          variant="destructive"
+                          className="text-sm font-semibold"
+                        >
+                          {discountPercentage}% OFF
+                        </Badge>
+                      </>
+                    )}
+                </div>
+                <p className="text-lg text-gray-600">
+                  {product.stock > 0
+                    ? `${product.stock} items available`
+                    : "Out of stock"}
+                </p>
+              </div>
+
+              <p className="text-lg text-gray-700 leading-relaxed">
+                {product.description}
+              </p>
+
+              {/* Variants */}
+              {product.variants && (
+                <div className="space-y-6">
+                  {product.variants.map((variant) => (
+                    <VariantSelector
+                      key={variant.type}
+                      variant={variant}
+                      selectedOptionValue={selectedVariants[variant.type]}
+                      onOptionSelect={handleVariantSelect}
+                    />
+                  ))}
+                </div>
               )}
-              <div><strong>Stock:</strong> {product.stock}</div>
+
+              {/* Purchase Section */}
+              <div className="space-y-6 p-6 bg-white rounded-2xl border border-gray-200 shadow-sm">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                  <QuantitySelector
+                    quantity={quantity}
+                    onQuantityChange={setQuantity}
+                    maxQuantity={product.stock}
+                  />
+                  <div className="flex gap-3 w-full sm:w-auto">
+                    <AddToCartButton
+                      product={product}
+                      quantity={quantity}
+                      selectedVariants={selectedVariants}
+                      className="flex-1 sm:flex-none h-12 px-8 text-lg font-semibold"
+                      size="lg"
+                    />
+                    {/* <button className="h-12 w-12 rounded-lg border-2 border-gray-200 hover:border-red-300 hover:bg-red-50 transition-colors flex items-center justify-center group">
+                      <HeartIcon className="w-6 h-6 text-gray-400 group-hover:text-red-500 transition-colors" />
+                    </button> */}
+                  </div>
+                </div>
+              </div>
+
+              {/* Trust Badges */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex items-center gap-3 p-4 bg-green-50 rounded-xl border border-green-200">
+                  <CheckBadgeIcon className="w-8 h-8 text-green-600 flex-shrink-0" />
+                  <div>
+                    <p className="font-semibold text-green-900">
+                      Secure Checkout
+                    </p>
+                    <p className="text-sm text-green-700">
+                      SSL encrypted transactions
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-xl border border-blue-200">
+                  <TruckIcon className="w-8 h-8 text-blue-600 flex-shrink-0" />
+                  <div>
+                    <p className="font-semibold text-blue-900">Free Shipping</p>
+                    <p className="text-sm text-blue-700">
+                      On orders over ₨2000
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 p-4 bg-purple-50 rounded-xl border border-purple-200">
+                  <ArrowPathIcon className="w-8 h-8 text-purple-600 flex-shrink-0" />
+                  <div>
+                    <p className="font-semibold text-purple-900">
+                      Easy Returns
+                    </p>
+                    <p className="text-sm text-purple-700">
+                      30-day return policy
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 p-4 bg-orange-50 rounded-xl border border-orange-200">
+                  <ShieldCheckIcon className="w-8 h-8 text-orange-600 flex-shrink-0" />
+                  <div>
+                    <p className="font-semibold text-orange-900">
+                      Quality Guarantee
+                    </p>
+                    <p className="text-sm text-orange-700">
+                      100% authentic products
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
-          </CardContent>
-        </Card>
-      </section>
+          </section>
 
-      <Separator />
+          <Separator className="my-16" />
 
-      <section className="space-y-6">
-        <h2 className="text-2xl font-semibold">Customer Reviews</h2>
-        <ReviewList productId={productId} refreshReviewsSignal={refreshReviewsSignal} />
-        <ReviewForm productId={productId} onReviewSubmit={handleReviewSubmitted} />
-      </section>
+          {/* Product Details */}
+          <section className="space-y-8">
+            <h2 className="text-3xl font-bold text-gray-900">
+              Product Details
+            </h2>
+            <Card className="bg-white border-0  ">
+              <CardContent className="p-8">
+                <div className="prose prose-lg max-w-none">
+                  <p className="text-gray-700 leading-relaxed mb-6">
+                    {product.longDescription || product.description}
+                  </p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 pt-6 border-t border-gray-200">
+                  <div className="space-y-2">
+                    <p className="font-semibold text-gray-900">Category</p>
+                    <p className="text-gray-600">{product.category}</p>
+                  </div>
+                  {product.tags && product.tags.length > 0 && (
+                    <div className="space-y-2">
+                      <p className="font-semibold text-gray-900">Tags</p>
+                      <div className="flex flex-wrap gap-2">
+                        {product.tags.map((tag, index) => (
+                          <Badge
+                            key={index}
+                            variant="outline"
+                            className="text-sm"
+                          >
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  <div className="space-y-2">
+                    <p className="font-semibold text-gray-900">Availability</p>
+                    <p className="text-gray-600">
+                      {product.stock > 0
+                        ? `${product.stock} in stock`
+                        : "Out of stock"}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </section>
 
-      {relatedProducts.length > 0 && (
-        <section>
-          <Separator className="my-8" />
-          <h2 className="text-2xl font-semibold mb-6">Related Products</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {relatedProducts.map((relatedProd) => (
-              <ProductCard key={relatedProd.id} product={relatedProd} />
-            ))}
-          </div>
-        </section>
-      )}
+          <Separator className="my-16" />
+
+          {/* Reviews Section */}
+          <section className="space-y-8">
+            <h2 className="text-3xl font-bold text-gray-900">
+              Customer Reviews
+            </h2>
+            <div className="space-y-8">
+              <ReviewList
+                productId={productId}
+                refreshReviewsSignal={refreshReviewsSignal}
+              />
+              <ReviewForm
+                productId={productId}
+                onReviewSubmit={handleReviewSubmitted}
+              />
+            </div>
+          </section>
+        </div>
+      </div>
     </div>
   );
 }
