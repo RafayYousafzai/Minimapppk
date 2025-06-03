@@ -105,7 +105,7 @@ export default function ProductDetailPage() {
 
   if (loading || product === undefined) {
     return (
-      <div className="min-h-screen backdrop-blur-sm bg-white/50 rounded-2xl">
+      <div className=" px-4 min-h-screen backdrop-blur-sm bg-white/50 rounded-2xl">
         <div className="container mx-auto px-4 py-12">
           <div className="grid lg:grid-cols-2 gap-12 xl:gap-16">
             <div className="space-y-6">

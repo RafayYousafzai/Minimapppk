@@ -175,7 +175,7 @@ function ProductsContent() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col lg:flex-row gap-8">
+      <div className="  px-4 flex flex-col lg:flex-row gap-8">
         <div className="hidden lg:block lg:w-72 xl:w-80 space-y-6 p-4">
           <Skeleton className="h-8 w-1/3 mb-4" />
           {[...Array(3)].map((_, i) => (
@@ -208,7 +208,7 @@ function ProductsContent() {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8">
+    <div className="  px-4 flex flex-col lg:flex-row gap-8">
       <FilterSidebar
         onFilterChange={handleFilterChange}
         initialFilters={filters}

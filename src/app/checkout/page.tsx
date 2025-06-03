@@ -107,7 +107,7 @@ export default function CheckoutPage() {
 
   if (getItemCount() === 0 && !isSubmitting) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-purple-100 flex items-center justify-center">
+      <div className=" px-4 min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-purple-100 flex items-center justify-center">
         <div className="text-center py-12 max-w-md mx-auto">
           <div className="relative mb-8">
             <div className="w-32 h-32 bg-gradient-to-br from-purple-200 to-pink-200 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
@@ -141,7 +141,7 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen  ">
+    <div className="min-h-screen  px-4 ">
       <div className="container mx-auto px-4 py-8">
         {/* Header Section */}
         <div className="text-center mb-12">

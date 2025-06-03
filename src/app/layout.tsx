@@ -29,9 +29,7 @@ export default function RootLayout({
         <CartProvider>
           <Providers>
             <Header />
-            <main className="flex-grow   mx-auto px-4 py-8 md:px-6">
-              {children}
-            </main>
+            <main className="flex-grow mx-auto py-8 overflow-x-hidden">{children}</main>
             <Footer />
           </Providers>
           <Toaster />
