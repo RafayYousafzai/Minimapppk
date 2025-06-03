@@ -12,6 +12,7 @@ import Image from "next/image";
 import Link from "next/link";
 // import SeedButton from "@/components/dev/SeedButton";
 import TestimonialSection from "@/components/home/TestimonialSection";
+import Carousal from "@/components/embla-carousal/index";
 
 // Cute category icons
 const CategoryIcon = ({ category }: { category: string }) => {
@@ -48,6 +49,7 @@ export default async function HomePage() {
 
   return (
     <div className="flex-1 ">
+      <Carousal />
       {/* Developer Zone */}
       {/* <div className="container mx-auto px-4 pt-8">
         <div className="my-4 p-6 border-2 border-dashed border-purple-300 rounded-2xl bg-purple-50/50 backdrop-blur-sm">
@@ -73,7 +75,7 @@ export default async function HomePage() {
 
       <div className="mx-auto px-4 space-y-16 pb-16">
         {/* Hero Section */}
-        {heroProduct && (
+        {/* {heroProduct && (
           <section className="relative overflow-hidden">
             <div className="bg-gradient-to-r from-purple-400 via-pink-400 to-purple-500 rounded-md shadow-2xl overflow-hidden">
               <div className="absolute inset-0 bg-black/10"></div>
@@ -116,14 +118,14 @@ export default async function HomePage() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-purple-900/20 to-transparent"></div>
                   </div>
-                  {/* Floating decorative elements */}
+     
                   <div className="absolute -top-4 -right-4 w-8 h-8 bg-yellow-300 rounded-full animate-bounce"></div>
                   <div className="absolute -bottom-4 -left-4 w-6 h-6 bg-pink-300 rounded-full animate-pulse"></div>
                 </div>
               </div>
             </div>
           </section>
-        )}
+        )} */}
 
         {/* Featured Products Section */}
         {featuredProducts.length > 0 && (
