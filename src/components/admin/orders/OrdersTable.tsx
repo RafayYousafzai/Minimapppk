@@ -21,11 +21,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, FileText } from 'lucide-react';
+import { MoreHorizontal, FileText, Undo2 } from 'lucide-react'; // Added Undo2 for refund
 import OrderStatusBadge from './OrderStatusBadge';
 import OrderStatusSelector from './OrderStatusSelector';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import Link from 'next/link'; // Added Link for Order ID
+import Link from 'next/link';
 
 interface OrdersTableProps {
   initialOrders: Order[];
@@ -76,7 +76,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ initialOrders }) => {
             {orders.map((order) => (
               <TableRow key={order.id}>
                 <TableCell className="font-medium">
-                  <Link href={`#`} className="hover:underline" title={`View details for order ${order.id}`}>
+                  <Link href={`/admin/orders/${order.id}`} className="text-primary hover:underline" title={`View details for order ${order.id}`}>
                     #{order.id.substring(0, 8)}...
                   </Link>
                 </TableCell>
@@ -110,15 +110,18 @@ const OrdersTable: React.FC<OrdersTableProps> = ({ initialOrders }) => {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem onClick={() => alert(`Viewing details for order ${order.id}`)}>
-                        <FileText className="mr-2 h-4 w-4" /> View Details
+                      <DropdownMenuItem asChild>
+                        <Link href={`/admin/orders/${order.id}`}>
+                           <FileText className="mr-2 h-4 w-4" /> View Details
+                        </Link>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem 
-                        onClick={() => alert(`Refunding order ${order.id}`)}
+                        onClick={() => alert(`Initiate refund process for order ${order.id}. (This is a placeholder - actual refund logic to be implemented.)`)}
                         disabled={order.orderStatus === 'cancelled' || order.orderStatus === 'delivered'}
+                        className="text-orange-600 focus:text-orange-700 focus:bg-orange-50"
                       >
-                        Refund Order
+                        <Undo2 className="mr-2 h-4 w-4" /> Refund Order
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
