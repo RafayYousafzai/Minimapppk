@@ -1,6 +1,7 @@
 
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage'; // Added
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -14,6 +15,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const db = getFirestore(app);
+const storage = getStorage(app); // Added
 
 // Log the project ID being used to help debug connection issues.
 if (typeof window === 'undefined') { // Log only on the server during initialization
@@ -21,7 +23,11 @@ if (typeof window === 'undefined') { // Log only on the server during initializa
     if (!firebaseConfig.projectId) {
         console.warn('[Firebase Config] WARNING: NEXT_PUBLIC_FIREBASE_PROJECT_ID is not set in your environment variables. Firestore will not work.');
     }
+     if (!firebaseConfig.storageBucket) {
+        console.warn('[Firebase Config] WARNING: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET is not set in your environment variables. Firebase Storage will not work.');
+    }
 }
 
 
-export { app, db };
+export { app, db, storage }; // Export storage
+

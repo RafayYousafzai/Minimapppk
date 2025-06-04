@@ -2,21 +2,65 @@
 import type { Product, VariantOption, Review } from '@/lib/types';
 import type { ProductFormData } from '@/lib/productFormTypes';
 import type { ReviewFormData } from '@/lib/reviewFormSchema';
-import { db } from '@/lib/firebase/config';
-import { collection, doc, getDoc, getDocs, writeBatch, query, where, limit as firestoreLimit, orderBy, addDoc, serverTimestamp, Timestamp, updateDoc, FieldValue, collectionGroup } from 'firebase/firestore';
+import { db, storage } from '@/lib/firebase/config'; // Import storage
+import { 
+  collection, doc, getDoc, getDocs, writeBatch, query, where, 
+  limit as firestoreLimit, orderBy, addDoc, serverTimestamp, 
+  Timestamp, updateDoc, FieldValue, collectionGroup 
+} from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage"; // Firebase Storage functions
 import { mockProducts as productsToSeed } from '@/lib/mock-data'; 
 
 const PRODUCTS_COLLECTION = 'products';
 const REVIEWS_SUBCOLLECTION = 'reviews';
 
+// Function to upload an image to Firebase Storage
+export async function uploadProductImage(file: File, productIdOrTempId: string, fileName: string): Promise<string> {
+  // Use a more specific path, e.g., products/<productId>/<fileName>
+  // Or for new products before ID is known: product_images/temp/<tempId>/<fileName>
+  // For simplicity, using a general path with timestamp to avoid collisions if tempId is not robust
+  const filePath = `product_images/${productIdOrTempId}/${Date.now()}_${fileName}`;
+  const storageRef = ref(storage, filePath);
+  try {
+    const snapshot = await uploadBytes(storageRef, file);
+    const downloadURL = await getDownloadURL(snapshot.ref);
+    return downloadURL;
+  } catch (error) {
+    console.error("Error uploading image: ", error);
+    throw new Error(`Failed to upload image ${fileName}`);
+  }
+}
+
+// Function to delete an image from Firebase Storage by its URL
+export async function deleteProductImageByUrl(imageUrl: string): Promise<void> {
+  if (!imageUrl.startsWith('https://firebasestorage.googleapis.com')) {
+    console.warn(`Skipping deletion of non-Firebase Storage URL: ${imageUrl}`);
+    return;
+  }
+  try {
+    const storageRef = ref(storage, imageUrl);
+    await deleteObject(storageRef);
+    console.log(`Image deleted from Storage: ${imageUrl}`);
+  } catch (error) {
+    // It's common for delete to fail if the file doesn't exist, which might be fine.
+    // You might want to specifically check for 'storage/object-not-found' error code.
+    if ((error as any)?.code !== 'storage/object-not-found') {
+        console.error(`Error deleting image from Storage (${imageUrl}):`, error);
+        // Optionally re-throw if it's not a "not found" error
+        // throw new Error(`Failed to delete image ${imageUrl} from Storage.`);
+    } else {
+        console.log(`Image not found in Storage, presumed already deleted: ${imageUrl}`);
+    }
+  }
+}
+
+
 export async function seedProducts(): Promise<void> {
   const batch = writeBatch(db);
   const productsCollectionRef = collection(db, PRODUCTS_COLLECTION);
 
-  // Check if products already exist to prevent re-seeding
   const existingProductsSnapshot = await getDocs(query(productsCollectionRef, firestoreLimit(1)));
   if (!existingProductsSnapshot.empty) {
-    // More robust check: verify if specific mock product IDs exist
     let seeded = false;
     if (productsToSeed.length > 0) {
         const firstProductCheckRef = doc(productsCollectionRef, productsToSeed[0].id);
@@ -65,7 +109,7 @@ export async function addProduct(data: ProductFormData): Promise<string> {
       name: data.name,
       description: data.description,
       longDescription: data.longDescription || '',
-      images: data.images.map(img => img.url),
+      images: data.images.map(img => img.url), // Expects URLs from ProductForm after upload
       price: data.price,
       originalPrice: data.originalPrice || undefined,
       category: data.category,
@@ -101,7 +145,7 @@ export async function updateProduct(productId: string, data: ProductFormData): P
       name: data.name,
       description: data.description,
       longDescription: data.longDescription || '',
-      images: data.images.map(img => img.url),
+      images: data.images.map(img => img.url), // Expects URLs from ProductForm after upload/management
       price: data.price,
       originalPrice: data.originalPrice || undefined,
       category: data.category,
@@ -137,7 +181,6 @@ export async function getAllProducts(): Promise<Product[]> {
     const productsCollectionRef = collection(db, PRODUCTS_COLLECTION);
     const q = query(productsCollectionRef, orderBy('createdAt', 'desc'));
     const querySnapshot = await getDocs(q);
-    console.log(`Fetched ${querySnapshot.docs.length} products from Firestore.`);
     const products = querySnapshot.docs.map(docSnap => {
       const data = docSnap.data();
       let createdAtDate = data.createdAt;
@@ -310,10 +353,7 @@ export async function addReview(productId: string, reviewData: ReviewFormData): 
       createdAt: serverTimestamp(),
     };
     const docRef = await addDoc(reviewCollectionRef, newReview);
-
-    // TODO: For a production app, update the product's average rating and review count
-    // using a Firebase Transaction or a Cloud Function.
-
+    // TODO: Update product's average rating and review count using a Transaction or Cloud Function.
     return docRef.id;
   } catch (error) {
     console.error(`Error adding review for product ${productId}:`, error);

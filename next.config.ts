@@ -1,3 +1,4 @@
+
 // @ts-check
 
 /** @type {import('next').NextConfig} */
@@ -22,12 +23,19 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "example.com",
+        hostname: "firebasestorage.googleapis.com", // Added Firebase Storage
         port: "",
-        pathname: "/images/**",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "placehold.co", // Added for placeholder images used elsewhere
+        port: "",
+        pathname: "/**",
       },
     ],
   },
 };
 
 module.exports = nextConfig;
+
