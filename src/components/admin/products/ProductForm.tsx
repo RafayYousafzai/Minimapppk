@@ -52,16 +52,15 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, existingCategori
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // State for image management
   const [existingImageUrls, setExistingImageUrls] = useState<string[]>(initialData?.images || []);
   const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]); // For new files
-  const [imagesToRemove, setImagesToRemove] = useState<string[]>([]); // URLs of existing images marked for removal
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]); 
+  const [imagesToRemove, setImagesToRemove] = useState<string[]>([]); 
 
   const formDefaultValues = initialData 
     ? transformProductToFormData(initialData) 
     : {
-        name: "", description: "", longDescription: "", images: [], // Will be populated by uploads
+        name: "", description: "", longDescription: "", images: [], 
         price: 0, originalPrice: undefined, category: "", stock: 0, tags: "", variants: [],
       };
 
@@ -97,7 +96,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, existingCategori
       const currentTotalImages = existingImageUrls.length - imagesToRemove.length + newImageFiles.length + filesArray.length;
       if (currentTotalImages > 5) {
         toast({ title: "Image Limit", description: "You can upload a maximum of 5 images.", variant: "destructive" });
-        if (fileInputRef.current) fileInputRef.current.value = ""; // Reset file input
+        if (fileInputRef.current) fileInputRef.current.value = ""; 
         return;
       }
       setNewImageFiles(prev => [...prev, ...filesArray]);
@@ -107,75 +106,102 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, existingCategori
   };
 
   const removeNewImage = (index: number) => {
-    const fileToRemove = newImageFiles[index];
     const previewToRemove = imagePreviews[index];
     if (previewToRemove) URL.revokeObjectURL(previewToRemove);
     setNewImageFiles(prev => prev.filter((_, i) => i !== index));
     setImagePreviews(prev => prev.filter((_, i) => i !== index));
-    if (fileInputRef.current) fileInputRef.current.value = ""; // Reset file input to allow re-selection of same file
+    if (fileInputRef.current) fileInputRef.current.value = ""; 
   };
 
   const removeExistingImage = (url: string) => {
     setExistingImageUrls(prev => prev.filter(imgUrl => imgUrl !== url));
-    setImagesToRemove(prev => [...prev, url]); // Track for deletion from storage on successful update
+    setImagesToRemove(prev => [...prev, url]); 
   };
   
   useEffect(() => {
-    // Cleanup object URLs on component unmount
     return () => {
       imagePreviews.forEach(preview => URL.revokeObjectURL(preview));
     };
   }, [imagePreviews]);
 
   async function onSubmit(data: ProductFormData) {
+    console.log("onSubmit triggered. Data:", JSON.parse(JSON.stringify(data)));
+    console.log("Current newImageFiles:", newImageFiles.map(f => f.name));
+    console.log("Current existingImageUrls:", existingImageUrls);
+    console.log("Current imagesToRemove:", imagesToRemove);
+
     setIsSubmitting(true);
+    console.log("isSubmitting set to true");
+
     let finalImageUrls: { url: string }[] = existingImageUrls
-        .filter(url => !imagesToRemove.includes(url)) // Keep existing images not marked for removal
+        .filter(url => !imagesToRemove.includes(url))
         .map(url => ({ url }));
+    console.log("Initial finalImageUrls (from existing):", finalImageUrls);
 
     try {
-      // 1. Upload new images
+      console.log("Attempting to process images and save product...");
       const uploadedUrls: string[] = [];
       if (newImageFiles.length > 0) {
+        console.log(`Uploading ${newImageFiles.length} new images...`);
         toast({ title: "Uploading Images...", description: `Please wait while ${newImageFiles.length} images are uploaded.`});
         for (const file of newImageFiles) {
-          // For new products, productId might be null. We'll use a temp identifier or handle path generation inside uploadProductImage.
-          // For simplicity, using product name + timestamp as a temporary group for new product images.
           const imageIdForPath = productId || data.name.replace(/\s+/g, '-').toLowerCase() + '-' + Date.now();
+          console.log(`Uploading file: ${file.name} to path group: ${imageIdForPath}`);
           const url = await uploadProductImage(file, imageIdForPath, file.name);
           uploadedUrls.push(url);
+          console.log(`Uploaded ${file.name} to URL: ${url}`);
         }
         finalImageUrls = [...finalImageUrls, ...uploadedUrls.map(url => ({ url }))];
+        console.log("finalImageUrls after new uploads:", finalImageUrls);
       }
       
+      if (finalImageUrls.length === 0 && data.images.length === 0 ) { // Check if images array in data is also empty, as Zod validates data.images
+          console.error("No images provided or selected for the product. finalImageUrls is empty and data.images is empty.");
+          toast({
+              title: "Image Required",
+              description: "Please upload or ensure at least one image is present for the product.",
+              variant: "destructive",
+          });
+          setIsSubmitting(false); 
+          return; 
+      }
+
       const productPayload = { ...data, images: finalImageUrls, tags: data.tags };
+      // Ensure data.tags which is already string[] from Zod transform is used.
+      console.log("Product payload to be saved:", JSON.parse(JSON.stringify(productPayload)));
 
       if (productId && initialData) {
-        // 2a. Delete images from Storage that were marked for removal
+        console.log(`Updating product with ID: ${productId}`);
         for (const urlToRemove of imagesToRemove) {
+            console.log(`Attempting to delete image from storage: ${urlToRemove}`);
             await deleteProductImageByUrl(urlToRemove);
         }
         await updateProduct(productId, productPayload);
         toast({ title: "Product Updated", description: `Product "${data.name}" has been successfully updated.` });
+        console.log("Product updated successfully.");
       } else {
+        console.log("Adding new product...");
         const newProdId = await addProduct(productPayload);
-        // If images were uploaded using a temp ID, and you need to move them to newProdId path, this would be the place.
-        // For this implementation, images are uploaded to a path that should be fine.
         toast({ title: "Product Added", description: `Product "${data.name}" (ID: ${newProdId}) has been successfully added.`});
+        console.log(`Product added successfully with ID: ${newProdId}`);
       }
       router.push("/admin/products");
       router.refresh();
     } catch (error) {
-      console.error("Failed to save product:", error);
+      console.error("Failed to save product in onSubmit:", error);
       toast({
-        title: "Error",
+        title: "Error Saving Product",
         description: error instanceof Error ? error.message : `Could not ${productId ? 'update' : 'add'} product. Please try again.`,
         variant: "destructive",
       });
     } finally {
+      console.log("onSubmit finally block. Setting isSubmitting to false.");
       setIsSubmitting(false);
     }
   }
+
+  // For debugging validation errors:
+  // console.log("Form errors:", form.formState.errors);
 
   return (
     <Form {...form}>
@@ -192,26 +218,36 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, existingCategori
         <Card>
           <CardHeader><CardTitle>Product Images</CardTitle><CardDescription>Upload up to 5 images. The first image will be the primary one.</CardDescription></CardHeader>
           <CardContent className="space-y-4">
-            <FormItem>
-              <FormLabel htmlFor="image-upload" className="flex items-center gap-2 text-sm font-medium cursor-pointer hover:text-primary">
-                <UploadCloud className="h-5 w-5" /> Select Images to Upload
-              </FormLabel>
-              <FormControl>
-                <Input 
-                    id="image-upload" 
-                    type="file" 
-                    accept="image/*" 
-                    multiple 
-                    onChange={handleFileChange} 
-                    ref={fileInputRef}
-                    className="hidden"
-                    disabled={isSubmitting || (existingImageUrls.length - imagesToRemove.length + newImageFiles.length >= 5)}
-                />
-              </FormControl>
-              <FormDescription>
-                Max 5 images. Accepted formats: JPG, PNG, WebP. Max 2MB per image recommended.
-              </FormDescription>
-            </FormItem>
+            <FormField
+              control={form.control}
+              name="images" // This field is for Zod validation of the final image URL array
+              render={({ fieldState }) => ( // We don't render field directly, but use fieldState for errors
+                <>
+                  <FormItem>
+                    <FormLabel htmlFor="image-upload" className="flex items-center gap-2 text-sm font-medium cursor-pointer hover:text-primary">
+                      <UploadCloud className="h-5 w-5" /> Select Images to Upload
+                    </FormLabel>
+                    <FormControl>
+                      <Input 
+                          id="image-upload" 
+                          type="file" 
+                          accept="image/*" 
+                          multiple 
+                          onChange={handleFileChange} 
+                          ref={fileInputRef}
+                          className="hidden"
+                          disabled={isSubmitting || (existingImageUrls.length - imagesToRemove.length + newImageFiles.length >= 5)}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Max 5 images. Accepted formats: JPG, PNG, WebP. Max 2MB per image recommended.
+                    </FormDescription>
+                     {/* Display general 'images' field errors here, like min/max items */}
+                    {fieldState.error && <FormMessage>{fieldState.error.message}</FormMessage>}
+                  </FormItem>
+                </>
+              )}
+            />
 
             {(existingImageUrls.length > 0 || newImageFiles.length > 0) && (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-4">
@@ -291,7 +327,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, existingCategori
 };
 
 interface OptionsFieldArrayProps {
-  control: any;
+  control: any; // Type for useForm's control
   variantIndex: number;
 }
 
@@ -319,3 +355,4 @@ const OptionsFieldArray: React.FC<OptionsFieldArrayProps> = ({ control, variantI
 };
 
 export default ProductForm;
+
