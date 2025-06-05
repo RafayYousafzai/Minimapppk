@@ -208,7 +208,7 @@ function ProductsContent() {
   }
 
   return (
-    <div className="  px-4 flex flex-col lg:flex-row gap-8">
+    <div className=" px-4 flex flex-col lg:flex-row gap-8">
       <FilterSidebar
         onFilterChange={handleFilterChange}
         initialFilters={filters}
@@ -231,17 +231,6 @@ function ProductsContent() {
                 className="pr-10 bg-white border-none"
                 suppressHydrationWarning
               />
-              {/* {localSearchTerm && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
-                  onClick={clearSearch}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              )} */}
             </div>
             <Button
               type="submit"

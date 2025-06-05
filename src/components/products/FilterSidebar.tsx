@@ -1,130 +1,166 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Slider } from "@/components/ui/slider"
-import StarRating from "@/components/ui/StarRating"
-import { X, ListFilter, Sparkles, Filter, DollarSign, Star, Tag } from "lucide-react"
-import * as productService from "@/services/productService"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { Skeleton } from "../ui/skeleton"
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
+import StarRating from "@/components/ui/StarRating";
+import {
+  X,
+  ListFilter,
+  Sparkles,
+  Filter,
+  DollarSign,
+  Star,
+  Tag,
+} from "lucide-react";
+import * as productService from "@/services/productService";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Skeleton } from "../ui/skeleton";
 
 interface FilterSidebarProps {
   onFilterChange: (filters: {
-    categories: string[]
-    priceRange: [number, number]
-    minRating: number
-  }) => void
+    categories: string[];
+    priceRange: [number, number];
+    minRating: number;
+  }) => void;
   initialFilters: {
-    categories: string[]
-    priceRange: [number, number]
-    minRating: number
-  }
+    categories: string[];
+    priceRange: [number, number];
+    minRating: number;
+  };
 }
 
-const FilterSidebar: React.FC<FilterSidebarProps> = ({ onFilterChange, initialFilters }) => {
-  const [availableCategories, setAvailableCategories] = useState<string[]>([])
-  const [globalMinPrice, setGlobalMinPrice] = useState(0)
-  const [globalMaxPrice, setGlobalMaxPrice] = useState(1000)
-  const [isLoading, setIsLoading] = useState(true)
+const FilterSidebar: React.FC<FilterSidebarProps> = ({
+  onFilterChange,
+  initialFilters,
+}) => {
+  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
+  const [globalMinPrice, setGlobalMinPrice] = useState(0);
+  const [globalMaxPrice, setGlobalMaxPrice] = useState(1000);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(initialFilters.categories)
-  const [priceRange, setPriceRange] = useState<[number, number]>(initialFilters.priceRange)
-  const [minRating, setMinRating] = useState<number>(initialFilters.minRating)
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(
+    initialFilters.categories
+  );
+  const [priceRange, setPriceRange] = useState<[number, number]>(
+    initialFilters.priceRange
+  );
+  const [minRating, setMinRating] = useState<number>(initialFilters.minRating);
 
-  const [isSheetOpen, setIsSheetOpen] = useState(false)
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   useEffect(() => {
     const fetchFilterData = async () => {
-      setIsLoading(true)
+      setIsLoading(true);
       const [categories, priceRangeData] = await Promise.all([
         productService.getAllCategories(),
         productService.getPriceRange(),
-      ])
-      setAvailableCategories(categories)
-      setGlobalMinPrice(priceRangeData.min)
-      setGlobalMaxPrice(priceRangeData.max)
+      ]);
+      setAvailableCategories(categories);
+      setGlobalMinPrice(priceRangeData.min);
+      setGlobalMaxPrice(priceRangeData.max);
 
-      const initialMin = Math.max(priceRangeData.min, initialFilters.priceRange[0])
-      const initialMax = Math.min(priceRangeData.max, initialFilters.priceRange[1])
+      const initialMin = Math.max(
+        priceRangeData.min,
+        initialFilters.priceRange[0]
+      );
+      const initialMax = Math.min(
+        priceRangeData.max,
+        initialFilters.priceRange[1]
+      );
 
-      setPriceRange([initialMin, initialMax])
-      setSelectedCategories(initialFilters.categories)
-      setMinRating(initialFilters.minRating)
+      setPriceRange([initialMin, initialMax]);
+      setSelectedCategories(initialFilters.categories);
+      setMinRating(initialFilters.minRating);
 
-      setIsLoading(false)
-    }
-    fetchFilterData()
-  }, [])
+      setIsLoading(false);
+    };
+    fetchFilterData();
+  }, []);
 
   useEffect(() => {
     if (!isLoading) {
-      setSelectedCategories(initialFilters.categories)
-      const newMin = Math.max(globalMinPrice, initialFilters.priceRange[0])
-      const newMax = Math.min(globalMaxPrice, initialFilters.priceRange[1])
-      setPriceRange([newMin, newMax])
-      setMinRating(initialFilters.minRating)
+      setSelectedCategories(initialFilters.categories);
+      const newMin = Math.max(globalMinPrice, initialFilters.priceRange[0]);
+      const newMax = Math.min(globalMaxPrice, initialFilters.priceRange[1]);
+      setPriceRange([newMin, newMax]);
+      setMinRating(initialFilters.minRating);
     }
-  }, [initialFilters, isLoading, globalMinPrice, globalMaxPrice])
+  }, [initialFilters, isLoading, globalMinPrice, globalMaxPrice]);
 
   const handleCategoryChange = (category: string) => {
     setSelectedCategories((prev) =>
-      prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category],
-    )
-  }
+      prev.includes(category)
+        ? prev.filter((c) => c !== category)
+        : [...prev, category]
+    );
+  };
 
   const handlePriceChange = (newRange: [number, number]) => {
-    setPriceRange(newRange)
-  }
+    setPriceRange(newRange);
+  };
 
-  const handleMinPriceInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newMin = Number.parseFloat(e.target.value)
+  const handleMinPriceInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const newMin = Number.parseFloat(e.target.value);
     if (!isNaN(newMin) && newMin <= priceRange[1] && newMin >= globalMinPrice) {
-      setPriceRange([newMin, priceRange[1]])
+      setPriceRange([newMin, priceRange[1]]);
     } else if (e.target.value === "") {
-      setPriceRange([globalMinPrice, priceRange[1]])
+      setPriceRange([globalMinPrice, priceRange[1]]);
     }
-  }
+  };
 
-  const handleMaxPriceInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newMax = Number.parseFloat(e.target.value)
+  const handleMaxPriceInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const newMax = Number.parseFloat(e.target.value);
     if (!isNaN(newMax) && newMax >= priceRange[0] && newMax <= globalMaxPrice) {
-      setPriceRange([priceRange[0], newMax])
+      setPriceRange([priceRange[0], newMax]);
     } else if (e.target.value === "") {
-      setPriceRange([priceRange[0], globalMaxPrice])
+      setPriceRange([priceRange[0], globalMaxPrice]);
     }
-  }
+  };
 
   const handleRatingChange = (rating: number) => {
-    setMinRating(minRating === rating ? 0 : rating)
-  }
+    setMinRating(minRating === rating ? 0 : rating);
+  };
 
   const applyFilters = () => {
     onFilterChange({
       categories: selectedCategories,
-      priceRange: [Math.max(globalMinPrice, priceRange[0]), Math.min(globalMaxPrice, priceRange[1])],
+      priceRange: [
+        Math.max(globalMinPrice, priceRange[0]),
+        Math.min(globalMaxPrice, priceRange[1]),
+      ],
       minRating,
-    })
-    setIsSheetOpen(false)
-  }
+    });
+    setIsSheetOpen(false);
+  };
 
   const clearFilters = () => {
-    setSelectedCategories([])
-    setPriceRange([globalMinPrice, globalMaxPrice])
-    setMinRating(0)
+    setSelectedCategories([]);
+    setPriceRange([globalMinPrice, globalMaxPrice]);
+    setMinRating(0);
     onFilterChange({
       categories: [],
       priceRange: [globalMinPrice, globalMaxPrice],
       minRating: 0,
-    })
-    setIsSheetOpen(false)
-  }
+    });
+    setIsSheetOpen(false);
+  };
 
   if (isLoading) {
     return (
@@ -144,7 +180,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ onFilterChange, initialFi
         <Skeleton className="h-12 w-full mb-3 rounded-full" />
         <Skeleton className="h-12 w-full rounded-full" />
       </div>
-    )
+    );
   }
 
   const filterContent = (
@@ -155,29 +191,29 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ onFilterChange, initialFi
           <div className="w-8 h-8 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
             <Tag className="w-4 h-4 text-white" />
           </div>
-          <h3 className="text-lg font-bold text-gray-800">Categories</h3>
+          <h3 className="text-lg font-bold text-purple-900">Categories</h3>
         </div>
         <ScrollArea className="h-40">
           <div className="space-y-3">
             {availableCategories.map((category) => (
               <div
                 key={category}
-                className="flex items-center space-x-3 p-2 rounded-xl hover:bg-purple-50 transition-colors group"
+                className="flex items-center space-x-3 p-2 rounded-xl hover:bg-purple-100/50 transition-colors group"
               >
                 <Checkbox
                   id={`cat-${category}`}
                   checked={selectedCategories.includes(category)}
                   onCheckedChange={() => handleCategoryChange(category)}
-                  className="data-[state=checked]:bg-purple-500 data-[state=checked]:border-purple-500"
+                  className="data-[state=checked]:bg-purple-600 data-[state=checked]:border-purple-600"
                 />
                 <Label
                   htmlFor={`cat-${category}`}
-                  className="font-medium cursor-pointer text-gray-700 group-hover:text-purple-600 transition-colors flex-1"
+                  className="font-medium cursor-pointer text-purple-900/90 group-hover:text-purple-800 transition-colors flex-1"
                 >
                   {category}
                 </Label>
                 {selectedCategories.includes(category) && (
-                  <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
+                  <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
                 )}
               </div>
             ))}
@@ -185,7 +221,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ onFilterChange, initialFi
         </ScrollArea>
       </div>
 
-      <div className="h-px bg-gradient-to-r from-transparent via-purple-200 to-transparent"></div>
+      <div className="h-px bg-gradient-to-r from-transparent via-purple-300/50 to-transparent"></div>
 
       {/* Price Range Section */}
       <div className="space-y-4">
@@ -193,51 +229,57 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ onFilterChange, initialFi
           <div className="w-8 h-8 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
             <DollarSign className="w-4 h-4 text-white" />
           </div>
-          <h3 className="text-lg font-bold text-gray-800">Price Range</h3>
+          <h3 className="text-lg font-bold text-purple-900">Price Range</h3>
         </div>
-        <div className="bg-purple-50 p-4 rounded-xl space-y-4">
+        <div className="bg-purple-100/30 p-4 rounded-xl space-y-4">
           <Slider
             min={globalMinPrice}
             max={globalMaxPrice}
             step={1}
             value={priceRange}
-            onValueChange={(value) => handlePriceChange(value as [number, number])}
+            onValueChange={(value) =>
+              handlePriceChange(value as [number, number])
+            }
             className="mb-3"
           />
           <div className="flex items-center gap-3">
             <div className="flex-1">
-              <Label className="text-xs text-purple-600 font-medium mb-1 block">Min Price</Label>
+              <Label className="text-xs text-purple-800 font-medium mb-1 block">
+                Min Price
+              </Label>
               <Input
                 type="number"
                 value={priceRange[0]}
                 onChange={handleMinPriceInputChange}
                 placeholder={`$${globalMinPrice}`}
-                className="text-sm border-purple-200 focus:border-purple-400 rounded-xl"
+                className="text-sm border-purple-300 focus:border-purple-500 rounded-xl"
                 min={globalMinPrice}
                 max={priceRange[1]}
               />
             </div>
-            <div className="text-purple-400 font-bold mt-5">—</div>
+            <div className="text-purple-600 font-bold mt-5">—</div>
             <div className="flex-1">
-              <Label className="text-xs text-purple-600 font-medium mb-1 block">Max Price</Label>
+              <Label className="text-xs text-purple-800 font-medium mb-1 block">
+                Max Price
+              </Label>
               <Input
                 type="number"
                 value={priceRange[1]}
                 onChange={handleMaxPriceInputChange}
                 placeholder={`$${globalMaxPrice}`}
-                className="text-sm border-purple-200 focus:border-purple-400 rounded-xl"
+                className="text-sm border-purple-300 focus:border-purple-500 rounded-xl"
                 min={priceRange[0]}
                 max={globalMaxPrice}
               />
             </div>
           </div>
-          <div className="text-center text-sm text-purple-600 font-medium">
+          <div className="text-center text-sm text-purple-800 font-medium">
             ${priceRange[0]} - ${priceRange[1]}
           </div>
         </div>
       </div>
 
-      <div className="h-px bg-gradient-to-r from-transparent via-purple-200 to-transparent"></div>
+      <div className="h-px bg-gradient-to-r from-transparent via-purple-300/50 to-transparent"></div>
 
       {/* Rating Section */}
       <div className="space-y-4">
@@ -245,7 +287,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ onFilterChange, initialFi
           <div className="w-8 h-8 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
             <Star className="w-4 h-4 text-white" />
           </div>
-          <h3 className="text-lg font-bold text-gray-800">Rating</h3>
+          <h3 className="text-lg font-bold text-purple-900">Rating</h3>
         </div>
         <div className="space-y-2">
           {[4, 3, 2, 1].map((rating) => (
@@ -255,8 +297,8 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ onFilterChange, initialFi
               onClick={() => handleRatingChange(rating)}
               className={`w-full justify-start rounded-xl p-3 transition-all duration-300 ${
                 minRating === rating
-                  ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg hover:shadow-xl"
-                  : "hover:bg-purple-50 text-gray-700 hover:text-purple-600"
+                  ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg hover:shadow-xl"
+                  : "hover:bg-purple-100/30 text-purple-900 hover:text-purple-800"
               }`}
             >
               <StarRating rating={rating} size={16} />
@@ -267,13 +309,13 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ onFilterChange, initialFi
         </div>
       </div>
 
-      <div className="h-px bg-gradient-to-r from-transparent via-purple-200 to-transparent"></div>
+      <div className="h-px bg-gradient-to-r from-transparent via-purple-300/50 to-transparent"></div>
 
       {/* Action Buttons */}
       <div className="space-y-3 pt-2">
         <Button
           onClick={applyFilters}
-          className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-full py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+          className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-full py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
         >
           <Filter className="mr-2 h-5 w-5" />
           Apply Filters
@@ -281,19 +323,19 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ onFilterChange, initialFi
         <Button
           onClick={clearFilters}
           variant="outline"
-          className="w-full border-2 border-purple-200 text-purple-600 hover:bg-purple-50 rounded-full py-6 text-lg font-semibold transition-all duration-300"
+          className="w-full border-2 border-purple-300 text-purple-700 hover:bg-purple-100/30 rounded-full py-6 text-lg font-semibold transition-all duration-300"
         >
           <X className="mr-2 h-5 w-5" />
           Clear All
         </Button>
       </div>
     </div>
-  )
+  );
 
   return (
     <>
       {/* Mobile Filter Button and Sheet */}
-      <div className="lg:hidden mb-6">
+      <div className="lg:hidden mb-6 bg-[#ac8aed] ">
         <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
           <SheetTrigger asChild>
             <Button
@@ -305,7 +347,10 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ onFilterChange, initialFi
               <Sparkles className="ml-2 h-4 w-4" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-[320px] sm:w-[400px] p-0 bg-white/95 backdrop-blur-md">
+          <SheetContent
+            side="left"
+            className="w-[320px] sm:w-[400px] p-0 bg-white/95 backdrop-blur-md"
+          >
             <SheetHeader className="p-6 border-b border-purple-100 bg-gradient-to-r from-purple-50 to-pink-50">
               <SheetTitle className="text-xl font-bold text-gray-800 flex items-center gap-2">
                 <Filter className="w-5 h-5 text-purple-600" />
@@ -320,7 +365,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ onFilterChange, initialFi
       </div>
 
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:block lg:w-72 xl:w-80 p-6 bg-white/80 backdrop-blur-sm border-2 border-purple-100 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+      <aside className="hidden lg:block lg:w-72 xl:w-80 p-6 bg-[#ac8aed]  backdrop-blur-sm  rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg">
             <Filter className="w-5 h-5 text-white" />
@@ -332,7 +377,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ onFilterChange, initialFi
         {/* <ScrollArea className="h-[calc(100vh-240px)] pr-3">{filterContent}</ScrollArea> */}
       </aside>
     </>
-  )
-}
+  );
+};
 
-export default FilterSidebar
+export default FilterSidebar;
