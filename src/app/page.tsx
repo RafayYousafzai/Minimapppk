@@ -79,7 +79,7 @@ export default async function HomePage() {
           <section>
             <div className="text-center mb-12">
               <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
-                Best Seller Products
+                Best Selling Products
               </h2>
 
               <div className="inline-flex items-center gap-2   px-6 py-2 mb-6">
@@ -120,7 +120,7 @@ export default async function HomePage() {
           <section>
             <div className="text-center mb-12">
               <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
-                Shop by Category 🛍️
+                Shop by Collection
               </h2>
               <p className="text-lg text-gray-600">
                 Find exactly what you're looking for in our curated collections
@@ -154,18 +154,13 @@ export default async function HomePage() {
         )}
 
         {/* Hero Section */}
-        {heroProduct && (
+        {/* {heroProduct && (
           <section className="relative overflow-hidden">
             <div className="bg-gradient-to-r from-purple-400 via-pink-300 to-purple-500 rounded-3xl  overflow-hidden">
               <div className="absolute inset-0 bg-black/10 rounded-3xl"></div>
               <div className="relative grid md:grid-cols-2 gap-8 items-center p-8 md:p-12">
                 <div className="order-2 md:order-1 text-white z-10">
-                  {/* <div className="inline-flex items-center gap-2   backdrop-blur-sm rounded-full px-4 py-2 mb-6">
-                    <Star className="w-4 h-4 fill-yellow-300 text-yellow-300" />
-                    <span className="text-sm font-medium">
-                      Featured Product
-                    </span>
-                  </div> */}
+                 
                   <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
                     Discover
                     <span className="block text-yellow-300">
@@ -199,31 +194,31 @@ export default async function HomePage() {
                   </div>
 
                   <div className="absolute -top-4 -right-4 w-8 h-8 bg-yellow-300 rounded-full animate-bounce"></div>
-                  <div className="absolute -bottom-4 -left-4 w-6 h-6 bg-pink-300 rounded-full animate-pulse"></div>
+                  <div className="absolute -bottom-4 -left-4 w-6 h-6 bg-pink-300 FiltersFiltersrounded-full animate-pulse"></div>
                 </div>
               </div>
             </div>
           </section>
-        )}
+        )} */}
 
         {/* Stats Section */}
-        <section className="bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 rounded-3xl p-8 md:p-12 text-white shadow-2xl">
+        <section className="bg-gradient-to-br from-[#9b78e8] via-purple-600 to-[#9b78e8] rounded-3xl p-8 md:p-12 text-white shadow-2xl">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div className="space-y-2">
-              <div className="text-3xl md:text-4xl font-bold">2000+</div>
-              <div className="text-purple-100">Orders Shipped</div>
+              <div className="text-3xl text-white md:text-4xl font-bold">2000+</div>
+              <div className="text-gray-200">Orders Shipped</div>
             </div>
             <div className="space-y-2">
-              <div className="text-3xl md:text-4xl font-bold">1500+</div>
-              <div className="text-purple-100">Happy Customers</div>
+              <div className="text-3xl text-white md:text-4xl font-bold">1500+</div>
+              <div className="text-gray-200">Happy Customers</div>
             </div>
             <div className="space-y-2">
-              <div className="text-3xl md:text-4xl font-bold">5★</div>
-              <div className="text-purple-100">Average Rating</div>
+              <div className="text-3xl text-white md:text-4xl font-bold">5★</div>
+              <div className="text-gray-200">Average Rating</div>
             </div>
             <div className="space-y-2">
-              <div className="text-3xl md:text-4xl font-bold">24/7</div>
-              <div className="text-purple-100">Support</div>
+              <div className="text-3xl text-white md:text-4xl font-bold">24/7</div>
+              <div className="text-gray-200">Support</div>
             </div>
           </div>
         </section>

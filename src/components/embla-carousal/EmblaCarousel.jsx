@@ -6,6 +6,9 @@ import {
   usePrevNextButtons,
 } from "./EmblaCarouselArrowButtons";
 import { DotButton, useDotButton } from "./EmblaCarouselDotButton";
+import Link from "next/link";
+import { Button } from "../ui/button";
+import { ArrowRight } from "lucide-react";
 
 const TWEEN_FACTOR_BASE = 0.2;
 
@@ -91,29 +94,82 @@ const EmblaCarousel = (props) => {
     <div className="embla">
       <div className="embla__viewport" ref={emblaRef}>
         <div className="embla__container">
-          {products &&
-            products.length > 0 &&
-            products.map((prod, index) => (
-              <div className="embla__slide" key={index}>
-                <div className="embla__parallax">
-                  <div className="embla__parallax__layer">
-                    <img
-                      className="embla__slide__img embla__parallax__img"
-                      src={prod?.images[0]}
-                      alt="Your alt text"
-                    />
+          {products.map((product, index) => (
+            <div className="embla__slide" key={product.id + index}>
+              <div className="embla__parallax">
+                <div className="embla__parallax__layer relative flex min-h-[550px]">
+                  {/* Background image with blur and overlay */}
+                  <img
+                    className="embla__slide__img embla__parallax__img blur-2xl absolute inset-0  w-full h-full object-cover"
+                    src={product.images[0]}
+                    alt={product.name}
+                  />
+                  <div className="absolute -inset-6  bg-[#9b78e8]/60"></div>
+
+                  {/* Content container */}
+                  <div className="relative z-10 container mx-auto flex items-center lg:px-32 px-10">
+                    {/* Left side - Product details */}
+                    <div className="flex-1 text-white max-w-2xl">
+                      <span className="inline-block px-3 py-1 bg-white/20 rounded-full text-sm mb-3">
+                        {product.category}
+                      </span>
+
+                      <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+                        Discover
+                        <span className="block text-yellow-300">
+                          {product.name}
+                        </span>
+                      </h1>
+                      <p className="text-lg md:text-xl text-purple-100 mb-8 leading-relaxed">
+                        {product.description} Check out our latest arrival and
+                        fall in love! ✨
+                      </p>
+
+                      <div className="flex items-center gap-4 mb-6">
+                        <span className="text-2xl font-bold">
+                          ${product.price.toFixed(2)}
+                        </span>
+                        {product.originalPrice > product.price && (
+                          <span className="text-lg line-through opacity-70">
+                            ${product.originalPrice.toFixed(2)}
+                          </span>
+                        )}
+                      </div>
+
+                      <Link href={`/products/${product.id}`}>
+                        <Button
+                          size="lg"
+                          className="bg-white text-purple-600 hover:bg-purple-50 rounded-full px-8 py-6 text-lg font-semibold shadow-md hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                        >
+                          Shop Now <ArrowRight className="ml-2 h-5 w-5" />
+                        </Button>
+                      </Link>
+                    </div>
+
+                    {/* Right side - Product image */}
+                    <div className="hidden lg:block flex-1">
+                      <div className="relative">
+                        <img
+                          className="h-[400px] w-full rounded-2xl object-cover ml-auto transform -rotate-6 hover:rotate-0 transition-transform duration-300"
+                          src={product.images[0]}
+                          alt={product.name}
+                        />
+                        <div className="absolute  -z-10 inset-0 bg-white/20 rounded-xl transform rotate-6 translate-y-6"></div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            ))}
+            </div>
+          ))}
         </div>
       </div>
 
       <div className="embla__controls">
-        <div className="embla__buttons">
+        {/* <div className="embla__buttons">
           <PrevButton onClick={onPrevButtonClick} disabled={prevBtnDisabled} />
           <NextButton onClick={onNextButtonClick} disabled={nextBtnDisabled} />
-        </div>
+        </div> */}
 
         <div className="embla__dots">
           {scrollSnaps.map((_, index) => (

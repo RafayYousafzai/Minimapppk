@@ -10,7 +10,7 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
   return (
-    <div className="group bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-purple-100 hover:border-purple-300 transform hover:-translate-y-2">
+    <div className="group bg-[#9b78e8]/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-purple-100 hover:border-purple-300 transform hover:-translate-y-2">
       <div className="relative overflow-hidden">
         <Link href={`/products/${product.id}`}>
           <div className="relative h-64 bg-gradient-to-br from-purple-50 to-pink-50">
@@ -24,24 +24,6 @@ export default function ProductCard({ product }: ProductCardProps) {
           </div>
         </Link>
 
-        {/* Floating action buttons */}
-        {/* <div className="absolute top-4 right-4 space-y-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
-          <Button
-            size="sm"
-            variant="secondary"
-            className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg"
-          >
-            <Heart className="w-4 h-4 text-purple-600" />
-          </Button>
-          <Button
-            size="sm"
-            variant="secondary"
-            className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg"
-          >
-            <ShoppingCart className="w-4 h-4 text-purple-600" />
-          </Button>
-        </div> */}
-
         {/* Sale badge */}
         {product.salePrice && (
           <div className="absolute top-4 left-4 bg-gradient-to-r from-pink-400 to-purple-500 text-white px-3 py-1 rounded-full text-sm font-semibold shadow-lg">
@@ -52,12 +34,12 @@ export default function ProductCard({ product }: ProductCardProps) {
 
       <div className="p-6">
         <Link href={`/products/${product.id}`}>
-          <h3 className="font-bold text-lg text-gray-800 mb-2 group-hover:text-purple-600 transition-colors line-clamp-2">
+          <h3 className="font-bold text-lg text-white mb-2   line-clamp-2">
             {product.name}
           </h3>
         </Link>
 
-        <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+        <p className="text-gray-200 text-sm mb-3 line-clamp-2">
           {product.description}
         </p>
 
@@ -81,7 +63,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                 </span>
               </div>
             ) : (
-              <span className="text-xl font-bold text-purple-600">
+              <span className="text-xl font-bold text-white">
                 ${product.price.toFixed(2)}
               </span>
             )}
@@ -90,7 +72,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           <Link href={`/products/${product.id}`}>
             <Button
               size="sm"
-              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-full px-4 shadow-lg hover:shadow-xl transition-all duration-300"
+              className="bg-white  text-[#9b78e8] rounded-full px-4 "
             >
               View
             </Button>
