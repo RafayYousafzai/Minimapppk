@@ -29,7 +29,7 @@ const transformProductToFormData = (product: Product): ProductFormData => {
     name: product.name,
     description: product.description,
     longDescription: product.longDescription || "",
-    images: product.images.map(url => ({ url })), // Stays as URL for form data
+    images: product.images.map(url => ({ url })), 
     price: product.price,
     originalPrice: product.originalPrice ?? undefined,
     category: product.category,
@@ -125,7 +125,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, existingCategori
   }, [imagePreviews]);
 
   async function onSubmit(data: ProductFormData) {
-    console.log("onSubmit triggered. Data:", JSON.parse(JSON.stringify(data)));
+    console.log("onSubmit triggered. Raw form data (before image processing):", JSON.parse(JSON.stringify(data)));
     console.log("Current newImageFiles:", newImageFiles.map(f => f.name));
     console.log("Current existingImageUrls:", existingImageUrls);
     console.log("Current imagesToRemove:", imagesToRemove);
@@ -136,7 +136,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, existingCategori
     let finalImageUrls: { url: string }[] = existingImageUrls
         .filter(url => !imagesToRemove.includes(url))
         .map(url => ({ url }));
-    console.log("Initial finalImageUrls (from existing):", finalImageUrls);
+    console.log("Initial finalImageUrls (from existing non-removed images):", finalImageUrls);
 
     try {
       console.log("Attempting to process images and save product...");
@@ -155,8 +155,8 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, existingCategori
         console.log("finalImageUrls after new uploads:", finalImageUrls);
       }
       
-      if (finalImageUrls.length === 0 && data.images.length === 0 ) { // Check if images array in data is also empty, as Zod validates data.images
-          console.error("No images provided or selected for the product. finalImageUrls is empty and data.images is empty.");
+      if (finalImageUrls.length === 0) { 
+          console.error("No images provided or selected for the product. finalImageUrls is empty.");
           toast({
               title: "Image Required",
               description: "Please upload or ensure at least one image is present for the product.",
@@ -166,8 +166,11 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, existingCategori
           return; 
       }
 
-      const productPayload = { ...data, images: finalImageUrls, tags: data.tags };
-      // Ensure data.tags which is already string[] from Zod transform is used.
+      const productPayload: ProductFormData = { 
+        ...data, 
+        images: finalImageUrls, // Override data.images with the processed finalImageUrls
+        tags: data.tags // Zod transform already handles converting string to string[]
+      };
       console.log("Product payload to be saved:", JSON.parse(JSON.stringify(productPayload)));
 
       if (productId && initialData) {
@@ -200,9 +203,6 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, existingCategori
     }
   }
 
-  // For debugging validation errors:
-  // console.log("Form errors:", form.formState.errors);
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
@@ -220,8 +220,8 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, existingCategori
           <CardContent className="space-y-4">
             <FormField
               control={form.control}
-              name="images" // This field is for Zod validation of the final image URL array
-              render={({ fieldState }) => ( // We don't render field directly, but use fieldState for errors
+              name="images" 
+              render={({ fieldState }) => ( 
                 <>
                   <FormItem>
                     <FormLabel htmlFor="image-upload" className="flex items-center gap-2 text-sm font-medium cursor-pointer hover:text-primary">
@@ -242,8 +242,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, existingCategori
                     <FormDescription>
                       Max 5 images. Accepted formats: JPG, PNG, WebP. Max 2MB per image recommended.
                     </FormDescription>
-                     {/* Display general 'images' field errors here, like min/max items */}
-                    {fieldState.error && <FormMessage>{fieldState.error.message}</FormMessage>}
+                    {fieldState.error && fieldState.error.message !== "At least one image URL is required." && <FormMessage>{fieldState.error.message}</FormMessage>}
                   </FormItem>
                 </>
               )}
@@ -355,4 +354,3 @@ const OptionsFieldArray: React.FC<OptionsFieldArrayProps> = ({ control, variantI
 };
 
 export default ProductForm;
-
