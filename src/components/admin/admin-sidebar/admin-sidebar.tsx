@@ -1,16 +1,17 @@
+
 "use client";
 
 import {
   Package2,
   ShoppingBag,
   PackagePlus,
-  BarChart3,
   Users,
   Settings,
   Home,
+  LogOut, // Added
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation"; // Added useRouter
 import {
   Sidebar,
   SidebarContent,
@@ -24,6 +25,9 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import { useAuth } from "@/contexts/AuthContext"; // Added
+import { logOut as firebaseLogOut } from "@/lib/firebase/auth"; // Added
+import { useToast } from "@/hooks/use-toast"; // Added
 
 const navigationItems = [
   {
@@ -34,11 +38,6 @@ const navigationItems = [
         url: "/admin",
         icon: Home,
       },
-    //   {
-    //     title: "Analytics",
-    //     url: "/admin/analytics",
-    //     icon: BarChart3,
-    //   },
     ],
   },
   {
@@ -66,7 +65,7 @@ const navigationItems = [
     items: [
       {
         title: "Settings",
-        url: "/admin/settings",
+        url: "/admin/settings", // Placeholder, create this page if needed
         icon: Settings,
       },
     ],
@@ -75,6 +74,20 @@ const navigationItems = [
 
 export function AdminSidebar() {
   const pathname = usePathname();
+  const router = useRouter(); // Added
+  const { currentUser } = useAuth(); // Added
+  const { toast } = useToast(); // Added
+
+  const handleLogout = async () => {
+    try {
+      await firebaseLogOut();
+      toast({ title: "Logged Out", description: "You have been successfully logged out." });
+      router.push('/login');
+    } catch (error) {
+      console.error("Logout failed:", error);
+      toast({ title: "Logout Failed", description: "Could not log out. Please try again.", variant: "destructive" });
+    }
+  };
 
   return (
     <Sidebar collapsible="icon">
@@ -118,15 +131,23 @@ export function AdminSidebar() {
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
+          {currentUser && (
+            <SidebarMenuItem>
+              <SidebarMenuButton>
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-muted">
+                  <Users className="size-4" />
+                </div>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-semibold">{currentUser.displayName || "Admin User"}</span>
+                  <span className="truncate text-xs">{currentUser.email}</span>
+                </div>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
           <SidebarMenuItem>
-            <SidebarMenuButton>
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-muted">
-                <Users className="size-4" />
-              </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">Admin User</span>
-                <span className="truncate text-xs">admin@shopwave.com</span>
-              </div>
+            <SidebarMenuButton onClick={handleLogout}>
+              <LogOut />
+              <span>Logout</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

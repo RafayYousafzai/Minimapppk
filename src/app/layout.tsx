@@ -1,3 +1,4 @@
+
 import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
@@ -5,8 +6,9 @@ import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { CartProvider } from "@/contexts/CartContext";
+import { AuthProvider } from "@/contexts/AuthContext"; // Added
 import { Toaster } from "@/components/ui/toaster";
-import Providers from "@/app/Providers";
+import Providers from "@/app/Providers"; // HeroUIProvider
 
 export const metadata: Metadata = {
   title: "ShopWave - Your Ultimate Shopping Destination",
@@ -26,14 +28,16 @@ export default function RootLayout({
       className={`${GeistSans.variable} ${GeistMono.variable}`}
     >
       <body className={`font-sans antialiased flex flex-col min-h-screen `}>
-        <CartProvider>
-          <Providers>
-            <Header />
-            <main className="flex-grow mx-auto py-8 overflow-x-hidden">{children}</main>
-            <Footer />
-          </Providers>
-          <Toaster />
-        </CartProvider>
+        <AuthProvider> {/* Added AuthProvider wrapping CartProvider and others */}
+          <CartProvider>
+            <Providers> {/* This wraps HeroUIProvider */}
+              <Header />
+              <main className="flex-grow mx-auto py-8 overflow-x-hidden">{children}</main>
+              <Footer />
+            </Providers>
+            <Toaster />
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );

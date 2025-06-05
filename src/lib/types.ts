@@ -1,5 +1,10 @@
 
 import type { Timestamp } from 'firebase/firestore';
+import type { User as FirebaseUser } from 'firebase/auth'; // Import Firebase User type
+
+// You can extend this User type if you store more custom info in Firestore
+export interface User extends FirebaseUser {}
+
 
 export interface VariantOption {
   id: string;
