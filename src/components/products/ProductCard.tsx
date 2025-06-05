@@ -10,7 +10,7 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
   return (
-    <div className="group bg-[#9b78e8]/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-purple-100 hover:border-purple-300 transform hover:-translate-y-2">
+    <div className="group bg-[#9b78e8]/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden  hover:border-purple-300 transform hover:-translate-y-2">
       <div className="relative overflow-hidden">
         <Link href={`/products/${product.id}`}>
           <div className="relative h-64 bg-gradient-to-br from-purple-50 to-pink-50">
@@ -46,9 +46,18 @@ export default function ProductCard({ product }: ProductCardProps) {
         {/* Rating */}
         <div className="flex items-center gap-1 mb-3">
           {[...Array(5)].map((_, i) => (
-            <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+            <Star
+              key={i}
+              className={`w-4 h-4 ${
+                (product?.rating || 0) > i
+                  ? "fill-yellow-400 text-yellow-400"
+                  : "fill-gray-300 text-gray-300"
+              }`}
+            />
           ))}
-          <span className="text-sm text-gray-500 ml-1">(4.8)</span>
+          <span className="text-sm text-gray-500 ml-1">
+            ({product?.rating || 0})
+          </span>
         </div>
 
         <div className="flex items-center justify-between">

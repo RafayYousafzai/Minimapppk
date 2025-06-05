@@ -6,7 +6,8 @@ import { db, storage } from '@/lib/firebase/config'; // Import storage
 import { 
   collection, doc, getDoc, getDocs, writeBatch, query, where, 
   limit as firestoreLimit, orderBy, addDoc, serverTimestamp, 
-  Timestamp, updateDoc, FieldValue, collectionGroup 
+  Timestamp, updateDoc, FieldValue, collectionGroup, 
+  limit
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage"; // Firebase Storage functions
 import { mockProducts as productsToSeed } from '@/lib/mock-data'; 
@@ -56,49 +57,124 @@ export async function deleteProductImageByUrl(imageUrl: string): Promise<void> {
 
 
 export async function seedProducts(): Promise<void> {
-  const batch = writeBatch(db);
-  const productsCollectionRef = collection(db, PRODUCTS_COLLECTION);
+  console.log('🚦 Starting product seeding process...');
 
-  const existingProductsSnapshot = await getDocs(query(productsCollectionRef, firestoreLimit(1)));
-  if (!existingProductsSnapshot.empty) {
-    let seeded = false;
-    if (productsToSeed.length > 0) {
+  // 1. First verify database connection
+  if (!db) {
+    const errorMsg = 'Firestore database instance is not available';
+    console.error('❌', errorMsg);
+    throw new Error(errorMsg);
+  }
+
+  const productsCollectionRef = collection(db, PRODUCTS_COLLECTION);
+  console.log('🔗 Connected to Firestore collection:', PRODUCTS_COLLECTION);
+
+  // 2. Generate mock products (using your working format)
+  const productsToSeed = generateMockProducts(100); // Start with small batch for testing
+  console.log(`🛠 Generated ${productsToSeed.length} mock products`);
+
+  // 3. Enhanced existence check
+  try {
+    console.log('🔍 Checking for existing products...');
+    const existingSnapshot = await getDocs(query(productsCollectionRef, limit(1)));
+    
+    if (!existingSnapshot.empty) {
+      let seeded = false;
+      
+      if (productsToSeed.length > 0) {
+        console.log('🔎 Verifying against first mock product...');
         const firstProductCheckRef = doc(productsCollectionRef, productsToSeed[0].id);
         const firstProductSnap = await getDoc(firstProductCheckRef);
+        
         if (firstProductSnap.exists()) {
-            seeded = true;
+          seeded = true;
+          console.log('✅ Found first mock product - collection already seeded');
+        } else {
+          console.log('🆕 First mock product not found - proceeding with seed');
         }
-    }
-    if (seeded) {
-        console.log('Products collection already seems to contain data (found first mock product by ID). Skipping seed.');
+      }
+      
+      if (seeded || (!productsToSeed.length && !existingSnapshot.empty)) {
+        console.log('⏩ Skipping seeding - products already exist');
         return;
-    } else if (!productsToSeed.length && !existingProductsSnapshot.empty) {
-        console.log('Products collection contains data (and no mock products to check against). Skipping seed.');
-        return;
+      }
     }
+  } catch (error) {
+    console.error('⚠️ Error checking existing products:', error);
+    throw error;
   }
-  
+
+  // 4. Prepare batch with enhanced logging
+  const batch = writeBatch(db);
+  console.log('✏️ Preparing write batch...');
+
   productsToSeed.forEach((product) => {
-    const docRef = doc(productsCollectionRef, product.id); 
-    const productData = { ...product } as any; 
+    const docRef = doc(productsCollectionRef, product.id);
+    const productData = { ...product };
+    
+    // Clean undefined fields
     Object.keys(productData).forEach(key => {
       if (productData[key] === undefined) {
         delete productData[key];
       }
     });
+
+    // Ensure timestamp
     if (!productData.createdAt) {
-        productData.createdAt = serverTimestamp();
+      productData.createdAt = serverTimestamp();
     }
+
+    console.log(`📝 Adding product to batch: ${product.id} (${product.name})`);
     batch.set(docRef, productData);
   });
 
+  // 5. Commit with timeout safeguard
   try {
+    console.log('🚀 Attempting to commit batch...');
     await batch.commit();
-    console.log('Products seeded successfully!');
+    console.log('🎉 Products seeded successfully!');
+    
+    // Verification step
+    console.log('🔍 Verifying seeded products...');
+    const verificationSnapshot = await getDocs(query(productsCollectionRef, where('name', '==', productsToSeed[0].name)));
+    console.log(`✅ Verification: Found ${verificationSnapshot.size} matching products`);
+    
   } catch (error) {
-    console.error('Error seeding products:', error);
-    throw new Error('Failed to seed products.');
+    console.error('❌ Batch commit failed:', error);
+    
+    // Enhanced error diagnostics
+    if (error instanceof Error) {
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        code: (error as any).code // Firebase error code if available
+      });
+    }
+    
+    throw new Error(`Failed to seed products: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
+}
+
+// Helper function to generate products in your working format
+function generateMockProducts(count: number) {
+  const baseImageUrl = `https://picsum.photos/1000/1000?random=${Math.floor(Math.random() * 10000)}`
+
+  return Array.from({ length: count }, (_, i) => ({
+    id: `product-${i + 1}`,
+    name: `Product ${i + 1}`,
+    description: `Description ${i + 1}`,
+    longDescription: `Long description ${i + 1}`,
+    images: [`${baseImageUrl}mock-${i + 1}.png?alt=media`],
+    price: 20 + (i * 5),
+    originalPrice: 25 + (i * 5),
+    category: ['Electronics', 'Clothing', 'Home'][i % 3],
+    stock: 10 + i,
+    tags: ['tag1', 'tag2', 'tag3'],
+    rating: 0,
+    reviews: 0,
+    updatedAt: serverTimestamp(),
+    createdAt: serverTimestamp()
+  }));
 }
 
 export async function addProduct(data: ProductFormData): Promise<string> {

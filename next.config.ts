@@ -29,7 +29,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "placehold.co", // Added for placeholder images used elsewhere
+        hostname: "source.unsplash.com", // Added for placeholder images used elsewhere
         port: "",
         pathname: "/**",
       },

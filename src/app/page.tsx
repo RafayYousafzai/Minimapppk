@@ -10,7 +10,7 @@ import {
 import { ArrowRight, Package, Heart, Star, Sparkles } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-// import SeedButton from "@/components/dev/SeedButton";
+import SeedButton from "@/components/dev/SeedButton";
 import TestimonialSection from "@/components/home/TestimonialSection";
 import Carousal from "@/components/embla-carousal/index";
 
@@ -30,7 +30,7 @@ const CategoryIcon = ({ category }: { category: string }) => {
 
 export default async function HomePage() {
   // Fetch data from Firebase
-  const featuredProducts = await getFeaturedProducts(16);
+  const featuredProducts = await getFeaturedProducts(20);
 
   let heroProduct: Product | null = null;
   if (featuredProducts.length > 0) {
@@ -51,7 +51,7 @@ export default async function HomePage() {
     <div className="flex-1 ">
       <Carousal />
       {/* Developer Zone */}
-      {/* <div className="container mx-auto px-4 pt-8">
+      <div className="container mx-auto px-4 pt-8">
         <div className="my-4 p-6 border-2 border-dashed border-purple-300 rounded-2xl bg-purple-50/50 backdrop-blur-sm">
           <h3 className="text-lg font-bold text-purple-700 flex items-center gap-2">
             <Sparkles className="w-5 h-5" />
@@ -71,7 +71,7 @@ export default async function HomePage() {
             hints).
           </p>
         </div>
-      </div> */}
+      </div>
 
       <div className="mx-auto px-4 space-y-16 pb-16">
         {/* Featured Products Section */}
