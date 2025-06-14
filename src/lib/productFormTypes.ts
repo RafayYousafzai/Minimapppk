@@ -25,16 +25,19 @@ export const productFormSchema = z.object({
   description: z.string().min(10, "Description must be at least 10 characters long."),
   longDescription: z.string().optional(),
   images: z.array(z.object({ url: z.string().url("Each image must be a valid URL.") }))
-    .max(5, "You can add a maximum of 5 images.") // Keep max for the final payload
-    .optional(), // Allow the form field 'images' to be initially undefined or empty
+    .max(5, "You can add a maximum of 5 images.")
+    .optional(),
   price: z.coerce
     .number({ invalid_type_error: "Price must be a number" })
     .positive("Price must be a positive number."),
-  originalPrice: z.coerce
-    .number({ invalid_type_error: "Original price must be a number" })
-    .positive("Original price must be a positive number.")
-    .optional()
-    .nullable(),
+  originalPrice: z.preprocess(
+      (val) => (val === "" || val === null ? undefined : val), // Transform empty string or null to undefined
+      z.coerce
+        .number({ invalid_type_error: "Original price must be a number" })
+        .positive("Original price must be a positive number.")
+        .optional()
+        .nullable()
+    ),
   category: z.string().min(2, "Category must be at least 2 characters long."),
   stock: z.coerce
     .number({ invalid_type_error: "Stock must be a number" })
