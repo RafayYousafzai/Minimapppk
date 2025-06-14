@@ -90,6 +90,11 @@ const EmblaCarousel = (props) => {
       .on("slideFocus", tweenParallax);
   }, [emblaApi, tweenParallax]);
 
+  function truncateTextByLetters(text, charLimit) {
+    if (text.length <= charLimit) return text;
+    return text.slice(0, charLimit) + "...";
+  }
+
   return (
     <div className="embla">
       <div className="embla__viewport" ref={emblaRef}>
@@ -100,7 +105,7 @@ const EmblaCarousel = (props) => {
                 <div className="embla__parallax__layer relative flex min-h-[550px]">
                   {/* Background image with blur and overlay */}
                   <img
-                    className="embla__slide__img embla__parallax__img blur-2xl absolute inset-0  w-full h-full object-cover"
+                    className="embla__slide__img embla__parallax__img blur-md absolute inset-0  w-full h-full object-cover"
                     src={product.images[0]}
                     alt={product.name}
                   />
@@ -121,8 +126,8 @@ const EmblaCarousel = (props) => {
                         </span>
                       </h1>
                       <p className="text-lg md:text-xl text-purple-100 mb-8 leading-relaxed">
-                        {product.description} Check out our latest arrival and
-                        fall in love! ✨
+                        {truncateTextByLetters(product.description, 70)} Check
+                        out our latest arrival and fall in love! ✨
                       </p>
 
                       <div className="flex items-center gap-4 mb-6">

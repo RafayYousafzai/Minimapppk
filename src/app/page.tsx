@@ -43,7 +43,7 @@ export default async function HomePage() {
   }
 
   const categories = await getAllCategories();
-  const displayCategories = categories.slice(0, 4);
+  const displayCategories = categories.slice(0, 8);
 
   const recentReviews: Review[] = await getRecentReviews(3);
 
