@@ -26,18 +26,36 @@ export const productFormSchema = z.object({
   longDescription: z.string().optional(),
   images: z.array(z.object({ url: z.string().url("Each image must be a valid URL.") }))
     .max(5, "You can add a maximum of 5 images.")
-    .optional(),
+    .optional(), // Optional at the schema level, checked in onSubmit
   price: z.coerce
     .number({ invalid_type_error: "Price must be a number" })
     .positive("Price must be a positive number."),
-  originalPrice: z.preprocess(
-      (val) => (val === "" || val === null ? undefined : val), // Transform empty string or null to undefined
-      z.coerce
-        .number({ invalid_type_error: "Original price must be a number" })
-        .positive("Original price must be a positive number.")
-        .optional()
-        .nullable()
-    ),
+  originalPrice: z
+    .string() // Treat input as string initially
+    .optional()
+    .nullable() // Allow null from initial data or form state
+    .transform((val, ctx) => {
+      if (val === null || val === undefined || val.trim() === "") {
+        return undefined; // Explicitly return undefined if empty/null, making it optional
+      }
+      const num = parseFloat(val.trim());
+      if (isNaN(num)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Original price must be a valid number if provided.",
+        });
+        return z.NEVER; // Tell Zod to stop processing if invalid
+      }
+      if (num <= 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Original price must be a positive number.",
+        });
+        return z.NEVER;
+      }
+      return num;
+    })
+    .optional(), // Ensures the result of the transform can be undefined
   category: z.string().min(2, "Category must be at least 2 characters long."),
   stock: z.coerce
     .number({ invalid_type_error: "Stock must be a number" })
