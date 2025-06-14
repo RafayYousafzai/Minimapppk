@@ -181,13 +181,13 @@ export async function addProduct(data: ProductFormData): Promise<string> {
   try {
     const productsCollectionRef = collection(db, PRODUCTS_COLLECTION);
     
-    const productToSave: Omit<Product, 'id'> & { createdAt: FieldValue, updatedAt?: FieldValue } = {
+    // Base product data structure
+    const productPayload: Partial<Product> & { createdAt: FieldValue, updatedAt?: FieldValue } = {
       name: data.name,
       description: data.description,
       longDescription: data.longDescription || '',
-      images: data.images.map(img => img.url), // Expects URLs from ProductForm after upload
+      images: data.images ? data.images.map(img => img.url) : [],
       price: data.price,
-      originalPrice: data.originalPrice || undefined,
       category: data.category,
       stock: data.stock,
       tags: data.tags || [],
@@ -205,7 +205,14 @@ export async function addProduct(data: ProductFormData): Promise<string> {
       updatedAt: serverTimestamp(),
     };
 
-    const docRef = await addDoc(productsCollectionRef, productToSave);
+    // Conditionally add originalPrice only if it's a valid number and not undefined
+    if (typeof data.originalPrice === 'number' && !isNaN(data.originalPrice)) {
+      productPayload.originalPrice = data.originalPrice;
+    }
+    // If data.originalPrice is undefined (meaning the field was left blank and processed by Zod),
+    // the originalPrice key will not be added to productPayload, which is correct for Firestore.
+
+    const docRef = await addDoc(productsCollectionRef, productPayload);
     return docRef.id;
   } catch (error) {
     console.error('Error adding product:', error);
@@ -221,9 +228,8 @@ export async function updateProduct(productId: string, data: ProductFormData): P
       name: data.name,
       description: data.description,
       longDescription: data.longDescription || '',
-      images: data.images.map(img => img.url), // Expects URLs from ProductForm after upload/management
+      images: data.images ? data.images.map(img => img.url) : [],
       price: data.price,
-      originalPrice: data.originalPrice || undefined,
       category: data.category,
       stock: data.stock,
       tags: data.tags || [],
@@ -237,7 +243,23 @@ export async function updateProduct(productId: string, data: ProductFormData): P
       })) || [],
       updatedAt: serverTimestamp(),
     };
+
+    // Conditionally set originalPrice. If data.originalPrice is undefined (due to Zod transform for empty input),
+    // it won't be added here. If it's a number, it will be.
+    if (typeof data.originalPrice === 'number' && !isNaN(data.originalPrice)) {
+      productToUpdate.originalPrice = data.originalPrice;
+    } else if (data.originalPrice === undefined) {
+        // If the form intended to clear it, and Zod transformed it to undefined,
+        // we should ensure it's removed from Firestore or set to null.
+        // For Firestore, to remove a field, you'd use `deleteField()`.
+        // To set to null: productToUpdate.originalPrice = null;
+        // If we simply don't include it in productToUpdate, and the delete loop below runs, it achieves the same.
+        // The key here is that data.originalPrice is truly `undefined` from Zod when form field is empty.
+        productToUpdate.originalPrice = undefined; // explicitly set to undefined for the cleanup loop
+    }
     
+    // Clean up any top-level undefined fields before sending to Firestore
+    // This loop is important for fields that might become undefined, like originalPrice
     Object.keys(productToUpdate).forEach(key => {
         if (productToUpdate[key as keyof typeof productToUpdate] === undefined) {
             delete productToUpdate[key as keyof typeof productToUpdate];
@@ -488,9 +510,6 @@ export async function getRecentReviews(count: number): Promise<Review[]> {
     return reviews;
   } catch (error) {
     console.error("Error fetching recent reviews:", error);
-    if (error instanceof Error && (error.message.includes("indexes") || error.message.includes("INVALID_ARGUMENT"))) {
-        console.warn("Firestore index for collection group 'reviews' ordered by 'createdAt' (desc) might be missing. Please check your Firebase console. The error was:", error.message);
-    }
     return [];
   }
 }
