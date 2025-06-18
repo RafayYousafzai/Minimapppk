@@ -32,15 +32,15 @@ export default async function HomePage() {
   // Fetch data from Firebase
   const featuredProducts = await getFeaturedProducts(20);
 
-  let heroProduct: Product | null = null;
-  if (featuredProducts.length > 0) {
-    heroProduct = featuredProducts[0];
-  } else {
-    const allProds = await getAllProducts();
-    if (allProds.length > 0) {
-      heroProduct = allProds.find((p) => p.images.length > 1) || allProds[0];
-    }
-  }
+  // let heroProduct: Product | null = null;
+  // if (featuredProducts.length > 0) {
+  //   heroProduct = featuredProducts[0];
+  // } else {
+  //   const allProds = await getAllProducts();
+  //   if (allProds.length > 0) {
+  //     heroProduct = allProds.find((p) => p.images.length > 1) || allProds[0];
+  //   }
+  // }
 
   const categories = await getAllCategories();
   const displayCategories = categories.slice(0, 8);
@@ -49,7 +49,7 @@ export default async function HomePage() {
 
   return (
     <div className="flex-1 ">
-      <Carousal />
+      <Carousal products={featuredProducts} />
 
       <div className="mx-auto px-4 space-y-16 pb-16">
         {/* Featured Products Section */}
