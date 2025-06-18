@@ -25,7 +25,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${GeistSans.variable} ${GeistMono.variable}`}
+      className={`dark ${GeistSans.variable} ${GeistMono.variable}`} // Added 'dark' class here
     >
       <body className={`font-sans antialiased flex flex-col min-h-screen `}>
         <AuthProvider> {/* Added AuthProvider wrapping CartProvider and others */}
