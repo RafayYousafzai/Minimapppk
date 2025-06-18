@@ -18,9 +18,6 @@ const REVIEWS_SUBCOLLECTION = 'reviews';
 
 // Function to upload an image to Firebase Storage
 export async function uploadProductImage(file: File, productIdOrTempId: string, fileName: string): Promise<string> {
-  // Use a more specific path, e.g., products/<productId>/<fileName>
-  // Or for new products before ID is known: product_images/temp/<tempId>/<fileName>
-  // For simplicity, using a general path with timestamp to avoid collisions if tempId is not robust
   const filePath = `product_images/${productIdOrTempId}/${Date.now()}_${fileName}`;
   const storageRef = ref(storage, filePath);
   try {
@@ -35,23 +32,20 @@ export async function uploadProductImage(file: File, productIdOrTempId: string, 
 
 // Function to delete an image from Firebase Storage by its URL
 export async function deleteProductImageByUrl(imageUrl: string): Promise<void> {
-  if (!imageUrl.startsWith('https://firebasestorage.googleapis.com')) {
-    console.warn(`Skipping deletion of non-Firebase Storage URL: ${imageUrl}`);
-    return;
+  if (!imageUrl || !imageUrl.startsWith('https://firebasestorage.googleapis.com')) {
+    console.warn(`[Service:deleteImage] Skipping deletion of invalid/non-Firebase Storage URL: ${imageUrl}`);
+    return; 
   }
   try {
     const storageRef = ref(storage, imageUrl);
     await deleteObject(storageRef);
-    console.log(`Image deleted from Storage: ${imageUrl}`);
-  } catch (error) {
-    // It's common for delete to fail if the file doesn't exist, which might be fine.
-    // You might want to specifically check for 'storage/object-not-found' error code.
-    if ((error as any)?.code !== 'storage/object-not-found') {
-        console.error(`Error deleting image from Storage (${imageUrl}):`, error);
-        // Optionally re-throw if it's not a "not found" error
-        // throw new Error(`Failed to delete image ${imageUrl} from Storage.`);
+    console.log(`[Service:deleteImage] Image deleted from Storage: ${imageUrl}`);
+  } catch (error: any) {
+    if (error.code === 'storage/object-not-found') {
+      console.log(`[Service:deleteImage] Image not found in Storage, presumed already deleted: ${imageUrl}`);
     } else {
-        console.log(`Image not found in Storage, presumed already deleted: ${imageUrl}`);
+      console.error(`[Service:deleteImage] Error deleting image from Storage (${imageUrl}):`, error);
+      throw error; // Re-throw other errors to be caught by the caller in deleteProduct
     }
   }
 }
@@ -60,7 +54,6 @@ export async function deleteProductImageByUrl(imageUrl: string): Promise<void> {
 export async function seedProducts(): Promise<void> {
   console.log('🚦 Starting product seeding process...');
 
-  // 1. First verify database connection
   if (!db) {
     const errorMsg = 'Firestore database instance is not available';
     console.error('❌', errorMsg);
@@ -70,113 +63,116 @@ export async function seedProducts(): Promise<void> {
   const productsCollectionRef = collection(db, PRODUCTS_COLLECTION);
   console.log('🔗 Connected to Firestore collection:', PRODUCTS_COLLECTION);
 
-  // 2. Generate mock products (using your working format)
-  const productsToSeed = generateMockProducts(100); // Start with small batch for testing
-  console.log(`🛠 Generated ${productsToSeed.length} mock products`);
+  const productsToSeed = generateMockProducts(20); // Using a fixed small number for seeding
+  console.log(`🛠 Generated ${productsToSeed.length} mock products for seeding.`);
 
-  // 3. Enhanced existence check
   try {
     console.log('🔍 Checking for existing products...');
-    const existingSnapshot = await getDocs(query(productsCollectionRef, limit(1)));
+    const firstProductCheckRef = doc(productsCollectionRef, productsToSeed[0].id);
+    const firstProductSnap = await getDoc(firstProductCheckRef);
     
-    if (!existingSnapshot.empty) {
-      let seeded = false;
-      
-      if (productsToSeed.length > 0) {
-        console.log('🔎 Verifying against first mock product...');
-        const firstProductCheckRef = doc(productsCollectionRef, productsToSeed[0].id);
-        const firstProductSnap = await getDoc(firstProductCheckRef);
-        
-        if (firstProductSnap.exists()) {
-          seeded = true;
-          console.log('✅ Found first mock product - collection already seeded');
-        } else {
-          console.log('🆕 First mock product not found - proceeding with seed');
-        }
-      }
-      
-      if (seeded || (!productsToSeed.length && !existingSnapshot.empty)) {
-        console.log('⏩ Skipping seeding - products already exist');
+    if (firstProductSnap.exists()) {
+        console.log('✅ Found first mock product - collection likely already seeded. Skipping.');
         return;
-      }
+    } else {
+        console.log('🆕 First mock product not found - proceeding with seed.');
     }
   } catch (error) {
     console.error('⚠️ Error checking existing products:', error);
     throw error;
   }
 
-  // 4. Prepare batch with enhanced logging
   const batch = writeBatch(db);
   console.log('✏️ Preparing write batch...');
 
   productsToSeed.forEach((product) => {
     const docRef = doc(productsCollectionRef, product.id);
-    const productData = { ...product };
+    const productData: any = { ...product }; // Use 'any' temporarily for easier key deletion
     
-    // Clean undefined fields
     Object.keys(productData).forEach(key => {
-      if (productData[key as keyof typeof productData] === undefined) {
-        delete productData[key as keyof typeof productData];
+      if (productData[key] === undefined) {
+        delete productData[key];
       }
     });
 
-    // Ensure timestamp
     if (!productData.createdAt) {
-      productData.createdAt = serverTimestamp() as Timestamp;
+      productData.createdAt = serverTimestamp();
+    }
+    if (!productData.updatedAt) {
+      productData.updatedAt = serverTimestamp();
     }
 
     console.log(`📝 Adding product to batch: ${product.id} (${product.name})`);
     batch.set(docRef, productData);
   });
 
-  // 5. Commit with timeout safeguard
   try {
     console.log('🚀 Attempting to commit batch...');
     await batch.commit();
     console.log('🎉 Products seeded successfully!');
     
-    // Verification step
-    console.log('🔍 Verifying seeded products...');
-    const verificationSnapshot = await getDocs(query(productsCollectionRef, where('name', '==', productsToSeed[0].name)));
-    console.log(`✅ Verification: Found ${verificationSnapshot.size} matching products`);
+    console.log('🔍 Verifying seeded products (checking first product again)...');
+    const verificationSnap = await getDoc(doc(productsCollectionRef, productsToSeed[0].id));
+    if (verificationSnap.exists()) {
+        console.log(`✅ Verification successful: Product ${productsToSeed[0].id} found.`);
+    } else {
+        console.warn(`⚠️ Verification failed: Product ${productsToSeed[0].id} NOT found after seeding.`);
+    }
     
   } catch (error) {
     console.error('❌ Batch commit failed:', error);
-    
-    // Enhanced error diagnostics
     if (error instanceof Error) {
       console.error('Error details:', {
         message: error.message,
         stack: error.stack,
-        code: (error as any).code // Firebase error code if available
+        code: (error as any).code 
       });
     }
-    
     throw new Error(`Failed to seed products: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
 
-// Helper function to generate products in your working format
-function generateMockProducts(count: number) {
-  const baseImageUrl = `https://picsum.photos/1000/1000?random=${Math.floor(Math.random() * 10000)}`
-
-  return Array.from({ length: count }, (_, i) => ({
-    id: `product-${i + 1}`,
-    name: `Product ${i + 1}`,
-    description: `Description ${i + 1}`,
-    longDescription: `Long description ${i + 1}`,
-    images: [`${baseImageUrl}mock-${i + 1}.png?alt=media`],
-    price: 20 + (i * 5),
-    originalPrice: 25 + (i * 5),
-    category: ['Electronics', 'Clothing', 'Home'][i % 3],
-    stock: 10 + i,
-    tags: ['tag1', 'tag2', 'tag3'],
-    rating: 0,
-    reviews: 0,
-    updatedAt: serverTimestamp() as Timestamp,
-    createdAt: serverTimestamp() as Timestamp
-  }));
+function generateMockProducts(count: number): Product[] {
+  return Array.from({ length: count }, (_, i) => {
+    const baseName = `Awesome Gadget ${i + 1}`;
+    const price = parseFloat((20 + i * 7.35).toFixed(2));
+    const hasOriginalPrice = Math.random() > 0.5;
+    return {
+      id: `mock-product-${Date.now()}-${i}`,
+      name: baseName,
+      description: `This is a fantastic ${baseName.toLowerCase()}, perfect for your needs. High quality and great value!`,
+      longDescription: `Discover the amazing features of the ${baseName.toLowerCase()}. Built with precision and care, it offers unparalleled performance and durability. Whether for work or play, this gadget will exceed your expectations. Includes a 2-year warranty and free support.`,
+      images: [`https://placehold.co/600x400.png?text=${encodeURIComponent(baseName)}&font=Inter`, `https://placehold.co/600x400.png?text=${encodeURIComponent(baseName)}+View+2&font=Inter`],
+      price: price,
+      originalPrice: hasOriginalPrice ? parseFloat((price * (1 + (Math.random() * 0.3 + 0.1))).toFixed(2)) : undefined, // 10-40% higher
+      category: ['Electronics', 'Cool Gadgets', 'Home Office', 'Tech Accessories'][i % 4],
+      stock: Math.floor(Math.random() * 50) + 10, // 10 to 59
+      tags: ['new arrival', 'gadget', ['tech', 'innovation', 'modern', 'sleek'][i % 4]],
+      rating: parseFloat(((Math.random() * 2) + 3).toFixed(1)), // 3.0 to 4.9
+      reviews: Math.floor(Math.random() * 150) + 5, // 5 to 154
+      variants: i % 2 === 0 ? [ // Add variants to half of the products
+        {
+          type: 'Color',
+          options: [
+            { id: `col-${i}-1`, value: 'Black' },
+            { id: `col-${i}-2`, value: 'Silver', additionalPrice: 5 },
+            { id: `col-${i}-3`, value: 'Space Gray', additionalPrice: 7.5 },
+          ]
+        },
+        {
+          type: 'Storage',
+          options: [
+            { id: `stor-${i}-1`, value: '128GB' },
+            { id: `stor-${i}-2`, value: '256GB', additionalPrice: 50 },
+          ]
+        }
+      ] : [],
+      createdAt: serverTimestamp() as unknown as Timestamp, // Cast for type compatibility
+      updatedAt: serverTimestamp() as unknown as Timestamp,
+    };
+  });
 }
+
 
 export async function addProduct(data: ProductFormData): Promise<string> {
   try {
@@ -196,7 +192,7 @@ export async function addProduct(data: ProductFormData): Promise<string> {
       variants: data.variants?.map(variant => ({
         type: variant.type,
         options: variant.options.map(option => ({
-          id: `${variant.type.toLowerCase().replace(/\s+/g, '-')}-${option.value.toLowerCase().replace(/\s+/g, '-')}-${Math.random().toString(36).substring(2, 9)}`,
+          id: option.id || `${variant.type.toLowerCase().replace(/\s+/g, '-')}-${option.value.toLowerCase().replace(/\s+/g, '-')}-${Math.random().toString(36).substring(2, 9)}`,
           value: option.value,
           additionalPrice: option.additionalPrice || 0,
         } as VariantOption)), 
@@ -205,11 +201,8 @@ export async function addProduct(data: ProductFormData): Promise<string> {
       updatedAt: serverTimestamp(),
     };
 
-    if (typeof data.originalPrice === 'number' && !isNaN(data.originalPrice)) {
+    if (data.originalPrice !== undefined && data.originalPrice !== null && !isNaN(data.originalPrice)) {
       productPayload.originalPrice = data.originalPrice;
-    } else {
-      // Ensure originalPrice is not sent as undefined
-      delete productPayload.originalPrice;
     }
     
     const docRef = await addDoc(productsCollectionRef, productPayload);
@@ -217,7 +210,7 @@ export async function addProduct(data: ProductFormData): Promise<string> {
   } catch (error) {
     console.error('Error adding product:', error);
     if (error instanceof Error && error.message.includes("invalid data") && error.message.includes("undefined")) {
-        console.error("Detailed error: Attempted to write an undefined value to Firestore. Check productPayload:", error);
+        console.error("Detailed error: Attempted to write an undefined value to Firestore. Check productPayload:", error, "Payload:", JSON.stringify(data));
     }
     throw new Error('Failed to add product.');
   }
@@ -247,22 +240,79 @@ export async function updateProduct(productId: string, data: ProductFormData): P
       updatedAt: serverTimestamp(),
     };
 
-    if (typeof data.originalPrice === 'number' && !isNaN(data.originalPrice)) {
-      productToUpdate.originalPrice = data.originalPrice;
-    } else if (data.originalPrice === undefined) {
-        delete productToUpdate.originalPrice; 
+    if (data.originalPrice !== undefined && data.originalPrice !== null && !isNaN(data.originalPrice)) {
+        productToUpdate.originalPrice = data.originalPrice;
+    } else {
+        // If originalPrice is explicitly undefined or null, ensure it's removed or set to null
+        // Firestore can store null, but if we want to remove the field, more complex logic is needed (not typical for this field)
+        // For now, explicitly setting to undefined if it's not a valid number, Firestore will ignore it
+        delete productToUpdate.originalPrice;
     }
     
-    Object.keys(productToUpdate).forEach(key => {
-        if (productToUpdate[key as keyof typeof productToUpdate] === undefined) {
-            delete productToUpdate[key as keyof typeof productToUpdate];
-        }
+    // Sanitize any other potentially undefined top-level fields before sending to Firestore
+    Object.keys(productToUpdate).forEach(keyStr => {
+      const key = keyStr as keyof typeof productToUpdate;
+      if (productToUpdate[key] === undefined) {
+        delete productToUpdate[key];
+      }
     });
 
     await updateDoc(productDocRef, productToUpdate);
   } catch (error) {
     console.error(`Error updating product ${productId}:`, error);
+    if (error instanceof Error && error.message.includes("invalid data") && error.message.includes("undefined")) {
+        console.error("Detailed error: Attempted to write an undefined value to Firestore during update. Check productToUpdate:", error, "Payload:", JSON.stringify(data));
+    }
     throw new Error('Failed to update product.');
+  }
+}
+
+
+export async function deleteProduct(productId: string): Promise<boolean> {
+  console.log(`[Service:deleteProduct] Attempting to delete product ID: ${productId}`);
+  try {
+    const productDocRef = doc(db, PRODUCTS_COLLECTION, productId);
+    const productSnap = await getDoc(productDocRef);
+
+    if (!productSnap.exists()) {
+      console.warn(`[Service:deleteProduct] Product with ID ${productId} not found for deletion.`);
+      return false;
+    }
+
+    const productData = productSnap.data() as Product;
+    let allImageProcessingAttempted = true;
+
+    if (productData.images && productData.images.length > 0) {
+      console.log(`[Service:deleteProduct] Processing deletion for ${productData.images.length} images for product ${productId}...`);
+      
+      const deletePromises = productData.images.map(imageUrl => 
+        deleteProductImageByUrl(imageUrl).catch(err => {
+          console.error(`[Service:deleteProduct] Error during deletion of image ${imageUrl}:`, err);
+          allImageProcessingAttempted = false; // Mark if any specific image deletion throws an unhandled error
+          // We don't re-throw here to allow other image deletions and document deletion to proceed
+        })
+      );
+      
+      await Promise.allSettled(deletePromises); // Wait for all attempts to complete
+
+      if (!allImageProcessingAttempted) {
+        console.warn(`[Service:deleteProduct] One or more images encountered errors during deletion for product ${productId}. Check logs above. Proceeding with Firestore document deletion.`);
+        // Decide if this constitutes a "failure" of the deleteProduct operation.
+        // For now, we'll proceed to delete the Firestore doc.
+      } else {
+        console.log(`[Service:deleteProduct] All images for product ${productId} processed for deletion.`);
+      }
+    }
+
+    await deleteDoc(productDocRef);
+    console.log(`[Service:deleteProduct] Product document ${productId} deleted from Firestore.`);
+    
+    console.warn(`[Service:deleteProduct] Note: Subcollections for product ${productId} (e.g., reviews) may still exist in Firestore. Manual cleanup or a Cloud Function is needed for complete removal.`);
+
+    return true; 
+  } catch (error) {
+    console.error(`[Service:deleteProduct] Critical error during product deletion process for ${productId}:`, error);
+    return false;
   }
 }
 
@@ -329,40 +379,6 @@ export async function getProductById(id: string): Promise<Product | null> {
   }
 }
 
-export async function deleteProduct(productId: string): Promise<boolean> {
-  try {
-    const productDocRef = doc(db, PRODUCTS_COLLECTION, productId);
-    const productSnap = await getDoc(productDocRef);
-
-    if (!productSnap.exists()) {
-      console.warn(`Product with ID ${productId} not found for deletion.`);
-      return false;
-    }
-
-    const productData = productSnap.data() as Product;
-
-    // Delete images from Firebase Storage
-    if (productData.images && productData.images.length > 0) {
-      console.log(`Deleting ${productData.images.length} images for product ${productId}...`);
-      const deletePromises = productData.images.map(imageUrl => deleteProductImageByUrl(imageUrl));
-      await Promise.allSettled(deletePromises); // Use allSettled to attempt all deletions even if some fail
-      console.log(`Finished attempting to delete images for product ${productId}.`);
-    }
-
-    // Delete product document from Firestore
-    await deleteDoc(productDocRef);
-    console.log(`Product document ${productId} deleted from Firestore.`);
-
-    // Note: Subcollections (e.g., reviews) are NOT automatically deleted.
-    // This requires a more complex solution, often a Cloud Function.
-    console.warn(`Note: Subcollections for product ${productId} (e.g., reviews) may still exist in Firestore.`);
-
-    return true;
-  } catch (error) {
-    console.error(`Error deleting product ${productId}:`, error);
-    return false;
-  }
-}
 
 export async function getProductsByCategory(category: string): Promise<Product[]> {
   try {

@@ -22,12 +22,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Edit, Trash2, Loader2 } from 'lucide-react'; // Added Loader2
+import { MoreHorizontal, Edit, Trash2, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
-import { deleteProduct } from '@/services/productService'; // Import deleteProduct
+import { deleteProduct } from '@/services/productService';
 
 interface ProductsTableProps {
   initialProducts: Product[];
@@ -35,29 +35,39 @@ interface ProductsTableProps {
 
 const ProductsTable: React.FC<ProductsTableProps> = ({ initialProducts }) => {
   const [products, setProducts] = useState<Product[]>(initialProducts);
-  const [isDeleting, setIsDeleting] = useState<Record<string, boolean>>({}); // Track deleting state per product
+  const [isDeleting, setIsDeleting] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
 
   const handleDeleteProduct = async (productId: string, productName: string) => {
-    // Simple confirmation, consider a modal for better UX
+    console.log(`[Delete Product TABLE] Initiating delete for: ${productName} (ID: ${productId})`);
+
     if (!confirm(`Are you sure you want to delete "${productName}"? This action cannot be undone.`)) {
+      console.log("[Delete Product TABLE] User cancelled deletion.");
       return;
     }
+    console.log("[Delete Product TABLE] User confirmed deletion.");
 
     setIsDeleting(prev => ({ ...prev, [productId]: true }));
+    console.log(`[Delete Product TABLE] State isDeleting for ${productId} set to true.`);
     try {
+      console.log(`[Delete Product TABLE] Calling service to delete product ${productId}.`);
       const success = await deleteProduct(productId);
+      console.log(`[Delete Product TABLE] Service call finished. Success: ${success}`);
+
       if (success) {
         setProducts(prevProducts => prevProducts.filter(p => p.id !== productId));
         toast({ title: "Product Deleted", description: `"${productName}" has been successfully deleted.` });
+        console.log(`[Delete Product TABLE] Product ${productId} removed from local state and success toast shown.`);
       } else {
-        toast({ title: "Error", description: "Failed to delete product. It might have already been removed or an error occurred.", variant: "destructive" });
+        toast({ title: "Error Deleting Product", description: "Failed to delete product. It might have already been removed or an error occurred on the server.", variant: "destructive" });
+        console.log(`[Delete Product TABLE] Service reported failure for ${productId}. Error toast shown.`);
       }
     } catch (error) {
-        console.error("Error during product deletion in component:", error);
-        toast({ title: "Error", description: "An unexpected error occurred while deleting the product.", variant: "destructive" });
+        console.error("[Delete Product TABLE] Error during product deletion in component:", error);
+        toast({ title: "Client Error", description: "An unexpected error occurred while trying to delete the product.", variant: "destructive" });
     } finally {
         setIsDeleting(prev => ({ ...prev, [productId]: false }));
+        console.log(`[Delete Product TABLE] State isDeleting for ${productId} set to false in finally block.`);
     }
   };
 
