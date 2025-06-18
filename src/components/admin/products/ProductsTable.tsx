@@ -22,12 +22,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Edit, Trash2 } from 'lucide-react';
+import { MoreHorizontal, Edit, Trash2, Loader2 } from 'lucide-react'; // Added Loader2
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
-// import { deleteProduct } from '@/services/productService'; //  TODO: Implement deleteProduct
+import { deleteProduct } from '@/services/productService'; // Import deleteProduct
 
 interface ProductsTableProps {
   initialProducts: Product[];
@@ -35,21 +35,30 @@ interface ProductsTableProps {
 
 const ProductsTable: React.FC<ProductsTableProps> = ({ initialProducts }) => {
   const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [isDeleting, setIsDeleting] = useState<Record<string, boolean>>({}); // Track deleting state per product
   const { toast } = useToast();
 
-  const handleDeleteProduct = async (productId: string) => {
-    // TODO: Implement actual deletion via service
-    // For now, simulate deletion and update UI
-    // const success = await deleteProduct(productId);
-    // if (success) {
-    //   setProducts(prevProducts => prevProducts.filter(p => p.id !== productId));
-    //   toast({ title: "Product Deleted", description: "The product has been successfully deleted." });
-    // } else {
-    //   toast({ title: "Error", description: "Failed to delete product.", variant: "destructive" });
-    // }
-    alert(`Simulating delete for product ID: ${productId}. Implement actual deletion.`);
-     setProducts(prevProducts => prevProducts.filter(p => p.id !== productId));
-     toast({ title: "Product Deleted (Simulated)", description: "The product has been removed from the list." });
+  const handleDeleteProduct = async (productId: string, productName: string) => {
+    // Simple confirmation, consider a modal for better UX
+    if (!confirm(`Are you sure you want to delete "${productName}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    setIsDeleting(prev => ({ ...prev, [productId]: true }));
+    try {
+      const success = await deleteProduct(productId);
+      if (success) {
+        setProducts(prevProducts => prevProducts.filter(p => p.id !== productId));
+        toast({ title: "Product Deleted", description: `"${productName}" has been successfully deleted.` });
+      } else {
+        toast({ title: "Error", description: "Failed to delete product. It might have already been removed or an error occurred.", variant: "destructive" });
+      }
+    } catch (error) {
+        console.error("Error during product deletion in component:", error);
+        toast({ title: "Error", description: "An unexpected error occurred while deleting the product.", variant: "destructive" });
+    } finally {
+        setIsDeleting(prev => ({ ...prev, [productId]: false }));
+    }
   };
 
   if (products.length === 0) {
@@ -87,7 +96,7 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ initialProducts }) => {
               <TableRow key={product.id}>
                 <TableCell>
                   <Image
-                    src={product.images[0] || 'https://picsum.photos/seed/placeholder/50/50'}
+                    src={product.images[0] || 'https://placehold.co/50x50.png'}
                     alt={product.name}
                     width={50}
                     height={50}
@@ -111,9 +120,9 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ initialProducts }) => {
                 <TableCell className="text-right">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0">
+                      <Button variant="ghost" className="h-8 w-8 p-0" disabled={isDeleting[product.id]}>
                         <span className="sr-only">Open menu</span>
-                        <MoreHorizontal className="h-4 w-4" />
+                         {isDeleting[product.id] ? <Loader2 className="h-4 w-4 animate-spin" /> : <MoreHorizontal className="h-4 w-4" />}
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
@@ -124,8 +133,13 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ initialProducts }) => {
                          </Link>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => handleDeleteProduct(product.id)} className="text-destructive focus:text-destructive focus:bg-destructive/10">
-                        <Trash2 className="mr-2 h-4 w-4" /> Delete Product
+                      <DropdownMenuItem 
+                        onClick={() => handleDeleteProduct(product.id, product.name)} 
+                        className="text-destructive focus:text-destructive focus:bg-destructive/10"
+                        disabled={isDeleting[product.id]}
+                      >
+                        {isDeleting[product.id] ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
+                        {isDeleting[product.id] ? 'Deleting...' : 'Delete Product'}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

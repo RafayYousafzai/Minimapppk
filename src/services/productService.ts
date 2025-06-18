@@ -7,6 +7,7 @@ import {
   collection, doc, getDoc, getDocs, writeBatch, query, where, 
   limit as firestoreLimit, orderBy, addDoc, serverTimestamp, 
   Timestamp, updateDoc, FieldValue, collectionGroup, 
+  deleteDoc, // Added deleteDoc
   limit
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage"; // Firebase Storage functions
@@ -114,14 +115,14 @@ export async function seedProducts(): Promise<void> {
     
     // Clean undefined fields
     Object.keys(productData).forEach(key => {
-      if (productData[key] === undefined) {
-        delete productData[key];
+      if (productData[key as keyof typeof productData] === undefined) {
+        delete productData[key as keyof typeof productData];
       }
     });
 
     // Ensure timestamp
     if (!productData.createdAt) {
-      productData.createdAt = serverTimestamp();
+      productData.createdAt = serverTimestamp() as Timestamp;
     }
 
     console.log(`📝 Adding product to batch: ${product.id} (${product.name})`);
@@ -172,8 +173,8 @@ function generateMockProducts(count: number) {
     tags: ['tag1', 'tag2', 'tag3'],
     rating: 0,
     reviews: 0,
-    updatedAt: serverTimestamp(),
-    createdAt: serverTimestamp()
+    updatedAt: serverTimestamp() as Timestamp,
+    createdAt: serverTimestamp() as Timestamp
   }));
 }
 
@@ -181,7 +182,6 @@ export async function addProduct(data: ProductFormData): Promise<string> {
   try {
     const productsCollectionRef = collection(db, PRODUCTS_COLLECTION);
     
-    // Base product data structure
     const productPayload: Partial<Product> & { createdAt: FieldValue, updatedAt?: FieldValue } = {
       name: data.name,
       description: data.description,
@@ -205,17 +205,20 @@ export async function addProduct(data: ProductFormData): Promise<string> {
       updatedAt: serverTimestamp(),
     };
 
-    // Conditionally add originalPrice only if it's a valid number and not undefined
     if (typeof data.originalPrice === 'number' && !isNaN(data.originalPrice)) {
       productPayload.originalPrice = data.originalPrice;
+    } else {
+      // Ensure originalPrice is not sent as undefined
+      delete productPayload.originalPrice;
     }
-    // If data.originalPrice is undefined (meaning the field was left blank and processed by Zod),
-    // the originalPrice key will not be added to productPayload, which is correct for Firestore.
-
+    
     const docRef = await addDoc(productsCollectionRef, productPayload);
     return docRef.id;
   } catch (error) {
     console.error('Error adding product:', error);
+    if (error instanceof Error && error.message.includes("invalid data") && error.message.includes("undefined")) {
+        console.error("Detailed error: Attempted to write an undefined value to Firestore. Check productPayload:", error);
+    }
     throw new Error('Failed to add product.');
   }
 }
@@ -244,22 +247,12 @@ export async function updateProduct(productId: string, data: ProductFormData): P
       updatedAt: serverTimestamp(),
     };
 
-    // Conditionally set originalPrice. If data.originalPrice is undefined (due to Zod transform for empty input),
-    // it won't be added here. If it's a number, it will be.
     if (typeof data.originalPrice === 'number' && !isNaN(data.originalPrice)) {
       productToUpdate.originalPrice = data.originalPrice;
     } else if (data.originalPrice === undefined) {
-        // If the form intended to clear it, and Zod transformed it to undefined,
-        // we should ensure it's removed from Firestore or set to null.
-        // For Firestore, to remove a field, you'd use `deleteField()`.
-        // To set to null: productToUpdate.originalPrice = null;
-        // If we simply don't include it in productToUpdate, and the delete loop below runs, it achieves the same.
-        // The key here is that data.originalPrice is truly `undefined` from Zod when form field is empty.
-        productToUpdate.originalPrice = undefined; // explicitly set to undefined for the cleanup loop
+        delete productToUpdate.originalPrice; 
     }
     
-    // Clean up any top-level undefined fields before sending to Firestore
-    // This loop is important for fields that might become undefined, like originalPrice
     Object.keys(productToUpdate).forEach(key => {
         if (productToUpdate[key as keyof typeof productToUpdate] === undefined) {
             delete productToUpdate[key as keyof typeof productToUpdate];
@@ -333,6 +326,41 @@ export async function getProductById(id: string): Promise<Product | null> {
   } catch (error) {
     console.error(`Error fetching product by ID ${id}:`, error);
     return null;
+  }
+}
+
+export async function deleteProduct(productId: string): Promise<boolean> {
+  try {
+    const productDocRef = doc(db, PRODUCTS_COLLECTION, productId);
+    const productSnap = await getDoc(productDocRef);
+
+    if (!productSnap.exists()) {
+      console.warn(`Product with ID ${productId} not found for deletion.`);
+      return false;
+    }
+
+    const productData = productSnap.data() as Product;
+
+    // Delete images from Firebase Storage
+    if (productData.images && productData.images.length > 0) {
+      console.log(`Deleting ${productData.images.length} images for product ${productId}...`);
+      const deletePromises = productData.images.map(imageUrl => deleteProductImageByUrl(imageUrl));
+      await Promise.allSettled(deletePromises); // Use allSettled to attempt all deletions even if some fail
+      console.log(`Finished attempting to delete images for product ${productId}.`);
+    }
+
+    // Delete product document from Firestore
+    await deleteDoc(productDocRef);
+    console.log(`Product document ${productId} deleted from Firestore.`);
+
+    // Note: Subcollections (e.g., reviews) are NOT automatically deleted.
+    // This requires a more complex solution, often a Cloud Function.
+    console.warn(`Note: Subcollections for product ${productId} (e.g., reviews) may still exist in Firestore.`);
+
+    return true;
+  } catch (error) {
+    console.error(`Error deleting product ${productId}:`, error);
+    return false;
   }
 }
 
