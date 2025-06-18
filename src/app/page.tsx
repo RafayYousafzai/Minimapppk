@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import ProductCard from "@/components/products/ProductCard";
 import { Button } from "@/components/ui/button";
 import type { Product, Review } from "@/lib/types";
@@ -8,9 +10,7 @@ import {
   getRecentReviews,
 } from "@/services/productService";
 import { ArrowRight, Package, Heart, Star, Sparkles } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
-import SeedButton from "@/components/dev/SeedButton";
 import TestimonialSection from "@/components/home/TestimonialSection";
 import Carousal from "@/components/embla-carousal/index";
 
@@ -50,28 +50,6 @@ export default async function HomePage() {
   return (
     <div className="flex-1 ">
       <Carousal />
-      {/* Developer Zone */}
-      {/* <div className="container mx-auto px-4 pt-8">
-        <div className="my-4 p-6 border-2 border-dashed border-purple-300 rounded-2xl bg-purple-50/50 backdrop-blur-sm">
-          <h3 className="text-lg font-bold text-purple-700 flex items-center gap-2">
-            <Sparkles className="w-5 h-5" />
-            Developer Zone
-          </h3>
-          <p className="text-sm text-purple-600 mb-3 mt-2">
-            Use this button to populate your Firestore database with mock
-            product data if it's empty. This should only be used in development.
-          </p>
-          <SeedButton />
-          <p className="text-xs text-purple-500 mt-3 leading-relaxed">
-            If you encounter Firestore errors (like "INVALID_ARGUMENT"), please
-            ensure your Firebase Project ID is correctly set in your{" "}
-            <code className="bg-purple-200 px-1 rounded">.env</code> file,
-            Firestore is enabled in Native Mode in your Firebase project
-            console, and necessary indexes are created (check console logs for
-            hints).
-          </p>
-        </div>
-      </div> */}
 
       <div className="mx-auto px-4 space-y-16 pb-16">
         {/* Featured Products Section */}
@@ -153,71 +131,31 @@ export default async function HomePage() {
           <TestimonialSection reviews={recentReviews} />
         )}
 
-        {/* Hero Section */}
-        {/* {heroProduct && (
-          <section className="relative overflow-hidden">
-            <div className="bg-gradient-to-r from-purple-400 via-pink-300 to-purple-500 rounded-3xl  overflow-hidden">
-              <div className="absolute inset-0 bg-black/10 rounded-3xl"></div>
-              <div className="relative grid md:grid-cols-2 gap-8 items-center p-8 md:p-12">
-                <div className="order-2 md:order-1 text-white z-10">
-                 
-                  <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-                    Discover
-                    <span className="block text-yellow-300">
-                      {heroProduct.name}
-                    </span>
-                  </h1>
-                  <p className="text-lg md:text-xl text-purple-100 mb-8 leading-relaxed">
-                    {heroProduct.description} Check out our latest arrival and
-                    fall in love! ✨
-                  </p>
-                  <Link href={`/products/${heroProduct.id}`}>
-                    <Button
-                      size="lg"
-                      className="bg-white text-purple-600 hover:bg-purple-50 rounded-full px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-                    >
-                      Shop Now <ArrowRight className="ml-2 h-5 w-5" />
-                    </Button>
-                  </Link>
-                </div>
-                <div className="order-1 md:order-2 relative">
-                  <div className="relative h-80 md:h-96 rounded-2xl overflow-hidden group shadow-2xl">
-                    <Image
-                      src={heroProduct.images[0] || "/placeholder.svg"}
-                      alt={heroProduct.name}
-                      fill
-                      priority
-                      className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-                      data-ai-hint="product lifestyle"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-purple-900/20 to-transparent"></div>
-                  </div>
-
-                  <div className="absolute -top-4 -right-4 w-8 h-8 bg-yellow-300 rounded-full animate-bounce"></div>
-                  <div className="absolute -bottom-4 -left-4 w-6 h-6 bg-pink-300 FiltersFiltersrounded-full animate-pulse"></div>
-                </div>
-              </div>
-            </div>
-          </section>
-        )} */}
-
         {/* Stats Section */}
         <section className="bg-gradient-to-br from-[#9b78e8] via-purple-600 to-[#9b78e8] rounded-3xl p-8 md:p-12 text-white shadow-2xl">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div className="space-y-2">
-              <div className="text-3xl text-white md:text-4xl font-bold">2000+</div>
+              <div className="text-3xl text-white md:text-4xl font-bold">
+                2000+
+              </div>
               <div className="text-gray-200">Orders Shipped</div>
             </div>
             <div className="space-y-2">
-              <div className="text-3xl text-white md:text-4xl font-bold">1500+</div>
+              <div className="text-3xl text-white md:text-4xl font-bold">
+                1500+
+              </div>
               <div className="text-gray-200">Happy Customers</div>
             </div>
             <div className="space-y-2">
-              <div className="text-3xl text-white md:text-4xl font-bold">5★</div>
+              <div className="text-3xl text-white md:text-4xl font-bold">
+                5★
+              </div>
               <div className="text-gray-200">Average Rating</div>
             </div>
             <div className="space-y-2">
-              <div className="text-3xl text-white md:text-4xl font-bold">24/7</div>
+              <div className="text-3xl text-white md:text-4xl font-bold">
+                24/7
+              </div>
               <div className="text-gray-200">Support</div>
             </div>
           </div>
