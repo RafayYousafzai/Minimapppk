@@ -1,4 +1,7 @@
 
+export const dynamic = "force-dynamic";
+
+
 import ProductForm from '@/components/admin/products/ProductForm';
 import { getAllCategories } from '@/services/productService';
 
