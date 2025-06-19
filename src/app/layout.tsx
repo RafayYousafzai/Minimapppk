@@ -11,9 +11,9 @@ import { Toaster } from "@/components/ui/toaster";
 import Providers from "@/app/Providers"; // HeroUIProvider
 
 export const metadata: Metadata = {
-  title: "ShopWave - Your Ultimate Shopping Destination",
+  title: "Minimapppk - Your Ultimate Shopping Destination",
   description:
-    "Discover a wide range of products at ShopWave. Quality, affordability, and style, all in one place.",
+    "Discover a wide range of products at Minimapppk. Quality, affordability, and style, all in one place.",
 };
 
 export default function RootLayout({

@@ -80,7 +80,7 @@ export default function LoginPage() {
           </div>
           <CardTitle className="text-3xl font-bold text-gray-800">Admin Login</CardTitle>
           <CardDescription className="text-gray-600">
-            Access your ShopWave dashboard.
+            Access your Minimapppk dashboard.
           </CardDescription>
         </CardHeader>
         <CardContent>

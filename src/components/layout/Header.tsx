@@ -83,8 +83,7 @@ const Header = () => {
       <NavbarContent className="sm:hidden pr-3" justify="center">
         <Link href="/" className="flex items-center">
           <NavbarBrand>
-            <LogoIcon className="h-6 w-6" />
-            <p className="font-bold text-inherit ml-2">ShopWave</p>
+            <p className="font-bold  text-xl text-inherit ml-2">Minimapppk</p>
           </NavbarBrand>
         </Link>
       </NavbarContent>
@@ -92,8 +91,7 @@ const Header = () => {
       <NavbarContent className="hidden sm:flex gap-4" justify="center">
         <Link href="/" className="flex items-center">
           <NavbarBrand className="mr-6">
-            <LogoIcon className="h-6 w-6" />
-            <p className="font-bold text-inherit ml-2">ShopWave</p>
+            <p className="font-bold text-xl  text-inherit ml-2">Minimapppk</p>
           </NavbarBrand>
         </Link>
 

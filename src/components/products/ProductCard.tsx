@@ -44,7 +44,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         </p>
 
         {/* Rating */}
-        <div className="flex items-center gap-1 mb-3">
+        {/* <div className="flex items-center gap-1 mb-3">
           {[...Array(5)].map((_, i) => (
             <Star
               key={i}
@@ -58,22 +58,22 @@ export default function ProductCard({ product }: ProductCardProps) {
           <span className="text-sm text-gray-500 ml-1">
             ({product?.rating || 0})
           </span>
-        </div>
+        </div> */}
 
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             {product.salePrice ? (
               <div className="flex items-center gap-2">
                 <span className="text-xl font-bold text-purple-600">
-                  ${product.salePrice.toFixed(2)}
+                  Rs. {product.salePrice.toFixed(2)}
                 </span>
                 <span className="text-sm text-gray-400 line-through">
-                  ${product.price.toFixed(2)}
+                  Rs. {product.price.toFixed(2)}
                 </span>
               </div>
             ) : (
               <span className="text-xl font-bold text-white">
-                ${product.price.toFixed(2)}
+                Rs. {product.price.toFixed(2)}
               </span>
             )}
           </div>
