@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useCart } from "@/hooks/useCart";
@@ -6,33 +7,32 @@ import CartSummary from "@/components/cart/CartSummary";
 import RecommendedProducts from "@/components/cart/RecommendedProducts";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ShoppingCartIcon, SparklesIcon } from "@heroicons/react/24/outline";
-import { TrashIcon } from "@heroicons/react/24/solid";
+import { ShoppingCart, Sparkles, Trash2 } from "lucide-react";
 
 export default function CartPage() {
   const { cartItems, clearCart } = useCart();
 
   if (cartItems.length === 0) {
     return (
-      <div className="min-h-screen ">
+      <div className="min-h-[60vh] flex items-center justify-center">
         <div className="container mx-auto px-4 py-16">
           <div className="text-center max-w-md mx-auto">
-            <div className="mx-auto w-32 h-32 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mb-8">
-              <ShoppingCartIcon className="w-16 h-16 text-blue-600" />
+            <div className="mx-auto w-32 h-32 bg-secondary rounded-full flex items-center justify-center mb-8">
+              <ShoppingCart className="w-16 h-16 text-muted-foreground" />
             </div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            <h1 className="text-4xl font-bold text-foreground mb-4">
               Your Cart is Empty
             </h1>
-            <p className="text-lg text-gray-600 mb-8 leading-relaxed">
+            <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
               Discover amazing products and start building your perfect
               collection.
             </p>
             <Link href="/products" passHref>
               <Button
                 size="lg"
-                className="h-14 px-8 text-lg font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+                className="h-14 px-8 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
               >
-                <SparklesIcon className="mr-2 h-6 w-6" />
+                <Sparkles className="mr-2 h-6 w-6" />
                 Start Shopping
               </Button>
             </Link>
@@ -43,21 +43,21 @@ export default function CartPage() {
   }
 
   return (
-    <div className="min-h-screen  px-4">
+    <div className="min-h-screen px-4">
       <div className="container mx-auto px-4 py-8 lg:py-12">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-gray-900">Shopping Cart</h1>
-            <p className="text-lg text-gray-600 mt-2">
-              {cartItems.length} items in your cart
+            <h1 className="text-4xl font-bold text-foreground">Shopping Cart</h1>
+            <p className="text-lg text-muted-foreground mt-2">
+              {cartItems.length} item{cartItems.length !== 1 ? 's' : ''} in your cart
             </p>
           </div>
           <Button
             onClick={clearCart}
             disabled={cartItems.length === 0}
-            className="h-12 px-6 border-none text-black bg-white hover:bg-white  rounded-xl"
+            variant="outline"
           >
-            <TrashIcon className="mr-2 h-5 w-5" />
+            <Trash2 className="mr-2 h-5 w-5" />
             Clear Cart
           </Button>
         </div>

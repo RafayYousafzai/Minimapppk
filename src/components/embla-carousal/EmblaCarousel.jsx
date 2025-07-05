@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useCallback, useEffect, useRef } from "react";
@@ -107,11 +108,11 @@ const EmblaCarousel = (props) => {
                 <div className="embla__parallax__layer relative flex min-h-[550px]">
                   {/* Background image with blur and overlay */}
                   <img
-                    className="embla__slide__img embla__parallax__img blur-md absolute inset-0  w-full h-full object-cover"
+                    className="embla__slide__img embla__parallax__img blur-md absolute inset-0 w-full h-full object-cover"
                     src={product.images[0]}
                     alt={product.name}
                   />
-                  <div className="absolute -inset-6  bg-[#9b78e8]/60"></div>
+                  <div className="absolute -inset-6 bg-black/60 dark:bg-black/70"></div>
 
                   {/* Content container */}
                   <div className="relative z-10 container mx-auto flex items-center lg:px-32 px-10">
@@ -121,15 +122,15 @@ const EmblaCarousel = (props) => {
                         {product.category}
                       </span>
 
-                      <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+                      <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight text-background">
                         Discover
-                        <span className="block text-yellow-300">
+                        <span className="block">
                           {product.name}
                         </span>
                       </h1>
-                      <p className="text-lg md:text-xl text-purple-100 mb-8 leading-relaxed">
+                      <p className="text-lg md:text-xl text-gray-200 mb-8 leading-relaxed">
                         {truncateTextByLetters(product.description, 70)} Check
-                        out our latest arrival and fall in love! ✨
+                        out our latest arrival! ✨
                       </p>
 
                       <div className="flex items-center gap-4 mb-6">
@@ -146,7 +147,8 @@ const EmblaCarousel = (props) => {
                       <Link href={`/products/${product.id}`}>
                         <Button
                           size="lg"
-                          className="bg-white text-purple-600 hover:bg-purple-50 rounded-full px-8 py-6 text-lg font-semibold shadow-md hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                          variant="secondary"
+                          className="rounded-full px-8 py-6 text-lg font-semibold shadow-md hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                         >
                           Shop Now <ArrowRight className="ml-2 h-5 w-5" />
                         </Button>
@@ -173,11 +175,6 @@ const EmblaCarousel = (props) => {
       </div>
 
       <div className="embla__controls">
-        {/* <div className="embla__buttons">
-          <PrevButton onClick={onPrevButtonClick} disabled={prevBtnDisabled} />
-          <NextButton onClick={onNextButtonClick} disabled={nextBtnDisabled} />
-        </div> */}
-
         <div className="embla__dots">
           {scrollSnaps.map((_, index) => (
             <DotButton

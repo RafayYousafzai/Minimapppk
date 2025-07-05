@@ -73,12 +73,12 @@ const Header = () => {
       isBordered
       isMenuOpen={isMenuOpen}
       onMenuOpenChange={setIsMenuOpen}
-      className="bg-primary text-primary-foreground"
+      className="bg-background text-foreground border-b"
     >
       <NavbarContent className="sm:hidden" justify="start">
         <NavbarMenuToggle
           aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-          className="text-primary-foreground"
+          className="text-foreground"
         />
       </NavbarContent>
 
@@ -104,8 +104,8 @@ const Header = () => {
               className={cn(
                 "flex items-center gap-1.5",
                 pathname === item.href
-                  ? "text-primary-foreground font-semibold"
-                  : "text-primary-foreground/70 hover:text-primary-foreground/80"
+                  ? "text-foreground font-semibold"
+                  : "text-muted-foreground hover:text-foreground/80"
               )}
             >
               {item.label}
@@ -127,7 +127,7 @@ const Header = () => {
               onChange={(e) => setSearchValue(e.target.value)}
               classNames={{
                 inputWrapper:
-                  "bg-background/20 text-primary-foreground rounded-lg",
+                  "bg-secondary text-secondary-foreground rounded-lg",
               }}
               spellCheck={false}
             />
@@ -139,39 +139,38 @@ const Header = () => {
         </NavbarItem>
 
         <NavbarItem>
-          {cartInitialized && currentItemCount > 0 && (
-            <Chip
-              size="sm"
-              color="danger"
-              className="bg-pink-500 rounded-full z-30 absolute top-1 right-2"
-            >
-              {currentItemCount}
-            </Chip>
-          )}
           <Button
             as={Link}
             href="/cart"
             isIconOnly
-            variant="light"
-            className="text-primary-foreground relative"
+            variant="ghost"
+            className="text-foreground relative"
           >
+            {cartInitialized && currentItemCount > 0 && (
+                <Chip
+                size="sm"
+                color="danger"
+                className="bg-primary text-primary-foreground rounded-full z-10 absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center text-xs"
+                >
+                {currentItemCount}
+                </Chip>
+            )}
             <ShoppingCart className="h-5 w-5" />
           </Button>
         </NavbarItem>
       </NavbarContent>
 
-      <NavbarMenu className="bg-primary/95 text-primary-foreground">
+      <NavbarMenu className="bg-background/95 text-foreground">
         <NavbarMenuItem className="mt-4">
           <form onSubmit={handleSearch} className="flex gap-2">
             <Input
               placeholder="Search products..."
-              className="text-black placeholder:text-gray-800"
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
               variant="flat"
               color="secondary"
               classNames={{
-                inputWrapper: "bg-background text-foreground rounded-lg",
+                inputWrapper: "bg-secondary text-secondary-foreground rounded-lg",
               }}
               spellCheck={false}
             />
@@ -180,11 +179,11 @@ const Header = () => {
             </Button>
           </form>
         </NavbarMenuItem>
-        <Divider className="my-2 border-gray-600" />
+        <Divider className="my-2" />
         {[...navItems].map((item, index) => (
           <NavbarMenuItem key={`${item.href}-${index}`}>
             <Link
-              className="text-white w-full flex items-center gap-2 my-1"
+              className="w-full flex items-center gap-2 my-1"
               href={item.href}
               onClick={() => setIsMenuOpen(false)}
             >

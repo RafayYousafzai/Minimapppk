@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
@@ -13,14 +14,11 @@ import VariantSelector from "@/components/products/VariantSelector";
 import StarRating from "@/components/ui/StarRating";
 import { Separator } from "@/components/ui/separator";
 import {
-  ExclamationTriangleIcon,
-  ShieldCheckIcon,
-  ArrowPathIcon,
-} from "@heroicons/react/24/outline";
-import {
-  CheckBadgeIcon,
-  TruckIcon,
-} from "@heroicons/react/24/solid";
+  ShieldCheck,
+  RotateCw,
+  Truck,
+  AlertTriangle
+} from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import AddToCartButton from "@/components/shared/AddToCartButton";
@@ -105,31 +103,29 @@ export default function ProductDetailPage() {
 
   if (loading || product === undefined) {
     return (
-      <div className=" px-4 min-h-screen backdrop-blur-sm bg-white/50 rounded-2xl">
-        <div className="container mx-auto px-4 py-12">
-          <div className="grid lg:grid-cols-2 gap-12 xl:gap-16">
-            <div className="space-y-6">
-              <Skeleton className="w-full aspect-square rounded-2xl" />
-              <div className="grid grid-cols-5 gap-3">
-                {[...Array(4)].map((_, i) => (
-                  <Skeleton
-                    key={i}
-                    className="w-full aspect-square rounded-xl"
-                  />
-                ))}
-              </div>
+      <div className="container mx-auto px-4 py-12">
+        <div className="grid lg:grid-cols-2 gap-12 xl:gap-16">
+          <div className="space-y-6">
+            <Skeleton className="w-full aspect-square rounded-2xl" />
+            <div className="grid grid-cols-5 gap-3">
+              {[...Array(4)].map((_, i) => (
+                <Skeleton
+                  key={i}
+                  className="w-full aspect-square rounded-xl"
+                />
+              ))}
             </div>
-            <div className="space-y-8">
-              <div className="space-y-4">
-                <Skeleton className="h-12 w-3/4" />
-                <Skeleton className="h-8 w-1/3" />
-                <Skeleton className="h-6 w-1/2" />
-              </div>
-              <Skeleton className="h-24 w-full" />
-              <div className="space-y-4">
-                <Skeleton className="h-12 w-1/2" />
-                <Skeleton className="h-14 w-full" />
-              </div>
+          </div>
+          <div className="space-y-8">
+            <div className="space-y-4">
+              <Skeleton className="h-12 w-3/4" />
+              <Skeleton className="h-8 w-1/3" />
+              <Skeleton className="h-6 w-1/2" />
+            </div>
+            <Skeleton className="h-24 w-full" />
+            <div className="space-y-4">
+              <Skeleton className="h-12 w-1/2" />
+              <Skeleton className="h-14 w-full" />
             </div>
           </div>
         </div>
@@ -139,18 +135,18 @@ export default function ProductDetailPage() {
 
   if (!product) {
     return (
-      <div className="min-h-screen backdrop-blur-sm bg-white/30 rounded-2xl flex items-center justify-center">
+      <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center py-12 px-6">
-          <div className="mx-auto w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mb-6">
-            <ExclamationTriangleIcon className="w-12 h-12 text-red-600" />
+          <div className="mx-auto w-24 h-24 bg-destructive/10 rounded-full flex items-center justify-center mb-6">
+            <AlertTriangle className="w-12 h-12 text-destructive" />
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
+          <h2 className="text-3xl font-bold text-foreground mb-4">
             Product Not Found
           </h2>
-          <p className="text-lg text-gray-600 max-w-md mx-auto">
+          <p className="text-lg text-muted-foreground max-w-md mx-auto">
             The product you are looking for does not exist or may have been
             removed.
-          </p>
+          p>
         </div>
       </div>
     );
@@ -164,233 +160,228 @@ export default function ProductDetailPage() {
       : 0;
 
   return (
-    <div className="min-h-screen  backdrop-blur-sm bg-white/60 rounded-2xl">
-      <div className="container mx-auto px-4 py-8 lg:py-12">
-        <div className="space-y-16">
-          {/* Main Product Section */}
-          <section className="grid lg:grid-cols-2 gap-12 xl:gap-16 items-start">
-            <div className="sticky top-8">
-              <ProductImageGallery
-                images={product.images}
-                altText={product.name}
-              />
-            </div>
+    <div className="container mx-auto px-4 py-8 lg:py-12">
+      <div className="space-y-16">
+        {/* Main Product Section */}
+        <section className="grid lg:grid-cols-2 gap-12 xl:gap-16 items-start">
+          <div className="sticky top-8">
+            <ProductImageGallery
+              images={product.images}
+              altText={product.name}
+            />
+          </div>
 
-            <div className="space-y-8">
-              {/* Product Header */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <Badge variant="secondary" className="text-sm font-medium">
-                    {product.category}
+          <div className="space-y-8">
+            {/* Product Header */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <Badge variant="secondary" className="text-sm font-medium">
+                  {product.category}
+                </Badge>
+                {product.stock < 10 && product.stock > 0 && (
+                  <Badge variant="destructive" className="text-sm">
+                    Only {product.stock} left
                   </Badge>
-                  {product.stock < 10 && product.stock > 0 && (
-                    <Badge variant="destructive" className="text-sm">
-                      Only {product.stock} left
-                    </Badge>
-                  )}
-                </div>
-
-                <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">
-                  {product.name}
-                </h1>
-
-                {product.rating > 0 && (
-                  <div className="flex items-center gap-3">
-                    <StarRating rating={product.rating} size={24} />
-                    <span className="text-lg text-gray-600">
-                      {product.rating.toFixed(1)} ({product.reviews} reviews)
-                    </span>
-                  </div>
                 )}
               </div>
 
-              {/* Pricing */}
-              <div className="space-y-2">
-                <div className="flex items-baseline gap-4">
-                  <span className="text-4xl font-bold text-gray-900">
-                    ₨{currentPrice.toFixed(2)}
+              <h1 className="text-4xl lg:text-5xl font-bold text-foreground leading-tight">
+                {product.name}
+              </h1>
+
+              {product.rating > 0 && (
+                <div className="flex items-center gap-3">
+                  <StarRating rating={product.rating} size={24} />
+                  <span className="text-lg text-muted-foreground">
+                    {product.rating.toFixed(1)} ({product.reviews} reviews)
                   </span>
-                  {product.originalPrice &&
-                    product.originalPrice > currentPrice && (
-                      <>
-                        <span className="text-2xl text-gray-500 line-through">
-                          ₨{product.originalPrice.toFixed(2)}
-                        </span>
-                        <Badge
-                          variant="destructive"
-                          className="text-sm font-semibold"
-                        >
-                          {discountPercentage}% OFF
-                        </Badge>
-                      </>
-                    )}
-                </div>
-                <p className="text-lg text-gray-600">
-                  {product.stock > 0
-                    ? `${product.stock} items available`
-                    : "Out of stock"}
-                </p>
-              </div>
-
-              <p className="text-lg text-gray-700 leading-relaxed">
-                {product.description}
-              </p>
-
-              {/* Variants */}
-              {product.variants && (
-                <div className="space-y-6">
-                  {product.variants.map((variant) => (
-                    <VariantSelector
-                      key={variant.type}
-                      variant={variant}
-                      selectedOptionValue={selectedVariants[variant.type]}
-                      onOptionSelect={handleVariantSelect}
-                    />
-                  ))}
                 </div>
               )}
+            </div>
 
-              {/* Purchase Section */}
-              <div className="space-y-6 p-6 bg-white rounded-2xl border border-gray-200 shadow-sm">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                  <QuantitySelector
-                    quantity={quantity}
-                    onQuantityChange={setQuantity}
-                    maxQuantity={product.stock}
-                  />
-                  <div className="flex gap-3 w-full sm:w-auto">
-                    <AddToCartButton
-                      product={product}
-                      quantity={quantity}
-                      selectedVariants={selectedVariants}
-                      className="flex-1 sm:flex-none h-12 px-8 text-lg font-semibold"
-                      size="lg"
-                    />
-                    {/* <button className="h-12 w-12 rounded-lg border-2 border-gray-200 hover:border-red-300 hover:bg-red-50 transition-colors flex items-center justify-center group">
-                      <HeartIcon className="w-6 h-6 text-gray-400 group-hover:text-red-500 transition-colors" />
-                    </button> */}
-                  </div>
-                </div>
+            {/* Pricing */}
+            <div className="space-y-2">
+              <div className="flex items-baseline gap-4">
+                <span className="text-4xl font-bold text-foreground">
+                  ₨{currentPrice.toFixed(2)}
+                </span>
+                {product.originalPrice &&
+                  product.originalPrice > currentPrice && (
+                    <>
+                      <span className="text-2xl text-muted-foreground line-through">
+                        ₨{product.originalPrice.toFixed(2)}
+                      </span>
+                      <Badge
+                        variant="destructive"
+                        className="text-sm font-semibold"
+                      >
+                        {discountPercentage}% OFF
+                      </Badge>
+                    </>
+                  )}
               </div>
+              <p className="text-lg text-muted-foreground">
+                {product.stock > 0
+                  ? `${product.stock} items available`
+                  : "Out of stock"}
+              </p>
+            </div>
 
-              {/* Trust Badges */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="flex items-center gap-3 p-4 bg-green-50 rounded-xl border border-green-200">
-                  <CheckBadgeIcon className="w-8 h-8 text-green-600 flex-shrink-0" />
-                  <div>
-                    <p className="font-semibold text-green-900">
-                      Secure Checkout
-                    </p>
-                    <p className="text-sm text-green-700">
-                      SSL encrypted transactions
-                    </p>
-                  </div>
-                </div>
+            <p className="text-lg text-muted-foreground leading-relaxed">
+              {product.description}
+            </p>
 
-                <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-xl border border-blue-200">
-                  <TruckIcon className="w-8 h-8 text-blue-600 flex-shrink-0" />
-                  <div>
-                    <p className="font-semibold text-blue-900">Free Shipping</p>
-                    <p className="text-sm text-blue-700">
-                      On orders over ₨2000
-                    </p>
-                  </div>
-                </div>
+            {/* Variants */}
+            {product.variants && (
+              <div className="space-y-6">
+                {product.variants.map((variant) => (
+                  <VariantSelector
+                    key={variant.type}
+                    variant={variant}
+                    selectedOptionValue={selectedVariants[variant.type]}
+                    onOptionSelect={handleVariantSelect}
+                  />
+                ))}
+              </div>
+            )}
 
-                <div className="flex items-center gap-3 p-4 bg-purple-50 rounded-xl border border-purple-200">
-                  <ArrowPathIcon className="w-8 h-8 text-purple-600 flex-shrink-0" />
-                  <div>
-                    <p className="font-semibold text-purple-900">
-                      Easy Returns
-                    </p>
-                    <p className="text-sm text-purple-700">
-                      30-day return policy
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 p-4 bg-orange-50 rounded-xl border border-orange-200">
-                  <ShieldCheckIcon className="w-8 h-8 text-orange-600 flex-shrink-0" />
-                  <div>
-                    <p className="font-semibold text-orange-900">
-                      Quality Guarantee
-                    </p>
-                    <p className="text-sm text-orange-700">
-                      100% authentic products
-                    </p>
-                  </div>
+            {/* Purchase Section */}
+            <div className="space-y-6 p-6 bg-card border rounded-2xl shadow-sm">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                <QuantitySelector
+                  quantity={quantity}
+                  onQuantityChange={setQuantity}
+                  maxQuantity={product.stock}
+                />
+                <div className="flex gap-3 w-full sm:w-auto">
+                  <AddToCartButton
+                    product={product}
+                    quantity={quantity}
+                    selectedVariants={selectedVariants}
+                    className="flex-1 sm:flex-none h-12 px-8 text-lg font-semibold"
+                    size="lg"
+                  />
                 </div>
               </div>
             </div>
-          </section>
 
-          <Separator className="my-16" />
-
-          {/* Product Details */}
-          <section className="space-y-8">
-            <h2 className="text-3xl font-bold text-gray-900">
-              Product Details
-            </h2>
-            <Card className="bg-white border-0  ">
-              <CardContent className="p-8">
-                <div className="prose prose-lg max-w-none">
-                  <p className="text-gray-700 leading-relaxed mb-6">
-                    {product.longDescription || product.description}
+            {/* Trust Badges */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="flex items-center gap-3 p-4 bg-secondary rounded-xl border">
+                <ShieldCheck className="w-8 h-8 text-green-600 flex-shrink-0" />
+                <div>
+                  <p className="font-semibold text-secondary-foreground">
+                    Secure Checkout
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    SSL encrypted transactions
                   </p>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 pt-6 border-t border-gray-200">
-                  <div className="space-y-2">
-                    <p className="font-semibold text-gray-900">Category</p>
-                    <p className="text-gray-600">{product.category}</p>
-                  </div>
-                  {product.tags && product.tags.length > 0 && (
-                    <div className="space-y-2">
-                      <p className="font-semibold text-gray-900">Tags</p>
-                      <div className="flex flex-wrap gap-2">
-                        {product.tags.map((tag, index) => (
-                          <Badge
-                            key={index}
-                            variant="outline"
-                            className="text-sm"
-                          >
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  <div className="space-y-2">
-                    <p className="font-semibold text-gray-900">Availability</p>
-                    <p className="text-gray-600">
-                      {product.stock > 0
-                        ? `${product.stock} in stock`
-                        : "Out of stock"}
-                    </p>
-                  </div>
+              </div>
+
+              <div className="flex items-center gap-3 p-4 bg-secondary rounded-xl border">
+                <Truck className="w-8 h-8 text-blue-600 flex-shrink-0" />
+                <div>
+                  <p className="font-semibold text-secondary-foreground">Free Shipping</p>
+                  <p className="text-sm text-muted-foreground">
+                    On orders over ₨2000
+                  </p>
                 </div>
-              </CardContent>
-            </Card>
-          </section>
+              </div>
 
-          <Separator className="my-16" />
+              <div className="flex items-center gap-3 p-4 bg-secondary rounded-xl border">
+                <RotateCw className="w-8 h-8 text-orange-600 flex-shrink-0" />
+                <div>
+                  <p className="font-semibold text-secondary-foreground">
+                    Easy Returns
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    30-day return policy
+                  </p>
+                </div>
+              </div>
 
-          {/* Reviews Section */}
-          <section className="space-y-8">
-            <h2 className="text-3xl font-bold text-gray-900">
-              Customer Reviews
-            </h2>
-            <div className="space-y-8">
-              <ReviewList
-                productId={productId}
-                refreshReviewsSignal={refreshReviewsSignal}
-              />
-              <ReviewForm
-                productId={productId}
-                onReviewSubmit={handleReviewSubmitted}
-              />
+              <div className="flex items-center gap-3 p-4 bg-secondary rounded-xl border">
+                <ShieldCheck className="w-8 h-8 text-purple-600 flex-shrink-0" />
+                <div>
+                  <p className="font-semibold text-secondary-foreground">
+                    Quality Guarantee
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    100% authentic products
+                  </p>
+                </div>
+              </div>
             </div>
-          </section>
-        </div>
+          </div>
+        </section>
+
+        <Separator className="my-16" />
+
+        {/* Product Details */}
+        <section className="space-y-8">
+          <h2 className="text-3xl font-bold text-foreground">
+            Product Details
+          </h2>
+          <Card>
+            <CardContent className="p-8">
+              <div className="prose prose-lg max-w-none dark:prose-invert">
+                <p className="text-muted-foreground leading-relaxed mb-6">
+                  {product.longDescription || product.description}
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 pt-6 border-t">
+                <div className="space-y-2">
+                  <p className="font-semibold text-foreground">Category</p>
+                  <p className="text-muted-foreground">{product.category}</p>
+                </div>
+                {product.tags && product.tags.length > 0 && (
+                  <div className="space-y-2">
+                    <p className="font-semibold text-foreground">Tags</p>
+                    <div className="flex flex-wrap gap-2">
+                      {product.tags.map((tag, index) => (
+                        <Badge
+                          key={index}
+                          variant="outline"
+                          className="text-sm"
+                        >
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="space-y-2">
+                  <p className="font-semibold text-foreground">Availability</p>
+                  <p className="text-muted-foreground">
+                    {product.stock > 0
+                      ? `${product.stock} in stock`
+                      : "Out of stock"}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-16" />
+
+        {/* Reviews Section */}
+        <section className="space-y-8">
+          <h2 className="text-3xl font-bold text-foreground">
+            Customer Reviews
+          </h2>
+          <div className="space-y-8">
+            <ReviewList
+              productId={productId}
+              refreshReviewsSignal={refreshReviewsSignal}
+            />
+            <ReviewForm
+              productId={productId}
+              onReviewSubmit={handleReviewSubmitted}
+            />
+          </div>
+        </section>
       </div>
     </div>
   );

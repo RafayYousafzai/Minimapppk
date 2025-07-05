@@ -1,3 +1,4 @@
+
 "use client";
 
 import type React from "react";
@@ -164,7 +165,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
 
   if (isLoading) {
     return (
-      <div className="hidden lg:block lg:w-72 xl:w-80 space-y-6 p-6 bg-white/80 backdrop-blur-sm border-2 border-purple-100 rounded-2xl shadow-lg">
+      <div className="hidden lg:block lg:w-72 xl:w-80 space-y-6 p-6 bg-card border rounded-2xl shadow-lg">
         <div className="flex items-center gap-2 mb-6">
           <Skeleton className="h-8 w-8 rounded-full" />
           <Skeleton className="h-8 w-24" />
@@ -188,50 +189,46 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
       {/* Categories Section */}
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
-            <Tag className="w-4 h-4 text-white" />
+          <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center">
+            <Tag className="w-4 h-4" />
           </div>
-          <h3 className="text-lg font-bold text-purple-900">Categories</h3>
+          <h3 className="text-lg font-bold text-foreground">Categories</h3>
         </div>
         <ScrollArea className="h-40">
           <div className="space-y-3">
             {availableCategories.map((category) => (
               <div
                 key={category}
-                className="flex items-center space-x-3 p-2 rounded-xl hover:bg-purple-100/50 transition-colors group"
+                className="flex items-center space-x-3 p-2 rounded-xl hover:bg-secondary transition-colors group"
               >
                 <Checkbox
                   id={`cat-${category}`}
                   checked={selectedCategories.includes(category)}
                   onCheckedChange={() => handleCategoryChange(category)}
-                  className="data-[state=checked]:bg-purple-600 data-[state=checked]:border-purple-600"
                 />
                 <Label
                   htmlFor={`cat-${category}`}
-                  className="font-medium cursor-pointer text-purple-900/90 group-hover:text-purple-800 transition-colors flex-1"
+                  className="font-medium cursor-pointer text-foreground transition-colors flex-1"
                 >
                   {category}
                 </Label>
-                {selectedCategories.includes(category) && (
-                  <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
-                )}
               </div>
             ))}
           </div>
         </ScrollArea>
       </div>
 
-      <div className="h-px bg-gradient-to-r from-transparent via-purple-300/50 to-transparent"></div>
+      <div className="h-px bg-border"></div>
 
       {/* Price Range Section */}
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
-            <DollarSign className="w-4 h-4 text-white" />
+          <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center">
+            <DollarSign className="w-4 h-4" />
           </div>
-          <h3 className="text-lg font-bold text-purple-900">Price Range</h3>
+          <h3 className="text-lg font-bold text-foreground">Price Range</h3>
         </div>
-        <div className="bg-purple-100/30 p-4 rounded-xl space-y-4">
+        <div className="bg-secondary p-4 rounded-xl space-y-4">
           <Slider
             min={globalMinPrice}
             max={globalMaxPrice}
@@ -244,7 +241,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
           />
           <div className="flex items-center gap-3">
             <div className="flex-1">
-              <Label className="text-xs text-purple-800 font-medium mb-1 block">
+              <Label className="text-xs text-muted-foreground font-medium mb-1 block">
                 Min Price
               </Label>
               <Input
@@ -252,14 +249,14 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
                 value={priceRange[0]}
                 onChange={handleMinPriceInputChange}
                 placeholder={`$${globalMinPrice}`}
-                className="text-sm border-purple-300 focus:border-purple-500 rounded-xl"
+                className="text-sm rounded-xl"
                 min={globalMinPrice}
                 max={priceRange[1]}
               />
             </div>
-            <div className="text-purple-600 font-bold mt-5">—</div>
+            <div className="text-foreground font-bold mt-5">—</div>
             <div className="flex-1">
-              <Label className="text-xs text-purple-800 font-medium mb-1 block">
+              <Label className="text-xs text-muted-foreground font-medium mb-1 block">
                 Max Price
               </Label>
               <Input
@@ -267,27 +264,24 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
                 value={priceRange[1]}
                 onChange={handleMaxPriceInputChange}
                 placeholder={`$${globalMaxPrice}`}
-                className="text-sm border-purple-300 focus:border-purple-500 rounded-xl"
+                className="text-sm rounded-xl"
                 min={priceRange[0]}
                 max={globalMaxPrice}
               />
             </div>
           </div>
-          <div className="text-center text-sm text-purple-800 font-medium">
-            ${priceRange[0]} - ${priceRange[1]}
-          </div>
         </div>
       </div>
 
-      <div className="h-px bg-gradient-to-r from-transparent via-purple-300/50 to-transparent"></div>
+      <div className="h-px bg-border"></div>
 
       {/* Rating Section */}
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
-            <Star className="w-4 h-4 text-white" />
+          <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center">
+            <Star className="w-4 h-4" />
           </div>
-          <h3 className="text-lg font-bold text-purple-900">Rating</h3>
+          <h3 className="text-lg font-bold text-foreground">Rating</h3>
         </div>
         <div className="space-y-2">
           {[4, 3, 2, 1].map((rating) => (
@@ -295,11 +289,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
               key={rating}
               variant={minRating === rating ? "default" : "ghost"}
               onClick={() => handleRatingChange(rating)}
-              className={`w-full justify-start rounded-xl p-3 transition-all duration-300 ${
-                minRating === rating
-                  ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg hover:shadow-xl"
-                  : "hover:bg-purple-100/30 text-purple-900 hover:text-purple-800"
-              }`}
+              className="w-full justify-start rounded-xl p-3 transition-all duration-300"
             >
               <StarRating rating={rating} size={16} />
               <span className="ml-2 text-sm font-medium">& Up</span>
@@ -309,13 +299,13 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
         </div>
       </div>
 
-      <div className="h-px bg-gradient-to-r from-transparent via-purple-300/50 to-transparent"></div>
+      <div className="h-px bg-border"></div>
 
       {/* Action Buttons */}
       <div className="space-y-3 pt-2">
         <Button
           onClick={applyFilters}
-          className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-full py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+          className="w-full rounded-full py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
         >
           <Filter className="mr-2 h-5 w-5" />
           Apply Filters
@@ -323,7 +313,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
         <Button
           onClick={clearFilters}
           variant="outline"
-          className="w-full border-2 border-purple-300 text-purple-700 hover:bg-purple-100/30 rounded-full py-6 text-lg font-semibold transition-all duration-300"
+          className="w-full rounded-full py-6 text-lg font-semibold transition-all duration-300"
         >
           <X className="mr-2 h-5 w-5" />
           Clear All
@@ -335,25 +325,24 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
   return (
     <>
       {/* Mobile Filter Button and Sheet */}
-      <div className="lg:hidden mb-6 bg-[#ac8aed] ">
+      <div className="lg:hidden mb-6">
         <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
           <SheetTrigger asChild>
             <Button
               variant="outline"
-              className="w-full border-2 border-purple-200 text-purple-600  rounded-full py-6 text-lg font-semibold"
+              className="w-full rounded-full py-6 text-lg font-semibold"
             >
               <ListFilter className="mr-2 h-5 w-5" />
               Filters & Sort
-              <Sparkles className="ml-2 h-4 w-4" />
             </Button>
           </SheetTrigger>
           <SheetContent
             side="left"
-            className="w-[320px] sm:w-[400px] p-0 bg-white/95 backdrop-blur-md"
+            className="w-[320px] sm:w-[400px] p-0 bg-card"
           >
-            <SheetHeader className="p-6 border-b border-purple-100 bg-gradient-to-r from-purple-50 to-pink-50">
-              <SheetTitle className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <Filter className="w-5 h-5 text-purple-600" />
+            <SheetHeader className="p-6 border-b">
+              <SheetTitle className="text-xl font-bold flex items-center gap-2">
+                <Filter className="w-5 h-5 text-primary" />
                 Filter Products
               </SheetTitle>
             </SheetHeader>
@@ -365,16 +354,14 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
       </div>
 
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:block lg:w-72 xl:w-80 p-6 bg-[#ac8aed]  backdrop-blur-sm  rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+      <aside className="hidden lg:block lg:w-72 xl:w-80 p-6 bg-card border rounded-2xl shadow-lg transition-shadow duration-300">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg">
-            <Filter className="w-5 h-5 text-white" />
+          <div className="w-10 h-10 bg-primary text-primary-foreground rounded-full flex items-center justify-center shadow-lg">
+            <Filter className="w-5 h-5" />
           </div>
-          <h2 className="text-xl font-bold text-gray-800">Filters</h2>
-          <Sparkles className="w-5 h-5 text-purple-400 ml-auto" />
+          <h2 className="text-xl font-bold text-foreground">Filters</h2>
         </div>
         {filterContent}
-        {/* <ScrollArea className="h-[calc(100vh-240px)] pr-3">{filterContent}</ScrollArea> */}
       </aside>
     </>
   );

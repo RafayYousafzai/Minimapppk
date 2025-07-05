@@ -1,3 +1,4 @@
+
 "use client"
 
 import Image from "next/image"
@@ -6,8 +7,7 @@ import type { CartItem } from "@/lib/types"
 import { useCart } from "@/hooks/useCart"
 import QuantitySelector from "@/components/products/QuantitySelector"
 import { Button } from "@/components/ui/button"
-import { XMarkIcon, HeartIcon } from "@heroicons/react/24/outline"
-import { HeartIcon as HeartSolidIcon } from "@heroicons/react/24/solid"
+import { X, Trash2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Badge } from "@/components/ui/badge"
 import { useState } from "react"
@@ -19,26 +19,17 @@ interface CartItemCardProps {
 const CartItemCard: React.FC<CartItemCardProps> = ({ item }) => {
   const { removeFromCart, updateQuantity } = useCart()
   const { toast } = useToast()
-  const [isWishlisted, setIsWishlisted] = useState(false)
 
   const handleRemove = () => {
     removeFromCart(item.id)
     toast({
-      title: "Item Removed ✓",
+      title: "Item Removed",
       description: `${item.name} has been removed from your cart.`,
     })
   }
 
-  const handleWishlist = () => {
-    setIsWishlisted(!isWishlisted)
-    toast({
-      title: isWishlisted ? "Removed from Wishlist" : "Added to Wishlist ❤️",
-      description: `${item.name} ${isWishlisted ? "removed from" : "added to"} your wishlist.`,
-    })
-  }
-
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
+    <div className="bg-card rounded-2xl border shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
       <div className="p-6">
         <div className="flex gap-6">
           {/* Product Image */}
@@ -53,7 +44,7 @@ const CartItemCard: React.FC<CartItemCardProps> = ({ item }) => {
                 data-ai-hint="product cart item"
               />
               {item.availableStock < 5 && (
-                <Badge className="absolute -top-2 -right-2 bg-red-500 text-white text-xs">
+                <Badge variant="destructive" className="absolute -top-2 -right-2 text-xs">
                   Low Stock
                 </Badge>
               )}
@@ -64,32 +55,19 @@ const CartItemCard: React.FC<CartItemCardProps> = ({ item }) => {
           <div className="flex-grow min-w-0">
             <div className="flex justify-between items-start mb-3">
               <Link href={`/products/${item.productId}`}>
-                <h3 className="text-xl font-semibold text-gray-900 hover:text-[#9b78e8] transition-colors line-clamp-2">
+                <h3 className="text-xl font-semibold text-foreground hover:text-primary transition-colors line-clamp-2">
                   {item.name}
                 </h3>
               </Link>
               <div className="flex items-center gap-2 ml-4">
-                {/* <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleWishlist}
-                  className="text-gray-400 hover:text-red-500 h-10 w-10 rounded-full"
-                  aria-label="Add to wishlist"
-                >
-                  {isWishlisted ? (
-                    <HeartSolidIcon className="h-5 w-5 text-red-500" />
-                  ) : (
-                    <HeartIcon className="h-5 w-5" />
-                  )}
-                </Button> */}
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={handleRemove}
-                  className="text-gray-400 hover:text-white hover:bg-[#9b78e8] h-10 w-10 rounded-full"
+                  className="text-muted-foreground hover:text-destructive h-10 w-10 rounded-full"
                   aria-label="Remove item from cart"
                 >
-                  <XMarkIcon className="h-5 w-5" />
+                  <X className="h-5 w-5" />
                 </Button>
               </div>
             </div>
@@ -109,10 +87,10 @@ const CartItemCard: React.FC<CartItemCardProps> = ({ item }) => {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="space-y-2">
                 <div className="flex items-center gap-3">
-                  <span className="text-2xl font-bold text-gray-900">₨{item.price.toFixed(2)}</span>
-                  <span className="text-lg text-gray-500">each</span>
+                  <span className="text-2xl font-bold text-foreground">₨{item.price.toFixed(2)}</span>
+                  <span className="text-lg text-muted-foreground">each</span>
                 </div>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-muted-foreground">
                   {item.availableStock > 0 ? `${item.availableStock} available` : "Out of stock"}
                 </p>
               </div>
@@ -124,8 +102,8 @@ const CartItemCard: React.FC<CartItemCardProps> = ({ item }) => {
                   maxQuantity={item.availableStock}
                 />
                 <div className="text-right mb-2">
-                  <p className="text-sm text-gray-500">Total</p>
-                  <p className="text-2xl font-bold text-[#9b78e8]">₨{(item.price * item.quantity).toFixed(2)}</p>
+                  <p className="text-sm text-muted-foreground">Total</p>
+                  <p className="text-2xl font-bold text-foreground">₨{(item.price * item.quantity).toFixed(2)}</p>
                 </div>
               </div>
             </div>

@@ -1,3 +1,4 @@
+
 export const dynamic = "force-dynamic";
 
 import ProductCard from "@/components/products/ProductCard";
@@ -5,18 +6,17 @@ import { Button } from "@/components/ui/button";
 import type { Product, Review } from "@/lib/types";
 import {
   getFeaturedProducts,
-  getAllProducts,
   getAllCategories,
   getRecentReviews,
 } from "@/services/productService";
-import { ArrowRight, Package, Heart, Star, Sparkles } from "lucide-react";
+import { ArrowRight, Package, Heart, Sparkles } from "lucide-react";
 import Link from "next/link";
 import TestimonialSection from "@/components/home/TestimonialSection";
 import Carousal from "@/components/embla-carousal/index";
 
-// Cute category icons
+// Category icons
 const CategoryIcon = ({ category }: { category: string }) => {
-  const iconClass = "w-8 h-8 text-purple-600";
+  const iconClass = "w-8 h-8 text-primary-foreground";
 
   switch (category.toLowerCase()) {
     case "jewelry":
@@ -29,22 +29,9 @@ const CategoryIcon = ({ category }: { category: string }) => {
 };
 
 export default async function HomePage() {
-  // Fetch data from Firebase
   const featuredProducts = await getFeaturedProducts(20);
-
-  // let heroProduct: Product | null = null;
-  // if (featuredProducts.length > 0) {
-  //   heroProduct = featuredProducts[0];
-  // } else {
-  //   const allProds = await getAllProducts();
-  //   if (allProds.length > 0) {
-  //     heroProduct = allProds.find((p) => p.images.length > 1) || allProds[0];
-  //   }
-  // }
-
   const categories = await getAllCategories();
   const displayCategories = categories.slice(0, 8);
-
   const recentReviews: Review[] = await getRecentReviews(3);
 
   return (
@@ -56,15 +43,15 @@ export default async function HomePage() {
         {featuredProducts.length > 0 && (
           <section>
             <div className="text-center mb-12">
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+              <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
                 Best Selling Products
               </h2>
 
-              <div className="inline-flex items-center gap-2   px-6 py-2 mb-6">
-                <span className="text-purple-700 font-semibold">
+              <div className="inline-flex items-center gap-2 px-6 py-2 mb-6">
+                <span className="text-muted-foreground font-semibold">
                   Most loved products
                 </span>
-                <Heart className="w-5 h-5 text-purple-500 fill-purple-500" />
+                <Heart className="w-5 h-5 text-destructive fill-destructive" />
               </div>
             </div>
 
@@ -80,15 +67,11 @@ export default async function HomePage() {
             </div>
 
             <div className="text-center">
-              <Link href="/products">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="rounded-full border-2 border-purple-300 text-purple-600 hover:bg-purple-50 px-8 py-6 text-lg font-semibold"
-                >
+              <Button variant="outline" size="lg" asChild>
+                <Link href="/products">
                   View All Products <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
           </section>
         )}
@@ -97,10 +80,10 @@ export default async function HomePage() {
         {displayCategories.length > 0 && (
           <section>
             <div className="text-center mb-12">
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+              <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
                 Shop by Collection
               </h2>
-              <p className="text-lg text-gray-600">
+              <p className="text-lg text-muted-foreground">
                 Find exactly what you're looking for in our curated collections
               </p>
             </div>
@@ -111,14 +94,13 @@ export default async function HomePage() {
                   key={category}
                   href={`/products?categories=${encodeURIComponent(category)}`}
                 >
-                  <div className="group bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 text-center cursor-pointer aspect-square flex flex-col justify-center items-center border border-purple-100 hover:border-purple-300 transform hover:scale-105">
-                    <div className="w-20 h-20 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                  <div className="group bg-card p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 text-center cursor-pointer aspect-square flex flex-col justify-center items-center border hover:border-primary transform hover:scale-105">
+                    <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
                       <CategoryIcon category={category} />
                     </div>
-                    <h3 className="font-bold text-lg text-gray-800 group-hover:text-purple-600 transition-colors">
+                    <h3 className="font-bold text-lg text-card-foreground group-hover:text-primary transition-colors">
                       {category}
                     </h3>
-                    <div className="w-12 h-1 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   </div>
                 </Link>
               ))}
@@ -132,31 +114,31 @@ export default async function HomePage() {
         )}
 
         {/* Stats Section */}
-        <section className="bg-gradient-to-br from-[#9b78e8] via-purple-600 to-[#9b78e8] rounded-3xl p-8 md:p-12 text-white shadow-2xl">
+        <section className="bg-primary text-primary-foreground rounded-3xl p-8 md:p-12 shadow-2xl">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div className="space-y-2">
-              <div className="text-3xl text-white md:text-4xl font-bold">
+              <div className="text-3xl md:text-4xl font-bold">
                 2000+
               </div>
-              <div className="text-gray-200">Orders Shipped</div>
+              <div className="opacity-80">Orders Shipped</div>
             </div>
             <div className="space-y-2">
-              <div className="text-3xl text-white md:text-4xl font-bold">
+              <div className="text-3xl md:text-4xl font-bold">
                 1500+
               </div>
-              <div className="text-gray-200">Happy Customers</div>
+              <div className="opacity-80">Happy Customers</div>
             </div>
             <div className="space-y-2">
-              <div className="text-3xl text-white md:text-4xl font-bold">
+              <div className="text-3xl md:text-4xl font-bold">
                 5★
               </div>
-              <div className="text-gray-200">Average Rating</div>
+              <div className="opacity-80">Average Rating</div>
             </div>
             <div className="space-y-2">
-              <div className="text-3xl text-white md:text-4xl font-bold">
+              <div className="text-3xl md:text-4xl font-bold">
                 24/7
               </div>
-              <div className="text-gray-200">Support</div>
+              <div className="opacity-80">Support</div>
             </div>
           </div>
         </section>
