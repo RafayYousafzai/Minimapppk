@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useCallback, useEffect, useRef } from "react";
@@ -122,7 +121,7 @@ const EmblaCarousel = (props) => {
                         {product.category}
                       </span>
 
-                      <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight text-background">
+                      <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight text-white">
                         Discover
                         <span className="block">
                           {product.name}
