@@ -146,7 +146,7 @@ export default function ProductDetailPage() {
           <p className="text-lg text-muted-foreground max-w-md mx-auto">
             The product you are looking for does not exist or may have been
             removed.
-          p>
+          </p>
         </div>
       </div>
     );
@@ -386,3 +386,5 @@ export default function ProductDetailPage() {
     </div>
   );
 }
+
+    
