@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
@@ -228,7 +229,7 @@ function ProductsContent() {
                 placeholder="Search products by name, description, or tags..."
                 value={localSearchTerm}
                 onChange={(e) => setLocalSearchTerm(e.target.value)}
-                className="pr-10 bg-white border-none"
+                className="pr-10"
                 suppressHydrationWarning
               />
             </div>
