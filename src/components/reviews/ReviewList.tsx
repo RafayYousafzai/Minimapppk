@@ -1,3 +1,4 @@
+
 "use client"
 
 import type React from "react"
@@ -44,21 +45,21 @@ const ReviewList: React.FC<ReviewListProps> = ({ productId, refreshReviewsSignal
     return (
       <div className="flex flex-col items-center justify-center py-16 px-6">
         <div className="relative">
-          <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-          <ArrowPathIcon className="w-6 h-6 text-blue-600 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+          <div className="w-16 h-16 border-4 border-secondary border-t-primary rounded-full animate-spin"></div>
+          <ArrowPathIcon className="w-6 h-6 text-primary absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
         </div>
-        <p className="mt-4 text-lg font-medium text-gray-700">Loading reviews...</p>
-        <p className="text-sm text-gray-500">Please wait while we fetch customer feedback</p>
+        <p className="mt-4 text-lg font-medium text-foreground">Loading reviews...</p>
+        <p className="text-sm text-muted-foreground">Please wait while we fetch customer feedback</p>
       </div>
     )
   }
 
   if (error) {
     return (
-      <Alert className="border-red-200 bg-red-50">
-        <ExclamationTriangleIcon className="h-5 w-5 text-red-600" />
-        <AlertTitle className="text-red-900">Error Loading Reviews</AlertTitle>
-        <AlertDescription className="text-red-700">{error}</AlertDescription>
+      <Alert variant="destructive">
+        <ExclamationTriangleIcon className="h-5 w-5" />
+        <AlertTitle>Error Loading Reviews</AlertTitle>
+        <AlertDescription>{error}</AlertDescription>
       </Alert>
     )
   }
@@ -66,11 +67,11 @@ const ReviewList: React.FC<ReviewListProps> = ({ productId, refreshReviewsSignal
   if (reviews.length === 0) {
     return (
       <div className="text-center py-16 px-6">
-        <div className="mx-auto w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-6">
-          <ChatBubbleLeftEllipsisIcon className="w-10 h-10 text-gray-400" />
+        <div className="mx-auto w-20 h-20 bg-secondary rounded-full flex items-center justify-center mb-6">
+          <ChatBubbleLeftEllipsisIcon className="w-10 h-10 text-muted-foreground" />
         </div>
-        <h3 className="text-xl font-semibold text-gray-900 mb-2">No Reviews Yet</h3>
-        <p className="text-gray-600 max-w-md mx-auto">
+        <h3 className="text-xl font-semibold text-foreground mb-2">No Reviews Yet</h3>
+        <p className="text-muted-foreground max-w-md mx-auto">
           Be the first to share your experience with this product! Your review helps other customers make informed
           decisions.
         </p>
@@ -81,7 +82,7 @@ const ReviewList: React.FC<ReviewListProps> = ({ productId, refreshReviewsSignal
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-xl font-semibold text-gray-900">Customer Reviews ({reviews.length})</h3>
+        <h3 className="text-xl font-semibold text-foreground">Customer Reviews ({reviews.length})</h3>
       </div>
       <div className="space-y-6">
         {reviews.map((review) => (

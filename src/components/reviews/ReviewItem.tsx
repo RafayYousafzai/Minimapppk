@@ -1,3 +1,4 @@
+
 import type { Review } from "@/lib/types";
 import StarRating from "@/components/ui/StarRating";
 import { format } from "date-fns";
@@ -15,7 +16,7 @@ interface ReviewItemProps {
 
 const ReviewItem: React.FC<ReviewItemProps> = ({ review }) => {
   return (
-    <Card className="mb-4 border-none bg-white ">
+    <Card className="mb-4 bg-background">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg">{review.reviewerName}</CardTitle>

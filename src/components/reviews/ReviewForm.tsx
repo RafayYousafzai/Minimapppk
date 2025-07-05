@@ -1,3 +1,4 @@
+
 "use client";
 
 import type React from "react";
@@ -19,11 +20,7 @@ import {
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { addReview } from "@/services/productService";
-import { StarIcon } from "@heroicons/react/24/solid";
-import {
-  StarIcon as StarOutlineIcon,
-  PencilSquareIcon,
-} from "@heroicons/react/24/outline";
+import { StarIcon, PencilSquareIcon } from "@heroicons/react/24/solid";
 
 interface ReviewFormProps {
   productId: string;
@@ -72,22 +69,22 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
   }
 
   return (
-    <div className="   ">
-      <div className="  py-6">
+    <div className="bg-card p-6 rounded-lg shadow-sm">
+      <div className="pb-6">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
-            <PencilSquareIcon className="w-6 h-6 text-purple-600" />
+          <div className="w-12 h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center">
+            <PencilSquareIcon className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="text-2xl font-bold text-gray-900">Write a Review</h3>
-            <p className="text-gray-600">
+            <h3 className="text-2xl font-bold text-foreground">Write a Review</h3>
+            <p className="text-muted-foreground">
               Share your experience with other customers
             </p>
           </div>
         </div>
       </div>
 
-      <div className="py-6">
+      <div className="pt-6 border-t">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <FormField
@@ -95,13 +92,13 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
               name="reviewerName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-lg font-semibold text-gray-900">
+                  <FormLabel className="text-lg font-semibold text-foreground">
                     Your Name *
                   </FormLabel>
                   <FormControl>
                     <Input
                       placeholder="e.g., John Doe"
-                      className="h-12 text-lg bg-white border-gray-300 focus:border-purple-500 focus:ring-purple-500 rounded-xl"
+                      className="h-12 text-lg rounded-xl"
                       {...field}
                     />
                   </FormControl>
@@ -115,7 +112,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
               name="rating"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-lg font-semibold text-gray-900">
+                  <FormLabel className="text-lg font-semibold text-foreground">
                     Your Rating *
                   </FormLabel>
                   <FormControl>
@@ -128,27 +125,22 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
                             <button
                               key={star}
                               type="button"
-                              className="bg-white transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 rounded-full p-1"
+                              className="bg-transparent transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-full p-1"
                               onClick={() => field.onChange(star)}
                               onMouseEnter={() => setHoverRating(star)}
                               onMouseLeave={() => setHoverRating(0)}
                             >
-                              {isActive ? (
-                                <StarIcon className="w-8 h-8 text-yellow-400" />
-                              ) : (
-                                <StarOutlineIcon className="w-8 h-8 text-gray-300 hover:text-yellow-300" />
-                              )}
+                              <StarIcon className={isActive ? "w-8 h-8 text-yellow-400" : "w-8 h-8 text-muted-foreground/30 hover:text-yellow-300"} />
                             </button>
                           );
                         })}
                       </div>
                       {currentRating > 0 && (
-                        <p className="text-sm text-gray-600 font-medium">
+                        <p className="text-sm text-muted-foreground font-medium">
                           {currentRating === 1 && "Poor - Not satisfied"}
                           {currentRating === 2 && "Fair - Below expectations"}
                           {currentRating === 3 && "Good - Meets expectations"}
-                          {currentRating === 4 &&
-                            "Very Good - Exceeds expectations"}
+                          {currentRating === 4 && "Very Good - Exceeds expectations"}
                           {currentRating === 5 && "Excellent - Outstanding!"}
                         </p>
                       )}
@@ -164,14 +156,14 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
               name="comment"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-lg font-semibold text-gray-900">
+                  <FormLabel className="text-lg font-semibold text-foreground">
                     Your Review *
                   </FormLabel>
                   <FormControl>
                     <Textarea
                       placeholder="Tell us what you think about the product... What did you like? What could be improved?"
                       rows={5}
-                      className="text-lg bg-white border-gray-300 focus:border-purple-500 focus:ring-purple-500 rounded-xl resize-none"
+                      className="text-lg rounded-xl resize-none"
                       {...field}
                     />
                   </FormControl>
@@ -184,11 +176,11 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="h-12 px-8 text-lg font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+                className="h-12 px-8 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
               >
                 {isSubmitting ? (
                   <div className="flex items-center gap-2">
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <div className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin"></div>
                     Submitting...
                   </div>
                 ) : (
@@ -199,7 +191,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
                 type="button"
                 variant="outline"
                 onClick={() => form.reset()}
-                className="h-12 px-6 text-lg font-medium border-gray-300 hover:bg-pink-500 rounded-xl"
+                className="h-12 px-6 text-lg font-medium rounded-xl"
               >
                 Clear Form
               </Button>
