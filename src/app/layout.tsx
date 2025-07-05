@@ -6,9 +6,10 @@ import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { CartProvider } from "@/contexts/CartContext";
-import { AuthProvider } from "@/contexts/AuthContext"; // Added
+import { AuthProvider } from "@/contexts/AuthContext";
 import { Toaster } from "@/components/ui/toaster";
 import Providers from "@/app/Providers"; // HeroUIProvider
+import { ThemeProvider } from "@/components/layout/ThemeProvider";
 
 export const metadata: Metadata = {
   title: "Minimapppk - Your Ultimate Shopping Destination",
@@ -25,19 +26,26 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`dark ${GeistSans.variable} ${GeistMono.variable}`} // Added 'dark' class here
+      className={`${GeistSans.variable} ${GeistMono.variable}`}
     >
       <body className={`font-sans antialiased flex flex-col min-h-screen `}>
-        <AuthProvider> {/* Added AuthProvider wrapping CartProvider and others */}
-          <CartProvider>
-            <Providers> {/* This wraps HeroUIProvider */}
-              <Header />
-              <main className="flex-grow mx-auto py-8 overflow-x-hidden">{children}</main>
-              <Footer />
-            </Providers>
-            <Toaster />
-          </CartProvider>
-        </AuthProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <AuthProvider>
+            <CartProvider>
+              <Providers>
+                <Header />
+                <main className="flex-grow mx-auto py-8 overflow-x-hidden">{children}</main>
+                <Footer />
+              </Providers>
+              <Toaster />
+            </CartProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

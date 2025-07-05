@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState } from "react";
@@ -26,6 +27,7 @@ import { useCart } from "@/hooks/useCart";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { ThemeToggle } from "./ThemeToggle";
 
 const Header = () => {
   const { getItemCount, cartInitialized } = useCart();
@@ -106,10 +108,6 @@ const Header = () => {
                   : "text-primary-foreground/70 hover:text-primary-foreground/80"
               )}
             >
-              {/* {item.icon &&
-                React.cloneElement(item.icon as React.ReactElement<any>, {
-                  className: "h-4 w-4",
-                })} */}
               {item.label}
             </Link>
           </NavbarItem>
@@ -131,9 +129,13 @@ const Header = () => {
                 inputWrapper:
                   "bg-background/20 text-primary-foreground rounded-lg",
               }}
-              spellCheck={false} // Explicitly set spellCheck
+              spellCheck={false}
             />
           </form>
+        </NavbarItem>
+
+        <NavbarItem>
+          <ThemeToggle />
         </NavbarItem>
 
         <NavbarItem>
@@ -171,7 +173,7 @@ const Header = () => {
               classNames={{
                 inputWrapper: "bg-background text-foreground rounded-lg",
               }}
-              spellCheck={false} // Explicitly set spellCheck here too
+              spellCheck={false}
             />
             <Button type="submit" variant="flat" isIconOnly aria-label="Search">
               <Search className="h-5 w-5" />
