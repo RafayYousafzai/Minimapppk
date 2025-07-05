@@ -1,5 +1,14 @@
-import Link from "next/link"
-import { Facebook, Instagram, Twitter, Heart, Sparkles, Mail, Phone, MapPin } from "lucide-react"
+import Link from "next/link";
+import {
+  Facebook,
+  Instagram,
+  Heart,
+  Sparkles,
+  Mail,
+  Phone,
+  MapPin,
+  MessageCircle,
+} from "lucide-react";
 
 const Footer = () => {
   return (
@@ -21,16 +30,18 @@ const Footer = () => {
               <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
                 <Heart className="w-6 h-6 text-[#9b78e8] fill-[#9b78e8]" />
               </div>
-              <h3 className="text-2xl font-bold text-black">ShopWave</h3>
+              <h3 className="text-2xl font-bold text-black">Minimapppk</h3>
               <Sparkles className="w-5 h-5 text-[#9b78e8]" />
             </div>
             <p className="text-gray-800 leading-relaxed max-w-md">
-              Your favorite destination for fancy and trendy products! We bring you the latest styles with love and care.
-              ✨
+              Your favorite destination for fancy and trendy products! We bring
+              you the latest styles with love and care. ✨
             </p>
             <div className="flex items-center gap-2 text-gray-800">
               <Heart className="w-4 h-4 fill-[#9b78e8] text-[#9b78e8]" />
-              <span className="text-sm">Made with love for our amazing customers</span>
+              <span className="text-sm">
+                Made with love for our amazing customers
+              </span>
             </div>
           </div>
 
@@ -68,10 +79,6 @@ const Footer = () => {
                 <Phone className="w-4 h-4" />
                 <span className="text-sm">+1 (555) 123-4567</span>
               </div>
-              <div className="flex items-center gap-3 text-gray-800">
-                <MapPin className="w-4 h-4" />
-                <span className="text-sm">123 Fashion St, Style City</span>
-              </div>
             </div>
           </div>
         </div>
@@ -84,13 +91,23 @@ const Footer = () => {
                 <Sparkles className="w-4 h-4 text-[#9b78e8]" />
                 Follow Our Journey
               </h4>
-              <p className="text-gray-800 text-sm">Stay updated with our latest collections and exclusive offers!</p>
+              <p className="text-gray-800 text-sm">
+                Stay updated with our latest collections and exclusive offers!
+              </p>
             </div>
             <div className="flex gap-4">
               {[
-                { icon: Facebook, label: "Facebook", href: "#" },
-                { icon: Instagram, label: "Instagram", href: "#" },
-                { icon: Twitter, label: "Twitter", href: "#" },
+                {
+                  icon: MessageCircle,
+                  label: "Whatsapp",
+                  href: "https://l.instagram.com/?u=https%3A%2F%2Fchat.whatsapp.com%2FJR3lDyCXENn78cIwC66pJO&e=AT0_0ifaWGX4Pky45n7Szrpre1xj6DIojGMN0j0tmgjunHRwBPIOB2ayvfK0-oNw2bZ2VYhUkqsfwlsqYO5nIgr85QkscMTX",
+                },
+                {
+                  icon: Instagram,
+                  label: "Instagram",
+                  href: "https://www.instagram.com/minimapppk/?igsh=NGlubnFqaWtxb2E3#",
+                },
+                // { icon: Twitter, label: "Twitter", href: "#" },
               ].map(({ icon: Icon, label, href }) => (
                 <Link
                   key={label}
@@ -110,26 +127,16 @@ const Footer = () => {
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-2 text-gray-800">
               <Heart className="w-4 h-4 fill-[#9b78e8] text-[#9b78e8] animate-pulse" />
-              <p className="text-sm">&copy; {new Date().getFullYear()} ShopWave. All rights reserved.</p>
+              <p className="text-sm">
+                &copy; {new Date().getFullYear()} Minimapppk. All rights
+                reserved.
+              </p>
             </div>
-            {/* <div className="flex items-center gap-4 text-xs text-gray-800">
-              <Link href="#" className="hover:text-black transition-colors">
-                Privacy Policy
-              </Link>
-              <span>•</span>
-              <Link href="#" className="hover:text-black transition-colors">
-                Terms of Service
-              </Link>
-              <span>•</span>
-              <Link href="#" className="hover:text-black transition-colors">
-                Returns
-              </Link>
-            </div> */}
           </div>
           <div className="text-center mt-4">
             <p className="text-xs text-gray-800 flex items-center justify-center gap-2">
               <Sparkles className="w-3 h-3 text-[#9b78e8]" />
-              Show wave!
+              Minimapppk
               <Heart className="w-3 h-3 fill-[#9b78e8] text-[#9b78e8]" />
             </p>
           </div>
@@ -139,7 +146,7 @@ const Footer = () => {
       {/* Bottom gradient decoration */}
       <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#efd1ff] via-[#9b78e8] to-[#efd1ff]"></div>
     </footer>
-  )
-}
+  );
+};
 
-export default Footer
+export default Footer;

@@ -1,4 +1,7 @@
 
+export const dynamic = "force-dynamic";
+
+
 import { getAllCustomerSummaries } from '@/services/customerService';
 import CustomersTable from '@/components/admin/customers/CustomersTable';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

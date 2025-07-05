@@ -1,4 +1,7 @@
 
+export const dynamic = "force-dynamic";
+
+
 import { getOrderById } from '@/services/orderService';
 import { notFound } from 'next/navigation';
 import OrderDetailsClient from '@/components/admin/orders/OrderDetailsClient';

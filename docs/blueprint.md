@@ -1,4 +1,4 @@
-# **App Name**: ShopWave
+# **App Name**: Minimapppk
 
 ## Core Features:
 

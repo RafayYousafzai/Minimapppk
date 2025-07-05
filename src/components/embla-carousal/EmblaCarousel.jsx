@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useCallback, useEffect, useRef } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import {
@@ -132,11 +134,11 @@ const EmblaCarousel = (props) => {
 
                       <div className="flex items-center gap-4 mb-6">
                         <span className="text-2xl font-bold">
-                          ${product.price.toFixed(2)}
+                          Rs. {product.price.toFixed(2)}
                         </span>
                         {product.originalPrice > product.price && (
                           <span className="text-lg line-through opacity-70">
-                            ${product.originalPrice.toFixed(2)}
+                            Rs. {product.originalPrice.toFixed(2)}
                           </span>
                         )}
                       </div>
