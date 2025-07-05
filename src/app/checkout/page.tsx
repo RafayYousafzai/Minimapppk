@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -107,20 +108,18 @@ export default function CheckoutPage() {
 
   if (getItemCount() === 0 && !isSubmitting) {
     return (
-      <div className=" px-4 min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-purple-100 flex items-center justify-center">
+      <div className="px-4 min-h-screen bg-background flex items-center justify-center">
         <div className="text-center py-12 max-w-md mx-auto">
           <div className="relative mb-8">
-            <div className="w-32 h-32 bg-gradient-to-br from-purple-200 to-pink-200 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-              <ShoppingCart className="h-16 w-16 text-purple-500" />
+            <div className="w-32 h-32 bg-secondary rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <ShoppingCart className="h-16 w-16 text-primary" />
             </div>
-            <div className="absolute -top-2 -right-2 w-8 h-8 bg-pink-400 rounded-full animate-bounce"></div>
-            <div className="absolute -bottom-2 -left-2 w-6 h-6 bg-yellow-400 rounded-full animate-pulse"></div>
           </div>
 
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">
+          <h1 className="text-4xl font-bold text-foreground mb-4">
             Your Cart is Empty! 🛒
           </h1>
-          <p className="text-gray-600 mb-8 leading-relaxed">
+          <p className="text-muted-foreground mb-8 leading-relaxed">
             Looks like you haven't added any amazing products to your cart yet.
             Let's fix that! ✨
           </p>
@@ -128,9 +127,9 @@ export default function CheckoutPage() {
           <Link href="/products">
             <Button
               size="lg"
-              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-full px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+              className="rounded-full px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
             >
-              <Heart className="mr-2 h-5 w-5 fill-white" />
+              <Heart className="mr-2 h-5 w-5 fill-primary-foreground" />
               Start Shopping
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
@@ -141,18 +140,18 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen  px-4 ">
+    <div className="min-h-screen px-4">
       <div className="container mx-auto px-4 py-8">
         {/* Header Section */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-3 bg-gradient-to-r from-purple-100 to-pink-100 rounded-full px-8 py-4 mb-6">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-              <Package className="w-5 h-5 text-white" />
+          <div className="inline-flex items-center gap-3 bg-secondary rounded-full px-8 py-4 mb-6">
+            <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+              <Package className="w-5 h-5 text-primary-foreground" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-800">Checkout</h1>
-            <Sparkles className="w-6 h-6 text-purple-500" />
+            <h1 className="text-3xl font-bold text-foreground">Checkout</h1>
+            <Sparkles className="w-6 h-6 text-primary" />
           </div>
-          <p className="text-gray-600 max-w-2xl mx-auto text-lg">
+          <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
             You're almost there! Just a few more details and your amazing
             products will be on their way to you! 🚚💕
           </p>
@@ -167,7 +166,7 @@ export default function CheckoutPage() {
               <BillingDetailsForm form={form} />
 
               {/* Ship to Different Address */}
-              <div className="bg-white/80 backdrop-blur-sm border-2 border-purple-100 rounded-2xl p-6 shadow-lg">
+              <div className="bg-card border rounded-lg p-6 shadow-sm">
                 <FormField
                   control={form.control}
                   name="shipToDifferentAddress"
@@ -177,15 +176,15 @@ export default function CheckoutPage() {
                         <Checkbox
                           checked={field.value || false}
                           onCheckedChange={field.onChange}
-                          className="data-[state=checked]:bg-purple-500 data-[state=checked]:border-purple-500 mt-1"
+                          className="mt-1"
                         />
                       </FormControl>
                       <div className="space-y-2 leading-none flex-1">
-                        <FormLabel className="cursor-pointer text-lg font-semibold text-gray-800 flex items-center gap-2">
-                          <Package className="w-5 h-5 text-purple-500" />
+                        <FormLabel className="cursor-pointer text-base font-semibold text-foreground flex items-center gap-2">
+                          <Package className="w-5 h-5 text-primary" />
                           Ship to a different address?
                         </FormLabel>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-muted-foreground">
                           Check this if you want your order delivered to a
                           different address than your billing address.
                         </p>
@@ -200,29 +199,29 @@ export default function CheckoutPage() {
               )}
 
               {/* Order Notes */}
-              <div className="bg-white/80 backdrop-blur-sm border-2 border-purple-100 rounded-2xl p-6 shadow-lg">
+              <div className="bg-card border rounded-lg p-6 shadow-sm">
                 <FormField
                   control={form.control}
                   name="orderNotes"
                   render={({ field }) => (
                     <FormItem className="space-y-4">
-                      <FormLabel className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                        <Heart className="w-5 h-5 text-purple-500 fill-purple-500" />
+                      <FormLabel className="text-lg font-bold text-foreground flex items-center gap-2">
+                        <Heart className="w-5 h-5 text-primary fill-primary" />
                         Order Notes (optional)
                       </FormLabel>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-muted-foreground">
                         Any special instructions for your order? We're here to
                         make your experience perfect! ✨
                       </p>
                       <FormControl>
                         <Textarea
                           placeholder="Notes about your order, e.g. special notes for delivery, gift wrapping requests, or any other special instructions... 💝"
-                          className="resize-none border-2 border-purple-200 focus:border-purple-400 rounded-xl min-h-[120px] text-lg transition-all duration-300 hover:border-purple-300"
+                          className="resize-none min-h-[120px]"
                           {...field}
                           value={field.value ?? ""}
                         />
                       </FormControl>
-                      <FormMessage className="text-pink-500" />
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
