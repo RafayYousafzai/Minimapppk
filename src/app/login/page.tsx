@@ -72,14 +72,14 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-purple-100 via-pink-100 to-purple-200 p-4">
-      <Card className="w-full max-w-md shadow-2xl bg-white/90 backdrop-blur-lg">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-purple-100 via-pink-100 to-purple-200 dark:from-purple-900/10 dark:via-pink-900/10 dark:to-purple-900/10 p-4">
+      <Card className="w-full max-w-md shadow-2xl bg-card/80 backdrop-blur-lg">
         <CardHeader className="text-center">
-          <div className="inline-block mx-auto p-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full mb-4">
-            <LogIn className="h-8 w-8 text-white" />
+          <div className="inline-block mx-auto p-3 bg-gradient-to-r from-primary to-accent rounded-full mb-4">
+            <LogIn className="h-8 w-8 text-primary-foreground" />
           </div>
-          <CardTitle className="text-3xl font-bold text-gray-800">Admin Login</CardTitle>
-          <CardDescription className="text-gray-600">
+          <CardTitle className="text-3xl font-bold text-foreground">Admin Login</CardTitle>
+          <CardDescription>
             Access your Minimapppk dashboard.
           </CardDescription>
         </CardHeader>
@@ -91,13 +91,13 @@ export default function LoginPage() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-gray-700 font-medium">Email Address</FormLabel>
+                    <FormLabel className="font-medium">Email Address</FormLabel>
                     <FormControl>
                       <Input 
                         type="email" 
                         placeholder="admin@example.com" 
                         {...field} 
-                        className="py-6 text-lg border-2 border-purple-200 focus:border-purple-400 rounded-xl"
+                        className="py-6 text-lg border-2 border-border focus:border-primary rounded-xl"
                       />
                     </FormControl>
                     <FormMessage />
@@ -109,20 +109,20 @@ export default function LoginPage() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-gray-700 font-medium">Password</FormLabel>
+                    <FormLabel className="font-medium">Password</FormLabel>
                     <FormControl>
                       <Input 
                         type="password" 
                         placeholder="••••••••" 
                         {...field} 
-                        className="py-6 text-lg border-2 border-purple-200 focus:border-purple-400 rounded-xl"
+                        className="py-6 text-lg border-2 border-border focus:border-primary rounded-xl"
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-full py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300" disabled={isLoading}>
+              <Button type="submit" className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground rounded-full py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300" disabled={isLoading}>
                 {isLoading ? (
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                 ) : (
@@ -133,8 +133,8 @@ export default function LoginPage() {
             </form>
           </Form>
         </CardContent>
-        <CardFooter className="text-center text-sm text-gray-500">
-          <p>Go back to <Link href="/" className="text-purple-600 hover:underline">Homepage</Link></p>
+        <CardFooter className="text-center text-sm text-muted-foreground">
+          <p>Go back to <Link href="/" className="text-primary hover:underline">Homepage</Link></p>
         </CardFooter>
       </Card>
     </div>

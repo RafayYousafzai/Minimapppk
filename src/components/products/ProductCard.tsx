@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Heart, ShoppingCart, Star } from "lucide-react";
 import type { Product } from "@/lib/types";
+import { Badge } from "@/components/ui/badge";
 
 interface ProductCardProps {
   product: Product;
@@ -25,9 +26,9 @@ export default function ProductCard({ product }: ProductCardProps) {
         </Link>
 
         {product.originalPrice && product.originalPrice > product.price && (
-          <div className="absolute top-4 left-4 bg-destructive text-destructive-foreground px-3 py-1 rounded-full text-sm font-semibold shadow-lg">
+          <Badge variant="destructive" className="absolute top-4 left-4 text-sm font-semibold shadow-lg">
             Sale
-          </div>
+          </Badge>
         )}
       </div>
 
