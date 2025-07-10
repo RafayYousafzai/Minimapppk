@@ -147,7 +147,7 @@ const EmblaCarousel = (props) => {
                       <Link href={`/products/${product.id}`}>
                         <Button
                           size="lg"
-                          className="bg-gradient-to-r from-primary to-accent text-foreground dark:text-primary-foreground rounded-full px-8 py-6 text-lg font-semibold shadow-md hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                          className="bg-primary text-primary-foreground rounded-full px-8 py-6 text-lg font-semibold shadow-md hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                         >
                           Shop Now <ArrowRight className="ml-2 h-5 w-5" />
                         </Button>
