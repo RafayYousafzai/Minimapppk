@@ -58,7 +58,7 @@ body {
   }
 
   .dark {
-    --background: 224 71.4% 4.1%; /* Dark Blue-Gray */
+    --background: 224 71.4% 4.1%; /* Dark Blue-Gray (Blackish) */
     --foreground: 0 0% 98%; /* Almost White */
 
     --card: 224 71.4% 4.1%;
@@ -67,7 +67,7 @@ body {
     --popover: 224 71.4% 4.1%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 307 50% 55%; /* Bright Magenta */
+    --primary: 307 80% 65%; /* Brighter Magenta/Pink */
     --primary-foreground: 0 0% 98%;
 
     --secondary: 220 13% 18%; /* Darker Gray-Blue */
@@ -76,7 +76,7 @@ body {
     --muted: 220 13% 18%;
     --muted-foreground: 220 8.9% 43.1%;
 
-    --accent: 307 50% 55%;
+    --accent: 307 80% 65%; /* Brighter Magenta/Pink */
     --accent-foreground: 0 0% 98%;
 
     --destructive: 0 62.8% 30.6%;
@@ -84,7 +84,7 @@ body {
 
     --border: 220 13% 18%;
     --input: 220 13% 18%;
-    --ring: 307 50% 55%;
+    --ring: 307 80% 65%; /* Brighter Magenta/Pink */
 
     /* Sidebar specific dark colors */
     --sidebar-background: 224 71.4% 4.1%;
@@ -94,7 +94,7 @@ body {
     --sidebar-accent: 220 13% 18%;
     --sidebar-accent-foreground: 0 0% 98%;
     --sidebar-border: 220 13% 18%;
-    --sidebar-ring: 307 50% 55%;
+    --sidebar-ring: 307 80% 65%; /* Brighter Magenta/Pink */
 
     /* Chart Colors - Dark Mode */
     --chart-1: 262 83.3% 57.8%;
