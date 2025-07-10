@@ -13,7 +13,7 @@ import {Button} from '@/components/ui/button'
 
 const Footer = () => {
   return (
-    <footer className="relative overflow-hidden bg-secondary text-secondary-foreground">
+    <footer className="relative overflow-hidden bg-card text-secondary-foreground border-t">
 
       <div className="relative container mx-auto py-12 px-4 md:px-6">
         {/* Main Footer Content */}
@@ -21,8 +21,8 @@ const Footer = () => {
           {/* Brand Section */}
           <div className="md:col-span-2 space-y-4">
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-background rounded-full flex items-center justify-center">
-                <Heart className="w-6 h-6 text-foreground fill-foreground" />
+              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                <Heart className="w-6 h-6 text-primary fill-primary" />
               </div>
               <h3 className="text-2xl font-bold text-foreground">Minimapppk</h3>
             </div>
@@ -74,7 +74,7 @@ const Footer = () => {
                   href: "https://www.instagram.com/minimapppk/?igsh=NGlubnFqaWtxb2E3#",
                 },
               ].map(({ icon: Icon, label, href }) => (
-                <Button key={label} variant="outline" size="icon" asChild>
+                <Button key={label} variant="outline" size="icon" className="text-muted-foreground hover:text-primary hover:border-primary" asChild>
                   <Link href={href} aria-label={label}>
                     <Icon className="h-5 w-5" />
                   </Link>
