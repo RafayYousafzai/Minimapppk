@@ -51,7 +51,7 @@ export default async function HomePage() {
                 <span className="text-muted-foreground font-semibold">
                   Most loved products
                 </span>
-                <Heart className="w-5 h-5 text-destructive fill-destructive" />
+                <Heart className="w-5 h-5 text-red-500 fill-red-500" />
               </div>
             </div>
 
