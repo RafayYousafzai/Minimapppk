@@ -104,7 +104,7 @@ export default function ProductDetailPage() {
   if (loading || product === undefined) {
     return (
       <div className="container mx-auto px-4 py-12">
-        <div className="grid lg:grid-cols-2 gap-12 xl:gap-16">
+        <div className="grid md:grid-cols-2 gap-12 xl:gap-16">
           <div className="space-y-6">
             <Skeleton className="w-full aspect-square rounded-2xl" />
             <div className="grid grid-cols-5 gap-3">
@@ -163,7 +163,7 @@ export default function ProductDetailPage() {
     <div className="container mx-auto px-4 py-8 lg:py-12">
       <div className="space-y-16">
         {/* Main Product Section */}
-        <section className="grid lg:grid-cols-2 gap-12 xl:gap-16 items-start">
+        <section className="grid md:grid-cols-2 gap-8 lg:gap-12 xl:gap-16 items-start">
           <div className="sticky top-8">
             <ProductImageGallery
               images={product.images}
@@ -247,21 +247,19 @@ export default function ProductDetailPage() {
 
             {/* Purchase Section */}
             <div className="space-y-6 p-6 bg-card border rounded-2xl shadow-sm">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              <div className="flex flex-col sm:flex-row items-center gap-4 flex-wrap">
                 <QuantitySelector
                   quantity={quantity}
                   onQuantityChange={setQuantity}
                   maxQuantity={product.stock}
                 />
-                <div className="flex gap-3 w-full sm:w-auto">
-                  <AddToCartButton
-                    product={product}
-                    quantity={quantity}
-                    selectedVariants={selectedVariants}
-                    className="flex-1 sm:flex-none h-12 px-8 text-lg font-semibold"
-                    size="lg"
-                  />
-                </div>
+                <AddToCartButton
+                  product={product}
+                  quantity={quantity}
+                  selectedVariants={selectedVariants}
+                  className="flex-1 h-12 px-8 text-lg font-semibold min-w-[200px]"
+                  size="lg"
+                />
               </div>
             </div>
 
@@ -386,5 +384,3 @@ export default function ProductDetailPage() {
     </div>
   );
 }
-
-    
