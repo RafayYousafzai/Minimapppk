@@ -164,7 +164,7 @@ export default function ProductDetailPage() {
       <div className="space-y-16">
         {/* Main Product Section */}
         <section className="grid md:grid-cols-2 gap-8 lg:gap-12 xl:gap-16 items-start">
-          <div className="sticky top-8">
+          <div className="md:sticky md:top-8">
             <ProductImageGallery
               images={product.images}
               altText={product.name}
