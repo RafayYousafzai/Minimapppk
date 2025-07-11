@@ -130,8 +130,8 @@ const EmblaCarousel = (props) => {
 
                       <h1 className="text-3xl md:text-6xl font-bold mb-6 leading-tight text-white">
                         Discover
-                        <span className="block">
-                          {product.name}
+                        <span className="block"> 
+                          {truncateTextByCharacters(product.name, 20)}
                         </span>
                       </h1>
                       <p className="text-lg md:text-xl text-gray-200 mb-8 leading-relaxed">
