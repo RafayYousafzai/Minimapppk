@@ -42,7 +42,7 @@ export default async function HomePage() {
         {/* Featured Products Section */}
         {featuredProducts.length > 0 && (
           <section>
-            <div className="text-center mb-12">
+            <div className="text-center mb-12" style={{ marginTop: 40 }}>
               <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
                 Best Selling Products
               </h2>

@@ -98,6 +98,12 @@ const EmblaCarousel = (props) => {
     return text.slice(0, charLimit) + "...";
   }
 
+  function truncateTextByCharacters(text, maxCharacters) {
+    if (!text) return '';
+    if (text.length <= maxCharacters) return text;
+    return text.substring(0, maxCharacters) + '...';
+  }
+
   return (
     <div className="embla">
       <div className="embla__viewport" ref={emblaRef}>
@@ -122,15 +128,14 @@ const EmblaCarousel = (props) => {
                         {product.category}
                       </span>
 
-                      <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight text-white">
+                      <h1 className="text-3xl md:text-6xl font-bold mb-6 leading-tight text-white">
                         Discover
                         <span className="block">
                           {product.name}
                         </span>
                       </h1>
                       <p className="text-lg md:text-xl text-gray-200 mb-8 leading-relaxed">
-                        {truncateTextByLetters(product.description, 70)} Check
-                        out our latest arrival! ✨
+                        {truncateTextByCharacters(product.description, 90)} ✨
                       </p>
 
                       <div className="flex items-center gap-4 mb-6">
@@ -173,7 +178,7 @@ const EmblaCarousel = (props) => {
         </div>
       </div>
 
-      <div className="embla__controls">
+      {/* <div className="embla__controls">
         <div className="embla__dots">
           {scrollSnaps.map((_, index) => (
             <DotButton
@@ -185,7 +190,7 @@ const EmblaCarousel = (props) => {
             />
           ))}
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

@@ -200,7 +200,7 @@ export default function ProductDetailPage() {
             </div>
 
             {/* Pricing */}
-            <div className="space-y-2">
+            <div className="space-y-2 w-[90vw]">
               <div className="flex items-baseline gap-4">
                 <span className="text-4xl font-bold text-foreground">
                   ₨{currentPrice.toFixed(2)}
