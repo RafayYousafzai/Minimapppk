@@ -1,4 +1,3 @@
-
 import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
@@ -31,7 +30,7 @@ export default function RootLayout({
       <body className={`font-sans antialiased flex flex-col min-h-screen `}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="white"
           enableSystem
           disableTransitionOnChange
         >
@@ -39,7 +38,9 @@ export default function RootLayout({
             <CartProvider>
               <Providers>
                 <Header />
-                <main className="flex-grow mx-auto py-8 overflow-x-hidden">{children}</main>
+                <main className="flex-grow mx-auto py-8 overflow-x-hidden">
+                  {children}
+                </main>
                 <Footer />
               </Providers>
               <Toaster />

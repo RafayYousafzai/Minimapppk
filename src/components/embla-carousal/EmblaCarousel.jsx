@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useCallback, useEffect, useRef } from "react";
@@ -99,9 +98,9 @@ const EmblaCarousel = (props) => {
   }
 
   function truncateTextByCharacters(text, maxCharacters) {
-    if (!text) return '';
+    if (!text) return "";
     if (text.length <= maxCharacters) return text;
-    return text.substring(0, maxCharacters) + '...';
+    return text.substring(0, maxCharacters) + "...";
   }
 
   return (
@@ -118,7 +117,7 @@ const EmblaCarousel = (props) => {
                     src={product.images[0]}
                     alt={product.name}
                   />
-                  <div className="absolute -inset-6 bg-black/60 dark:bg-black/70"></div>
+                  <div className="absolute -inset-6 bg-black/20 dark:bg-black/40"></div>
 
                   {/* Content container */}
                   <div className="relative z-10 container mx-auto flex items-center lg:px-32 px-10">
@@ -130,7 +129,7 @@ const EmblaCarousel = (props) => {
 
                       <h1 className="text-3xl md:text-6xl font-bold mb-6 leading-tight text-white">
                         Discover
-                        <span className="block"> 
+                        <span className="block">
                           {truncateTextByCharacters(product.name, 20)}
                         </span>
                       </h1>

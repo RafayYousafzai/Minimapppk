@@ -1,34 +1,57 @@
+"use client";
 
-"use client"
-
-import type React from "react"
-import type { UseFormReturn } from "react-hook-form"
-import type { CheckoutFormData } from "@/lib/checkoutTypes"
-import { useCart } from "@/hooks/useCart"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Checkbox } from "@/components/ui/checkbox"
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { ShoppingBag, CreditCard, Truck, Shield, Heart, Sparkles, Package, Loader2 } from 'lucide-react'
-import Link from "next/link"
+import type React from "react";
+import type { UseFormReturn } from "react-hook-form";
+import type { CheckoutFormData } from "@/lib/checkoutTypes";
+import { useCart } from "@/hooks/useCart";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  ShoppingBag,
+  CreditCard,
+  Truck,
+  Shield,
+  Heart,
+  Sparkles,
+  Package,
+  Loader2,
+} from "lucide-react";
+import Link from "next/link";
 
 interface OrderSummaryCardProps {
-  form: UseFormReturn<CheckoutFormData>
-  isSubmitting: boolean
+  form: UseFormReturn<CheckoutFormData>;
+  isSubmitting: boolean;
 }
 
-const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({ form, isSubmitting }) => {
-  const { cartItems, getTotalPrice, getItemCount } = useCart()
+const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({
+  form,
+  isSubmitting,
+}) => {
+  const { cartItems, getTotalPrice, getItemCount } = useCart();
 
-  const subtotal = getTotalPrice()
-  const shippingCharges = getItemCount() > 0 ? 250.0 : 0
-  const total = subtotal + shippingCharges
+  const subtotal = getTotalPrice();
+  const shippingCharges = getItemCount() > 0 ? 250.0 : 0;
+  const total = subtotal + shippingCharges;
 
   return (
     <Card className="bg-card border rounded-lg shadow-sm">
       {/* Header */}
-      <CardHeader className="bg-primary text-primary-foreground p-6">
+      <CardHeader className="bg-primary text-primary-foreground p-6 rounded-lg">
         <CardTitle className="text-2xl font-bold flex items-center gap-3">
           <div className="w-8 h-8 bg-primary-foreground/20 rounded-full flex items-center justify-center">
             <ShoppingBag className="w-5 h-5" />
@@ -36,7 +59,9 @@ const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({ form, isSubmitting 
           Your Order
           <Sparkles className="w-5 h-5 ml-auto" />
         </CardTitle>
-        <p className="text-primary-foreground/80 text-sm">Review your amazing selections! ✨</p>
+        <p className="text-primary-foreground/80 text-sm">
+          Review your amazing selections! ✨
+        </p>
       </CardHeader>
 
       <CardContent className="p-6 space-y-6">
@@ -55,14 +80,18 @@ const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({ form, isSubmitting 
                     className="flex justify-between items-center p-3 bg-secondary rounded-lg border"
                   >
                     <div className="flex-1">
-                      <span className="font-medium text-foreground">{item.name}</span>
+                      <span className="font-medium text-foreground">
+                        {item.name}
+                      </span>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <span>Qty: {item.quantity}</span>
                         <span>•</span>
                         <span>₨{item.price.toFixed(2)} each</span>
                       </div>
                     </div>
-                    <span className="font-bold text-foreground">₨{(item.price * item.quantity).toFixed(2)}</span>
+                    <span className="font-bold text-foreground">
+                      ₨{(item.price * item.quantity).toFixed(2)}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -73,7 +102,9 @@ const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({ form, isSubmitting 
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">Subtotal</span>
-                  <span className="font-semibold text-foreground">₨{subtotal.toFixed(2)}</span>
+                  <span className="font-semibold text-foreground">
+                    ₨{subtotal.toFixed(2)}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
@@ -81,13 +112,17 @@ const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({ form, isSubmitting 
                     <span className="text-muted-foreground">Shipping</span>
                   </div>
                   <span className="font-semibold text-foreground">
-                    {shippingCharges > 0 ? `₨${shippingCharges.toFixed(2)}` : "Free! 🎉"}
+                    {shippingCharges > 0
+                      ? `₨${shippingCharges.toFixed(2)}`
+                      : "Free! 🎉"}
                   </span>
                 </div>
                 <div className="h-px bg-border"></div>
                 <div className="flex justify-between items-center text-lg">
                   <span className="font-bold text-foreground">Total</span>
-                  <span className="font-bold text-primary text-xl">₨{total.toFixed(2)}</span>
+                  <span className="font-bold text-primary text-xl">
+                    ₨{total.toFixed(2)}
+                  </span>
                 </div>
               </div>
             </div>
@@ -96,7 +131,9 @@ const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({ form, isSubmitting 
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <CreditCard className="w-5 h-5 text-primary" />
-                <h3 className="font-semibold text-foreground">Payment Method</h3>
+                <h3 className="font-semibold text-foreground">
+                  Payment Method
+                </h3>
               </div>
               <FormField
                 control={form.control}
@@ -114,10 +151,14 @@ const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({ form, isSubmitting 
                         </FormControl>
                         <FormLabel className="font-normal cursor-pointer flex-1">
                           <div className="flex items-center gap-2 mb-1">
-                            <span className="font-semibold text-foreground">Cash on Delivery</span>
+                            <span className="font-semibold text-foreground">
+                              Cash on Delivery
+                            </span>
                             <span className="text-2xl">💰</span>
                           </div>
-                          <p className="text-sm text-muted-foreground">Pay with cash when your order arrives safely! 📦</p>
+                          <p className="text-sm text-muted-foreground">
+                            Pay with cash when your order arrives safely! 📦
+                          </p>
                         </FormLabel>
                       </FormItem>
                     </RadioGroup>
@@ -132,9 +173,13 @@ const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({ form, isSubmitting 
               <div className="flex items-start gap-2">
                 <Shield className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Your personal data will be used to process your order, support your experience throughout this
-                  website, and for other purposes described in our{" "}
-                  <Link href="/privacy-policy" className="text-primary hover:underline font-medium">
+                  Your personal data will be used to process your order, support
+                  your experience throughout this website, and for other
+                  purposes described in our{" "}
+                  <Link
+                    href="/privacy-policy"
+                    className="text-primary hover:underline font-medium"
+                  >
                     privacy policy
                   </Link>
                   . We keep your information safe and secure! 🔒
@@ -180,7 +225,9 @@ const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({ form, isSubmitting 
               <ShoppingBag className="w-8 h-8 text-muted-foreground" />
             </div>
             <p className="text-muted-foreground">Your cart is empty! 🛒</p>
-            <p className="text-sm text-muted-foreground mt-1">Add some amazing products to get started!</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Add some amazing products to get started!
+            </p>
           </div>
         )}
       </CardContent>
@@ -208,7 +255,7 @@ const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({ form, isSubmitting 
         </Button>
       </CardFooter>
     </Card>
-  )
-}
+  );
+};
 
-export default OrderSummaryCard
+export default OrderSummaryCard;

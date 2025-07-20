@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState } from "react";
@@ -73,7 +72,7 @@ const Header = () => {
       isBordered
       isMenuOpen={isMenuOpen}
       onMenuOpenChange={setIsMenuOpen}
-      className="bg-background text-foreground border-b"
+      className="bg-background text-foreground border-b dark "
     >
       <NavbarContent className="sm:hidden" justify="start">
         <NavbarMenuToggle
@@ -147,13 +146,13 @@ const Header = () => {
             className="text-foreground relative"
           >
             {cartInitialized && currentItemCount > 0 && (
-                <Chip
+              <Chip
                 size="sm"
                 color="danger"
                 className="bg-primary text-primary-foreground rounded-full z-10 absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center text-xs"
-                >
+              >
                 {currentItemCount}
-                </Chip>
+              </Chip>
             )}
             <ShoppingCart className="h-5 w-5" />
           </Button>
@@ -170,7 +169,8 @@ const Header = () => {
               variant="flat"
               color="secondary"
               classNames={{
-                inputWrapper: "bg-secondary text-secondary-foreground rounded-lg",
+                inputWrapper:
+                  "bg-secondary text-secondary-foreground rounded-lg",
               }}
               spellCheck={false}
             />
