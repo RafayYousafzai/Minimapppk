@@ -329,7 +329,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
         <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
           <SheetTrigger asChild>
             <Button
-              variant="outline"
+              variant="default"
               className="w-full rounded-full py-6 text-lg font-semibold"
             >
               <ListFilter className="mr-2 h-5 w-5" />
