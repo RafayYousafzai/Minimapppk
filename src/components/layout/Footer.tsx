@@ -22,7 +22,7 @@ const Footer = () => {
           <div className="md:col-span-2 space-y-4">
             <div className="flex items-center gap-2">
               <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                <Heart className="w-6 h-6 text-primary fill-primary" />
+                <Heart className="w-6 h-6 text-pink-500 fill-pink-500" />
               </div>
               <h3 className="text-2xl font-bold text-foreground">Minimapppk</h3>
             </div>
@@ -38,13 +38,13 @@ const Footer = () => {
               Get in Touch
             </h4>
             <div className="space-y-3">
-              <div className="flex items-center gap-3 text-muted-foreground">
+              {/* <div className="flex items-center gap-3 text-muted-foreground">
                 <Mail className="w-4 h-4" />
                 <span className="text-sm">hello@shopwave.com</span>
-              </div>
+              </div> */}
               <div className="flex items-center gap-3 text-muted-foreground">
                 <Phone className="w-4 h-4" />
-                <span className="text-sm">+1 (555) 123-4567</span>
+                <span className="text-sm">+92 324 5699838</span>
               </div>
             </div>
           </div>
