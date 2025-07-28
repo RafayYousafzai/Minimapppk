@@ -9,7 +9,7 @@ import * as productService from "@/services/productService";
 import type { Product } from "@/lib/types";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, X, Loader2 } from "lucide-react";
+import { Search, X, Loader2, ListFilter } from "lucide-react";
 import {
   Pagination,
   PaginationContent,
@@ -21,12 +21,13 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
 import { Suspense } from "react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 const PRODUCTS_PER_PAGE = 8;
 
 function ProductsContent() {
   const router = useRouter();
-  const searchParams = useSearchParams(); // This is now properly wrapped in Suspense
+  const searchParams = useSearchParams();
 
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -41,6 +42,7 @@ function ProductsContent() {
   });
   const [currentPage, setCurrentPage] = useState(1);
   const [localSearchTerm, setLocalSearchTerm] = useState("");
+  const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
 
   // Effect 1: Fetch initial data
   useEffect(() => {
@@ -117,12 +119,6 @@ function ProductsContent() {
     setCurrentPage(1);
   };
 
-  const clearSearch = () => {
-    setLocalSearchTerm("");
-    setSearchTerm("");
-    setCurrentPage(1);
-  };
-
   const handleFilterChange = useCallback(
     (newFilters: {
       categories: string[];
@@ -131,6 +127,7 @@ function ProductsContent() {
     }) => {
       setFilters(newFilters);
       setCurrentPage(1);
+      setIsFilterSheetOpen(false); // Close sheet on apply
     },
     []
   );
@@ -207,16 +204,24 @@ function ProductsContent() {
       </div>
     );
   }
-
-  return (
-    <div className=" px-4 flex flex-col lg:flex-row gap-8">
-      <FilterSidebar
+  
+  const filterSidebarComponent = (
+     <FilterSidebar
         onFilterChange={handleFilterChange}
         initialFilters={filters}
         key={`${globalMinPrice}-${globalMaxPrice}-${filters.categories.join(
           ","
         )}-${filters.minRating}-${filters.priceRange.join(",")}`}
       />
+  );
+
+  return (
+    <div className=" px-4 flex flex-col lg:flex-row gap-8">
+      {/* Desktop Sidebar */}
+      <div className="hidden lg:block">
+        {filterSidebarComponent}
+      </div>
+
       <div className="flex-1">
         <div className="mb-6">
           <form
@@ -236,16 +241,39 @@ function ProductsContent() {
             <Button
               type="submit"
               variant="outline"
-              className="bg-accent hover:bg-accent/90 text-accent-foreground"
+              className="bg-primary hover:bg-accent/90 text-white"
             >
               <Search className="h-5 w-5 mr-0 md:mr-2" />
               <span className="hidden md:inline">Search</span>
             </Button>
           </form>
-          <p className="text-sm text-muted-foreground mt-2">
+          
+          {/* Mobile Filter Trigger */}
+           <div className="lg:hidden mt-4">
+            <Sheet open={isFilterSheetOpen} onOpenChange={setIsFilterSheetOpen}>
+              <SheetTrigger asChild>
+                <div className="flex items-center justify-between text-sm text-muted-foreground p-2 rounded-md hover:bg-secondary cursor-pointer">
+                  <span>
+                    Showing {paginatedProducts.length} of {filteredProducts.length}{" "}
+                    products.
+                  </span>
+                  <div className="flex items-center gap-1 font-medium text-foreground">
+                    <ListFilter className="h-4 w-4" />
+                    Filters
+                  </div>
+                </div>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-full max-w-sm sm:max-w-md p-0">
+                  {filterSidebarComponent}
+              </SheetContent>
+            </Sheet>
+          </div>
+          
+           <p className="hidden lg:block text-sm text-muted-foreground mt-2">
             Showing {paginatedProducts.length} of {filteredProducts.length}{" "}
             products.
           </p>
+
         </div>
 
         {paginatedProducts.length > 0 ? (
