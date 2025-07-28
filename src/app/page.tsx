@@ -113,6 +113,7 @@ export default async function HomePage() {
           <TestimonialSection reviews={recentReviews} />
         )}
 
+
         {/* Stats Section */}
         <section className="bg-primary text-primary-foreground rounded-3xl p-8 md:p-12 shadow-2xl">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center capitalize">
