@@ -17,8 +17,8 @@ body {
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 10%;
 
-    --primary: 330 85% 60%; /* Rich muted purple */
-    --primary-foreground: 0 0% 98%;
+    --primary: 0 0% 10%; /* Black */
+    --primary-foreground: 0 0% 98%; /* White */
 
     --secondary: 0 0% 96%; /* Neutral light gray */
     --secondary-foreground: 0 0% 20%;
@@ -34,7 +34,7 @@ body {
 
     --border: 0 0% 90%;
     --input: 0 0% 90%;
-    --ring: 330 85% 60%;
+    --ring: 0 0% 10%; /* Black */
 
     --radius: 0.5rem;
 
@@ -64,8 +64,8 @@ body {
     --popover: 0 0% 10%;
     --popover-foreground: 0 0% 96%;
 
-    --primary: 330 85% 60%; /* Slightly warmer purple */
-    --primary-foreground: 0 0% 98%;
+    --primary: 0 0% 98%; /* White */
+    --primary-foreground: 0 0% 10%; /* Black */
 
     --secondary: 0 0% 16%; /* Deep gray */
     --secondary-foreground: 0 0% 96%;
@@ -81,7 +81,7 @@ body {
 
     --border: 0 0% 16%;
     --input: 0 0% 16%;
-    --ring: 330 85% 60%;
+    --ring: 0 0% 98%; /* White */
 
     --sidebar-background: 0 0% 8%;
     --sidebar-foreground: 0 0% 96%;
