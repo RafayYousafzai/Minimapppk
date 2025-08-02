@@ -68,8 +68,9 @@ export default function ProductDetailPage() {
 
   const handleVariantSelect = (variantType: string, optionValue: string) => {
     setSelectedVariants((prev) => ({ ...prev, [variantType]: optionValue }));
-    setQuantity(1);
+    setQuantity(1); // Reset quantity when variant changes
   };
+
 
   const currentPrice = useMemo(() => {
     if (!product) return 0;
@@ -231,8 +232,8 @@ export default function ProductDetailPage() {
                   <VariantSelector
                     key={variant.type}
                     variant={variant}
-                    selectedOptionValue={selectedVariants[variant.type]}
-                    onOptionSelect={handleVariantSelect}
+                    selectedValue={selectedVariants[variant.type]}
+                    onValueChange={(value) => handleVariantSelect(variant.type, value)}
                   />
                 ))}
               </div>
