@@ -25,6 +25,7 @@ const VariantSelector: React.FC<VariantSelectorProps> = ({
         {variant.options.map((option) => (
           <Button
             key={option.id}
+            type="button" // Fix: Specify button type to prevent form submission behavior
             variant={selectedOptionValue === option.value ? 'default' : 'outline'}
             onClick={() => onOptionSelect(variant.type, option.value)}
             className={cn(
