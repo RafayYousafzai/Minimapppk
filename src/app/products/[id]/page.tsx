@@ -45,19 +45,12 @@ export default function ProductDetailPage() {
     if (productId) {
       const fetchProductData = async () => {
         setLoading(true);
+        setSelectedVariants({}); // Reset variants on new product load
         const foundProduct = await getProductById(productId);
         setProduct(foundProduct);
 
         if (foundProduct) {
-          if (foundProduct.variants) {
-            const initialVariants: { [key: string]: string } = {};
-            foundProduct.variants.forEach((variant) => {
-              if (variant.options.length > 0) {
-                initialVariants[variant.type] = variant.options[0].value;
-              }
-            });
-            setSelectedVariants(initialVariants);
-          }
+          // No longer setting initial variants here to allow user selection
           const fetchedRelatedProducts = await getProductsByCategory(
             foundProduct.category
           );
