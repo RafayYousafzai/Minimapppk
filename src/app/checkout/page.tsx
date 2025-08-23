@@ -85,6 +85,7 @@ export default function CheckoutPage() {
     try {
       const docRef = await addDoc(collection(db, "orders"), orderData);
       const orderId = docRef.id;
+      const shortOrderId = orderId.substring(0, 8).toUpperCase();
       console.log("Order placed with ID: ", orderId);
 
       toast({
