@@ -30,7 +30,7 @@ export default function OrderConfirmationPage() {
             <Link href="/products">Continue Shopping</Link>
           </Button>
            <Button variant="outline" className="w-full" asChild>
-            <a href="https://wa.me/923289462807" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center">
+            <a href="https://wa.me/923245699838" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center">
               <MessageSquare className="mr-2 h-5 w-5" />
               Open WhatsApp
             </a>

@@ -95,7 +95,7 @@ export default function CheckoutPage() {
       });
 
       // Construct WhatsApp message
-      const WHATSAPP_NUMBER = "923289462807"; // Your number in international format without + or 00
+      const WHATSAPP_NUMBER = "923245699838"; // Your number in international format without + or 00
       const baseUrl = window.location.origin;
       const adminOrderUrl = `${baseUrl}/admin/orders/${orderId}`;
       
