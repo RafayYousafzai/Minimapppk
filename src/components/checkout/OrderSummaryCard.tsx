@@ -1,3 +1,4 @@
+
 "use client";
 
 import type React from "react";
@@ -12,7 +13,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   FormControl,
@@ -30,6 +30,7 @@ import {
   Sparkles,
   Package,
   Loader2,
+  MessageSquare,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -127,45 +128,15 @@ const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({
               </div>
             </div>
 
-            {/* Payment Method */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <CreditCard className="w-5 h-5 text-primary" />
-                <h3 className="font-semibold text-foreground">
-                  Payment Method
-                </h3>
-              </div>
-              <FormField
-                control={form.control}
-                name="paymentMethod"
-                render={({ field }) => (
-                  <FormItem className="space-y-3">
-                    <RadioGroup
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      className="flex flex-col space-y-2"
-                    >
-                      <FormItem className="flex items-center space-x-3 space-y-0 p-4 bg-secondary rounded-lg border hover:border-primary/50 transition-colors">
-                        <FormControl>
-                          <RadioGroupItem value="cod" />
-                        </FormControl>
-                        <FormLabel className="font-normal cursor-pointer flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-semibold text-foreground">
-                              Cash on Delivery
-                            </span>
-                            <span className="text-2xl">💰</span>
-                          </div>
-                          <p className="text-sm text-muted-foreground">
-                            Pay with cash when your order arrives safely! 📦
-                          </p>
-                        </FormLabel>
-                      </FormItem>
-                    </RadioGroup>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            {/* Payment Info */}
+             <div className="bg-secondary p-4 rounded-lg border text-center">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                    <MessageSquare className="w-5 h-5 text-green-600" />
+                    <h3 className="font-semibold text-foreground">Payment via WhatsApp</h3>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                    After confirming your order, you will be redirected to WhatsApp to complete your payment with one of our agents.
+                </p>
             </div>
 
             {/* Privacy Notice */}
@@ -248,8 +219,8 @@ const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({
           ) : (
             <div className="flex items-center gap-2">
               <Heart className="w-5 h-5 fill-primary-foreground" />
-              Place Order
-              <Sparkles className="w-5 h-5" />
+              Confirm Order & Pay
+              <MessageSquare className="w-5 h-5" />
             </div>
           )}
         </Button>

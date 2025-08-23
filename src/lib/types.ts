@@ -57,7 +57,7 @@ export interface FilterOptions {
   minRating: number;
 }
 
-export type OrderStatus = "pending" | "processing" | "shipped" | "delivered" | "cancelled";
+export type OrderStatus = "pending payment" | "pending" | "processing" | "shipped" | "delivered" | "cancelled";
 
 export interface OrderItem {
   productId: string;
@@ -98,7 +98,7 @@ export interface Order {
   orderStatus: OrderStatus;
   createdAt: { seconds: number, nanoseconds: number } | Date; // Firestore timestamp or Date object
   orderNotes?: string;
-  paymentMethod: "cod"; // Assuming only COD for now
+  paymentMethod?: string; // Optional now
 }
 
 export interface Review {

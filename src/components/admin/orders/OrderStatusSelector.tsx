@@ -20,7 +20,7 @@ interface OrderStatusSelectorProps {
   onStatusChange: (newStatus: OrderStatus) => void; // Callback to update parent state
 }
 
-const availableStatuses: OrderStatus[] = ["pending", "processing", "shipped", "delivered", "cancelled"];
+const availableStatuses: OrderStatus[] = ["pending payment", "pending", "processing", "shipped", "delivered", "cancelled"];
 
 const OrderStatusSelector: React.FC<OrderStatusSelectorProps> = ({ orderId, currentStatus, onStatusChange }) => {
   const [selectedStatus, setSelectedStatus] = useState<OrderStatus>(currentStatus);
