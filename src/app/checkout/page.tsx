@@ -89,19 +89,26 @@ export default function CheckoutPage() {
 
       toast({
         title: "Order Placed! Redirecting...",
-        description: `Your order #${orderId.substring(0,8)} is confirmed. Redirecting to WhatsApp for payment.`,
+        description: `Your order #${orderId} is confirmed. Redirecting to WhatsApp for payment.`,
         variant: "default",
       });
 
       // Construct WhatsApp message
       const WHATSAPP_NUMBER = "923289462807"; // Your number in international format without + or 00
+      const baseUrl = window.location.origin;
+      const adminOrderUrl = `${baseUrl}/admin/orders/${orderId}`;
+      
       let message = `Hello! I've just placed an order on Minimapppk.\n\n*Order ID:* ${orderId}\n\n*Order Summary:*\n`;
       cartItems.forEach(item => {
         const variantString = item.selectedVariants ? ` (${Object.values(item.selectedVariants).join(', ')})` : '';
         message += `- ${item.name}${variantString} (x${item.quantity}) - ₨${(item.price * item.quantity).toFixed(2)}\n`;
       });
       message += `\n*Total Amount:* ₨${orderTotal.toFixed(2)}\n\n`;
-      message += `Please provide me with the payment details (Bank Account or JazzCash). I will send a screenshot after payment to confirm my order. Thank you!`;
+      message += `Please provide me with the payment details (Bank Account or JazzCash). I will send a screenshot after payment to confirm my order. Thank you!\n\n`;
+      message += `-------------------\n`;
+      message += `*For Admin:*\n`;
+      message += `View Order Details: ${adminOrderUrl}`;
+
 
       const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
       
