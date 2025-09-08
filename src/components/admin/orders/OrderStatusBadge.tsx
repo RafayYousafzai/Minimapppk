@@ -10,6 +10,7 @@ interface OrderStatusBadgeProps {
 
 const OrderStatusBadge: React.FC<OrderStatusBadgeProps> = ({ status, className }) => {
   const statusStyles: Record<OrderStatus, string> = {
+    "pending payment": 'bg-orange-100 text-orange-800 border-orange-300',
     pending: 'bg-yellow-100 text-yellow-800 border-yellow-300',
     processing: 'bg-blue-100 text-blue-800 border-blue-300',
     shipped: 'bg-indigo-100 text-indigo-800 border-indigo-300',

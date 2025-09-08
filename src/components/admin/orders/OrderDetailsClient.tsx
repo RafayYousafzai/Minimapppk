@@ -97,7 +97,7 @@ const OrderDetailsClient: React.FC<OrderDetailsClientProps> = ({ order }) => {
               <DetailItem label="Status" icon={AlertCircle}>
                 <OrderStatusBadge status={order.orderStatus} />
               </DetailItem>
-              <DetailItem label="Payment Method" value={order.paymentMethod.toUpperCase()} icon={CreditCard} />
+              <DetailItem label="Payment Method" value={order.paymentMethod?.toUpperCase()} icon={CreditCard} />
               <DetailItem label="Total Items" value={itemCount} icon={ShoppingBag} />
               <DetailItem label="Order Total" value={`₨${order.orderTotal.toFixed(2)}`} icon={CreditCard} />
             </dl>

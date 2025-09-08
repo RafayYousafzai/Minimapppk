@@ -44,7 +44,17 @@ export default function ProductDetailPage() {
         setProduct(foundProduct);
 
         if (foundProduct) {
-          // No longer setting initial variants here to allow user selection
+          // Pre-select the first option for each variant by default
+          if (foundProduct.variants && foundProduct.variants.length > 0) {
+            const defaultVariants: { [key: string]: string } = {};
+            foundProduct.variants.forEach(variant => {
+              if (variant.options && variant.options.length > 0) {
+                defaultVariants[variant.type] = variant.options[0].value;
+              }
+            });
+            setSelectedVariants(defaultVariants);
+          }
+
           const fetchedRelatedProducts = await getProductsByCategory(
             foundProduct.category
           );

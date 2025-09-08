@@ -47,7 +47,6 @@ export default function CheckoutPage() {
       shippingCountry: "PK",
       shippingState: "Sindh",
       shipToDifferentAddress: false,
-      paymentMethod: "cod",
       agreeToTerms: false,
       billingCompanyName: "",
       billingStreetAddress2: "",
@@ -66,7 +65,8 @@ export default function CheckoutPage() {
 
   async function onSubmit(data: CheckoutFormData) {
     setIsSubmitting(true);
-
+    const orderTotal = getTotalPrice() + (getItemCount() > 0 ? 250.0 : 0);
+    
     const orderData = {
       ...data,
       cartItems: cartItems.map((item) => ({
@@ -77,22 +77,47 @@ export default function CheckoutPage() {
         selectedVariants: item.selectedVariants || null,
         image: item.image,
       })),
-      orderTotal: getTotalPrice() + (getItemCount() > 0 ? 250.0 : 0),
-      orderStatus: "pending",
+      orderTotal: orderTotal,
+      orderStatus: "pending payment",
       createdAt: serverTimestamp(),
     };
 
     try {
       const docRef = await addDoc(collection(db, "orders"), orderData);
-      console.log("Order placed with ID: ", docRef.id);
+      const orderId = docRef.id;
+      const shortOrderId = orderId.substring(0, 8).toUpperCase();
+      console.log("Order placed with ID: ", orderId);
 
       toast({
-        title: "Order Placed Successfully! 🎉",
-        description: `Thank you for your purchase! Your order ID is ${docRef.id}. ✨`,
+        title: "Order Placed! Redirecting...",
+        description: `Your order #${orderId} is confirmed. Redirecting to WhatsApp for payment.`,
         variant: "default",
       });
+
+      // Construct WhatsApp message
+      const WHATSAPP_NUMBER = "923245699838"; // Your number in international format without + or 00
+      const baseUrl = window.location.origin;
+      const adminOrderUrl = `${baseUrl}/admin/orders/${orderId}`;
+      
+      let message = `Hello! I've just placed an order on Minimapppk.\n\n*Order ID:* ${orderId}\n\n*Order Summary:*\n`;
+      cartItems.forEach(item => {
+        const variantString = item.selectedVariants ? ` (${Object.values(item.selectedVariants).join(', ')})` : '';
+        message += `- ${item.name}${variantString} (x${item.quantity}) - ₨${(item.price * item.quantity).toFixed(2)}\n`;
+      });
+      message += `\n*Total Amount:* ₨${orderTotal.toFixed(2)}\n\n`;
+      message += `Please provide me with the payment details (Bank Account or JazzCash). I will send a screenshot after payment to confirm my order. Thank you!\n\n`;
+      message += `-------------------\n`;
+      message += `*For Admin:*\n`;
+      message += `View Order Details: ${adminOrderUrl}`;
+
+
+      const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+      
       clearCart();
-      router.push("/order-confirmation");
+
+      // Redirect to WhatsApp
+      window.location.href = whatsappUrl;
+
     } catch (error) {
       console.error("Error placing order: ", error);
       toast({
@@ -101,8 +126,7 @@ export default function CheckoutPage() {
           "There was an issue processing your order. Please try again.",
         variant: "destructive",
       });
-    } finally {
-      setIsSubmitting(false);
+       setIsSubmitting(false);
     }
   }
 

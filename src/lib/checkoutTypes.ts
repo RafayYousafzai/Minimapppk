@@ -45,8 +45,7 @@ export const checkoutFormSchema = z.object({
   // Order Notes
   orderNotes: z.string().optional(),
 
-  // Payment and Terms
-  paymentMethod: z.literal("cod").default("cod").describe("Payment method, defaulting to Cash on Delivery"),
+  // Terms
   agreeToTerms: z.boolean().refine(val => val === true, {
     message: "You must read and agree to the website terms and conditions.",
   }),

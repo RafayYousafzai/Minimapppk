@@ -1,7 +1,7 @@
 
 import { db } from '@/lib/firebase/config';
 import type { Order, OrderStatus } from '@/lib/types';
-import { collection, getDocs, doc, updateDoc, Timestamp, orderBy, query, limit as firestoreLimit, where, getCountFromServer, getDoc } from 'firebase/firestore'; // Renamed limit to firestoreLimit, added getDoc
+import { collection, getDocs, doc, updateDoc, Timestamp, orderBy, query, limit as firestoreLimit, where, getCountFromServer, getDoc, deleteDoc } from 'firebase/firestore'; // Renamed limit to firestoreLimit, added getDoc and deleteDoc
 
 const ORDERS_COLLECTION = 'orders';
 
@@ -71,6 +71,18 @@ export async function updateOrderStatus(orderId: string, newStatus: OrderStatus)
     throw new Error('Failed to update order status.');
   }
 }
+
+export async function deleteOrder(orderId: string): Promise<void> {
+  try {
+    const orderDocRef = doc(db, ORDERS_COLLECTION, orderId);
+    await deleteDoc(orderDocRef);
+    console.log(`Order ${orderId} successfully deleted.`);
+  } catch (error) {
+    console.error(`Error deleting order ${orderId}:`, error);
+    throw new Error('Failed to delete order.');
+  }
+}
+
 
 export async function getTotalRevenue(): Promise<number> {
   try {
