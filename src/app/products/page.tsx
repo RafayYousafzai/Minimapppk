@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
@@ -21,7 +20,13 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
 import { Suspense } from "react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 const PRODUCTS_PER_PAGE = 8;
 
@@ -204,23 +209,23 @@ function ProductsContent() {
       </div>
     );
   }
-  
+
   const filterSidebarComponent = (
-     <FilterSidebar
-        onFilterChange={handleFilterChange}
-        initialFilters={filters}
-        key={`${globalMinPrice}-${globalMaxPrice}-${filters.categories.join(
-          ","
-        )}-${filters.minRating}-${filters.priceRange.join(",")}`}
-      />
+    <FilterSidebar
+      onFilterChange={handleFilterChange}
+      initialFilters={filters}
+      key={`${globalMinPrice}-${globalMaxPrice}-${filters.categories.join(
+        ","
+      )}-${filters.minRating}-${filters.priceRange.join(",")}`}
+      paginatedProducts={paginatedProducts}
+      filteredProducts={filteredProducts}
+    />
   );
 
   return (
     <div className=" px-4 flex flex-col lg:flex-row gap-8">
       {/* Desktop Sidebar */}
-      <div className="hidden lg:block">
-        {filterSidebarComponent}
-      </div>
+      <div className="hidden lg:block">{filterSidebarComponent}</div>
 
       <div className="flex-1">
         <div className="mb-6">
@@ -247,33 +252,14 @@ function ProductsContent() {
               <span className="hidden md:inline">Search</span>
             </Button>
           </form>
-          
+
           {/* Mobile Filter Trigger */}
-           <div className="lg:hidden mt-4">
-            <Sheet open={isFilterSheetOpen} onOpenChange={setIsFilterSheetOpen}>
-              <SheetTrigger asChild>
-                <div className="flex items-center justify-between text-sm text-muted-foreground p-2 rounded-md hover:bg-secondary cursor-pointer">
-                  <span>
-                    Showing {paginatedProducts.length} of {filteredProducts.length}{" "}
-                    products.
-                  </span>
-                  <div className="flex items-center gap-1 font-medium text-foreground">
-                    <ListFilter className="h-4 w-4" />
-                    Filters
-                  </div>
-                </div>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-full max-w-sm sm:max-w-md p-0">
-                  {filterSidebarComponent}
-              </SheetContent>
-            </Sheet>
-          </div>
-          
-           <p className="hidden lg:block text-sm text-muted-foreground mt-2">
+          <div className="lg:hidden mt-4">{filterSidebarComponent}</div>
+
+          <p className="hidden lg:block text-sm text-muted-foreground mt-2">
             Showing {paginatedProducts.length} of {filteredProducts.length}{" "}
             products.
           </p>
-
         </div>
 
         {paginatedProducts.length > 0 ? (

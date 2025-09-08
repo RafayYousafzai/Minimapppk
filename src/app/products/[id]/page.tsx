@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
@@ -13,12 +12,7 @@ import QuantitySelector from "@/components/products/QuantitySelector";
 import VariantSelector from "@/components/products/VariantSelector";
 import StarRating from "@/components/ui/StarRating";
 import { Separator } from "@/components/ui/separator";
-import {
-  ShieldCheck,
-  RotateCw,
-  Truck,
-  AlertTriangle
-} from "lucide-react";
+import { ShieldCheck, RotateCw, Truck, AlertTriangle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import AddToCartButton from "@/components/shared/AddToCartButton";
@@ -71,7 +65,6 @@ export default function ProductDetailPage() {
     setQuantity(1); // Reset quantity when variant changes
   };
 
-
   const currentPrice = useMemo(() => {
     if (!product) return 0;
     let price = product.price;
@@ -103,10 +96,7 @@ export default function ProductDetailPage() {
             <Skeleton className="w-full aspect-square rounded-2xl" />
             <div className="grid grid-cols-5 gap-3">
               {[...Array(4)].map((_, i) => (
-                <Skeleton
-                  key={i}
-                  className="w-full aspect-square rounded-xl"
-                />
+                <Skeleton key={i} className="w-full aspect-square rounded-xl" />
               ))}
             </div>
           </div>
@@ -157,7 +147,7 @@ export default function ProductDetailPage() {
     <div className="container mx-auto px-4 py-8 lg:py-12">
       <div className="space-y-16">
         {/* Main Product Section */}
-        <section className="grid md:grid-cols-2 gap-8 lg:gap-12 xl:gap-16 items-start">
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 xl:gap-16 items-start">
           <div className="md:sticky md:top-8">
             <ProductImageGallery
               images={product.images}
@@ -196,13 +186,13 @@ export default function ProductDetailPage() {
             {/* Pricing */}
             <div className="space-y-2">
               <div className="flex items-baseline gap-4">
-                <span className="text-4xl font-bold text-foreground">
+                <span className=" text-2xl md:text-4xl font-bold text-foreground">
                   ₨{currentPrice.toFixed(2)}
                 </span>
                 {product.originalPrice &&
                   product.originalPrice > currentPrice && (
                     <>
-                      <span className="text-2xl text-muted-foreground line-through">
+                      <span className="text-lg md:text-2xl text-muted-foreground line-through">
                         ₨{product.originalPrice.toFixed(2)}
                       </span>
                       <Badge
@@ -233,7 +223,9 @@ export default function ProductDetailPage() {
                     key={variant.type}
                     variant={variant}
                     selectedValue={selectedVariants[variant.type]}
-                    onValueChange={(value) => handleVariantSelect(variant.type, value)}
+                    onValueChange={(value) =>
+                      handleVariantSelect(variant.type, value)
+                    }
                   />
                 ))}
               </div>
@@ -274,7 +266,9 @@ export default function ProductDetailPage() {
               <div className="flex items-center gap-3 p-4 bg-secondary rounded-xl border">
                 <Truck className="w-8 h-8 text-blue-600 flex-shrink-0" />
                 <div>
-                  <p className="font-semibold text-secondary-foreground">Free Shipping</p>
+                  <p className="font-semibold text-secondary-foreground">
+                    Free Shipping
+                  </p>
                   <p className="text-sm text-muted-foreground">
                     On orders over ₨2000
                   </p>

@@ -1,8 +1,6 @@
-
 "use client";
 
 import type React from "react";
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -10,17 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import StarRating from "@/components/ui/StarRating";
-import {
-  X,
-  ListFilter,
-  Sparkles,
-  Filter,
-  DollarSign,
-  Star,
-  Tag,
-} from "lucide-react";
+import { X, Filter, DollarSign, Star, Tag, ListFilter } from "lucide-react";
 import * as productService from "@/services/productService";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
   SheetContent,
@@ -41,11 +30,15 @@ interface FilterSidebarProps {
     priceRange: [number, number];
     minRating: number;
   };
+  paginatedProducts: any[];
+  filteredProducts: any[];
 }
 
 const FilterSidebar: React.FC<FilterSidebarProps> = ({
   onFilterChange,
   initialFilters,
+  paginatedProducts,
+  filteredProducts,
 }) => {
   const [availableCategories, setAvailableCategories] = useState<string[]>([]);
   const [globalMinPrice, setGlobalMinPrice] = useState(0);
@@ -161,81 +154,70 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
 
   if (isLoading) {
     return (
-      <div className="lg:w-72 xl:w-80 space-y-6 p-6 bg-card border rounded-2xl shadow-lg">
-        <div className="flex items-center gap-2 mb-6">
-          <Skeleton className="h-8 w-8 rounded-full" />
-          <Skeleton className="h-8 w-24" />
+      <div className="w-full lg:w-80 space-y-4 p-4 bg-card border rounded-lg">
+        <div className="flex items-center gap-2 mb-4">
+          <Skeleton className="h-6 w-6 rounded" />
+          <Skeleton className="h-6 w-20" />
         </div>
         {[...Array(3)].map((_, i) => (
-          <div key={i} className="space-y-3 mb-6">
-            <Skeleton className="h-6 w-1/2 mb-3" />
-            <Skeleton className="h-4 w-full mb-2" />
-            <Skeleton className="h-4 w-full mb-2" />
-            <Skeleton className="h-4 w-3/4 mb-2" />
+          <div key={i} className="space-y-2">
+            <Skeleton className="h-5 w-1/2" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
           </div>
         ))}
-        <Skeleton className="h-12 w-full mb-3 rounded-full" />
-        <Skeleton className="h-12 w-full rounded-full" />
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full" />
       </div>
     );
   }
 
   const filterContent = (
-    <div className="flex flex-col h-full">
-      <SheetHeader className="p-6 border-b lg:border-none lg:p-0">
-         <div className="flex items-center gap-3 mb-6 lg:mb-0">
-          <div className="w-10 h-10 bg-primary text-primary-foreground rounded-full flex items-center justify-center shadow-lg">
-            <Filter className="w-5 h-5" />
+    <div className="w-full h-full flex flex-col">
+      {/* Header */}
+      <div className="flex items-center gap-2 p-4 border-b lg:border-none">
+        <Filter className="w-5 h-5 text-primary" />
+        <h2 className="text-lg font-semibold">Filters</h2>
+      </div>
+
+      {/* Content - Single scrollable area instead of nested ones */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-6">
+        {/* Categories Section */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Tag className="w-4 h-4 text-muted-foreground" />
+            <h3 className="font-medium">Categories</h3>
           </div>
-          <h2 className="text-xl font-bold text-foreground">Filters</h2>
+          <div className="space-y-2 max-h-40 overflow-y-auto">
+            {availableCategories.map((category) => (
+              <div
+                key={category}
+                className="flex items-center space-x-2 p-2 rounded hover:bg-muted/50 transition-colors"
+              >
+                <Checkbox
+                  id={`cat-${category}`}
+                  checked={selectedCategories.includes(category)}
+                  onCheckedChange={() => handleCategoryChange(category)}
+                />
+                <Label
+                  htmlFor={`cat-${category}`}
+                  className="text-sm cursor-pointer flex-1"
+                >
+                  {category}
+                </Label>
+              </div>
+            ))}
+          </div>
         </div>
-      </SheetHeader>
-      
-      <ScrollArea className="flex-grow p-6">
-        <div className="space-y-8 p-1">
-          {/* Categories Section */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center">
-                <Tag className="w-4 h-4" />
-              </div>
-              <h3 className="text-lg font-bold text-foreground">Categories</h3>
-            </div>
-            <ScrollArea className="h-40">
-              <div className="space-y-3">
-                {availableCategories.map((category) => (
-                  <div
-                    key={category}
-                    className="flex items-center space-x-3 p-2 rounded-xl hover:bg-secondary transition-colors group"
-                  >
-                    <Checkbox
-                      id={`cat-${category}`}
-                      checked={selectedCategories.includes(category)}
-                      onCheckedChange={() => handleCategoryChange(category)}
-                    />
-                    <Label
-                      htmlFor={`cat-${category}`}
-                      className="font-medium cursor-pointer text-foreground transition-colors flex-1"
-                    >
-                      {category}
-                    </Label>
-                  </div>
-                ))}
-              </div>
-            </ScrollArea>
-          </div>
 
-          <div className="h-px bg-border"></div>
-
+        <div className="border-t pt-6">
           {/* Price Range Section */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center">
-                <DollarSign className="w-4 h-4" />
-              </div>
-              <h3 className="text-lg font-bold text-foreground">Price Range</h3>
+              <DollarSign className="w-4 h-4 text-muted-foreground" />
+              <h3 className="font-medium">Price Range</h3>
             </div>
-            <div className="bg-secondary p-4 rounded-xl space-y-4">
+            <div className="space-y-4">
               <Slider
                 min={globalMinPrice}
                 max={globalMaxPrice}
@@ -244,34 +226,27 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
                 onValueChange={(value) =>
                   handlePriceChange(value as [number, number])
                 }
-                className="mb-3"
               />
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <div className="flex-1">
-                  <Label className="text-xs text-muted-foreground font-medium mb-1 block">
-                    Min Price
-                  </Label>
+                  <Label className="text-xs text-muted-foreground">Min</Label>
                   <Input
                     type="number"
                     value={priceRange[0]}
                     onChange={handleMinPriceInputChange}
-                    placeholder={`$${globalMinPrice}`}
-                    className="text-sm rounded-xl"
+                    className="text-sm h-8"
                     min={globalMinPrice}
                     max={priceRange[1]}
                   />
                 </div>
-                <div className="text-foreground font-bold mt-5">—</div>
+                <span className="text-muted-foreground mt-4">—</span>
                 <div className="flex-1">
-                  <Label className="text-xs text-muted-foreground font-medium mb-1 block">
-                    Max Price
-                  </Label>
+                  <Label className="text-xs text-muted-foreground">Max</Label>
                   <Input
                     type="number"
                     value={priceRange[1]}
                     onChange={handleMaxPriceInputChange}
-                    placeholder={`$${globalMaxPrice}`}
-                    className="text-sm rounded-xl"
+                    className="text-sm h-8"
                     min={priceRange[0]}
                     max={globalMaxPrice}
                   />
@@ -279,62 +254,102 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
               </div>
             </div>
           </div>
+        </div>
 
-          <div className="h-px bg-border"></div>
-
+        <div className="border-t pt-6">
           {/* Rating Section */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center">
-                <Star className="w-4 h-4" />
-              </div>
-              <h3 className="text-lg font-bold text-foreground">Rating</h3>
+              <Star className="w-4 h-4 text-muted-foreground" />
+              <h3 className="font-medium">Rating</h3>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1">
               {[4, 3, 2, 1].map((rating) => (
                 <Button
                   key={rating}
                   variant={minRating === rating ? "default" : "ghost"}
                   onClick={() => handleRatingChange(rating)}
-                  className="w-full justify-start rounded-xl p-3 transition-all duration-300"
+                  className="w-full justify-start h-8 text-sm"
+                  size="sm"
                 >
-                  <StarRating rating={rating} size={16} />
-                  <span className="ml-2 text-sm font-medium">& Up</span>
-                  {minRating === rating && <Sparkles className="ml-auto w-4 h-4" />}
+                  <StarRating rating={rating} size={14} />
+                  <span className="ml-2">& Up</span>
                 </Button>
               ))}
             </div>
           </div>
         </div>
-      </ScrollArea>
-      
+      </div>
+
       {/* Action Buttons */}
-      <div className="p-6 border-t mt-auto">
-        <div className="space-y-3">
-          <Button
-            onClick={applyFilters}
-            className="w-full rounded-full py-6 text-lg shadow-lg hover:shadow-xl transition-all duration-300"
-          >
-            <Filter className="mr-2 h-5 w-5" />
-            Apply Filters
-          </Button>
-          <Button
-            onClick={clearFilters}
-            variant="outline"
-            className="w-full rounded-full py-6 text-lg transition-all duration-300"
-          >
-            <X className="mr-2 h-5 w-5" />
-            Clear All
-          </Button>
-        </div>
+      <div className="p-4 border-t mt-auto space-y-2">
+        <Button onClick={applyFilters} className="w-full h-9" size="sm">
+          <Filter className="mr-2 h-4 w-4" />
+          Apply Filters
+        </Button>
+        <Button
+          onClick={clearFilters}
+          variant="outline"
+          className="w-full h-9 bg-transparent"
+          size="sm"
+        >
+          <X className="mr-2 h-4 w-4" />
+          Clear All
+        </Button>
       </div>
     </div>
   );
 
   return (
-    <aside className="lg:w-72 xl:w-80 lg:bg-card lg:border lg:rounded-2xl lg:shadow-lg lg:transition-shadow lg:duration-300">
-      {filterContent}
-    </aside>
+    <>
+      <div className="lg:hidden">
+        <Sheet>
+          <SheetTrigger asChild>
+            <div className="flex items-center justify-between text-sm text-muted-foreground p-2 rounded-md hover:bg-secondary cursor-pointer">
+              <span>
+                Showing {paginatedProducts.length} of {filteredProducts.length}{" "}
+                products.
+              </span>
+              <div className="flex items-center gap-1 font-medium text-foreground">
+                <ListFilter className="h-4 w-4" />
+                Filters
+              </div>
+            </div>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-80 p-0">
+            <SheetHeader className="sr-only">
+              <SheetTitle>Filters</SheetTitle>
+            </SheetHeader>
+            {filterContent}
+          </SheetContent>
+        </Sheet>
+      </div>
+
+      {/* <Sheet open={isFilterSheetOpen} onOpenChange={setIsFilterSheetOpen}>
+                    <SheetTrigger asChild>
+                      <div className="flex items-center justify-between text-sm text-muted-foreground p-2 rounded-md hover:bg-secondary cursor-pointer">
+                        <span>
+                          Showing {paginatedProducts.length} of{" "}
+                          {filteredProducts.length} products.
+                        </span>
+                        <div className="flex items-center gap-1 font-medium text-foreground">
+                          <ListFilter className="h-4 w-4" />
+                          Filters
+                        </div>
+                      </div>
+                    </SheetTrigger>
+                    <SheetContent side="left" className="w-80 p-0">
+                      <SheetHeader className="sr-only">
+                        <SheetTitle>Filters</SheetTitle>
+                      </SheetHeader>
+                      {filterSidebarComponent}
+                    </SheetContent>
+                  </Sheet> */}
+
+      <aside className="hidden lg:block w-80 bg-card border rounded-lg h-fit sticky top-4">
+        {filterContent}
+      </aside>
+    </>
   );
 };
 
