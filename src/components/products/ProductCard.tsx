@@ -1,4 +1,3 @@
-
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -12,7 +11,7 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
   return (
-    <div className="group bg-card border rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden transform hover:-translate-y-1 h-full flex flex-col">
+    <div className="group bg-transparent border-none rounded-2xl transition-all duration-300 overflow-hidden transform hover:-translate-y-1 h-full flex flex-col">
       <div className="relative overflow-hidden">
         <Link href={`/products/${product.id}`}>
           <div className="relative h-64 bg-secondary">
@@ -20,29 +19,32 @@ export default function ProductCard({ product }: ProductCardProps) {
               src={product.images[0] || "/placeholder.svg"}
               alt={product.name}
               fill
-              className="object-cover transition-transform duration-500 group-hover:scale-110"
+              className="object-cover transition-transform duration-500 group-hover:scale-110 rounded-xl"
             />
           </div>
         </Link>
 
         {product.originalPrice && product.originalPrice > product.price && (
-          <Badge variant="destructive" className="absolute top-4 left-4 text-sm font-semibold shadow-lg">
+          <Badge
+            variant="destructive"
+            className="absolute top-4 left-4 text-sm font-semibold"
+          >
             Sale
           </Badge>
         )}
       </div>
 
-      <div className="p-4 flex flex-col flex-grow">
+      <div className="py-4 px-1 flex flex-col flex-grow">
         <div className="flex-grow">
-            <Link href={`/products/${product.id}`}>
-                <h3 className="font-semibold text-lg text-foreground mb-1 line-clamp-2">
-                    {product.name}
-                </h3>
-            </Link>
+          <Link href={`/products/${product.id}`}>
+            <h3 className="font-semibold text-lg text-foreground mb-1 line-clamp-2">
+              {product.name}
+            </h3>
+          </Link>
 
-            <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
+          <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
             {product.description}
-            </p>
+          </p>
         </div>
 
         <div className="flex items-center justify-between mt-auto">
