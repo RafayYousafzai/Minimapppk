@@ -1,69 +1,53 @@
-
 import type { Review } from '@/lib/types';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import StarRating from '@/components/ui/StarRating';
-import { Quote, User } from 'lucide-react';
+import { Quote, CheckCircle2 } from 'lucide-react';
 import { format } from 'date-fns';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface TestimonialCardProps {
   review: Review;
 }
 
 const TestimonialCard: React.FC<TestimonialCardProps> = ({ review }) => {
+  const initials = review.reviewerName
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+
   return (
-    <Card className="group relative overflow-hidden bg-card/80 backdrop-blur-sm border-2 border-border hover:border-primary/30 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 h-full">
-      {/* Gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-accent/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-      
-      {/* Decorative elements */}
-      <div className="absolute top-4 right-4 opacity-20 group-hover:opacity-40 transition-opacity duration-300">
-        <Quote className="h-12 w-12 text-primary/40 transform rotate-12" />
-      </div>
-      
-      <CardHeader className="relative pb-4 pt-6">
-        <div className="flex items-center gap-4 mb-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-            <User className="w-6 h-6 text-primary-foreground" />
-          </div>
-          <div className="flex-1">
-            <CardTitle className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">
-              {review.reviewerName}
-            </CardTitle>
-            <div className="flex items-center gap-2 mt-1">
-              <StarRating rating={review.rating} size={16} />
-              <span className="text-sm text-primary font-semibold">
-                {review.rating}/5
-              </span>
-            </div>
-          </div>
-        </div>
-      </CardHeader>
-
-      <CardContent className="relative flex-grow pb-6">
-        <div className="relative">
-          {/* <Quote className="absolute -top-2 -left-2 w-6 h-6 text-primary/30" /> */}
-          <p className="text-muted-foreground italic leading-relaxed pl-4 mb-4 group-hover:text-foreground transition-colors">
-            &quot;{review.comment}&quot;
-          </p>
+    <Card className="h-full border-none shadow-sm transition-all duration-300 bg-card hover:-translate-y-1 flex flex-col justify-between group rounded-2xl overflow-hidden">
+      <CardContent className="pt-8 px-6 relative flex-grow">
+        <Quote className="absolute top-6 right-6 h-8 w-8 text-primary/5 group-hover:text-primary/10 transition-colors duration-300" />
+        
+        <div className="mb-4">
+          <StarRating rating={review.rating} size={16} />
         </div>
 
-        {review.createdAt && (
-          <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
-            <div className="inline-flex items-center gap-1 bg-green-500/10 rounded-full px-3 py-1">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-              <span className="text-xs text-green-600 dark:text-green-400 font-medium">Verified Purchase</span>
-            </div>
-            <p className="text-xs text-muted-foreground font-medium">
-              {review.createdAt instanceof Date 
-                ? format(review.createdAt, 'MMM d, yyyy')
-                : 'Recently'}
-            </p>
-          </div>
-        )}
-
-        {/* Bottom gradient line */}
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-accent to-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        <p className="text-foreground/80 text-base leading-relaxed font-medium mb-6 relative z-10">
+          &quot;{review.comment}&quot;
+        </p>
       </CardContent>
+
+      <CardFooter className="px-6 pb-6 pt-4 flex items-center justify-between border-t border-border/30 bg-secondary/10">
+        <div className="flex items-center gap-3">
+          <Avatar className="h-10 w-10 border-2 border-background shadow-sm">
+            <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${review.reviewerName}`} />
+            <AvatarFallback className="bg-primary/10 text-primary font-bold">{initials}</AvatarFallback>
+          </Avatar>
+          <div>
+            <h4 className="font-bold text-sm text-foreground">{review.reviewerName}</h4>
+            <p className="text-xs text-muted-foreground">{format(review.createdAt || new Date(), 'MMM d, yyyy')}</p>
+          </div>
+        </div>
+
+        <div className="flex items-center text-green-600 bg-green-50 dark:bg-green-900/20 px-2.5 py-1 rounded-full border border-green-100 dark:border-green-900/30">
+          <CheckCircle2 className="h-3 w-3 mr-1.5" />
+          <span className="text-[10px] font-bold uppercase tracking-wider">Verified</span>
+        </div>
+      </CardFooter>
     </Card>
   );
 };

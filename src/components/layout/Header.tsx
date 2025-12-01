@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Navbar,
   NavbarBrand,
@@ -18,9 +18,10 @@ import {
   ShoppingCart,
   Search,
   PackageSearch,
-  Package2Icon as LogoIcon,
   Home,
   ListIcon,
+  Menu,
+  X,
 } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
@@ -37,11 +38,20 @@ const Header = () => {
   const [searchValue, setSearchValue] = useState(
     searchParams.get("search") || ""
   );
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const navItems = [
-    { href: "/", label: "Home", icon: <Home /> },
-    { href: "/products", label: "Products", icon: <ListIcon /> },
-    { href: "/track-order", label: "Track Order", icon: <PackageSearch /> },
+    { href: "/", label: "Home", icon: <Home className="w-4 h-4" /> },
+    { href: "/products", label: "Collection", icon: <ListIcon className="w-4 h-4" /> },
+    { href: "/track-order", label: "Track Order", icon: <PackageSearch className="w-4 h-4" /> },
   ];
 
   const currentItemCount = getItemCount();
@@ -69,30 +79,54 @@ const Header = () => {
 
   return (
     <Navbar
-      isBordered
+      isBordered={isScrolled}
       isMenuOpen={isMenuOpen}
       onMenuOpenChange={setIsMenuOpen}
-      className="bg-background text-foreground border-b dark "
+      maxWidth="xl"
+      className={cn(
+        "fixed top-0 z-50 transition-all duration-300",
+        isScrolled
+          ? "bg-background/80 backdrop-blur-md border-b shadow-sm py-2"
+          : "bg-transparent border-transparent py-4"
+      )}
+      classNames={{
+        wrapper: "px-4 md:px-8",
+        item: [
+          "flex",
+          "relative",
+          "h-full",
+          "items-center",
+          "data-[active=true]:after:content-['']",
+          "data-[active=true]:after:absolute",
+          "data-[active=true]:after:bottom-0",
+          "data-[active=true]:after:left-0",
+          "data-[active=true]:after:right-0",
+          "data-[active=true]:after:h-[2px]",
+          "data-[active=true]:after:rounded-[2px]",
+          "data-[active=true]:after:bg-primary",
+        ],
+      }}
     >
       <NavbarContent className="sm:hidden" justify="start">
         <NavbarMenuToggle
           aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+          icon={isMenuOpen ? <X /> : <Menu />}
           className="text-foreground"
         />
       </NavbarContent>
 
       <NavbarContent className="sm:hidden pr-3" justify="center">
-        <Link href="/" className="flex items-center">
+        <Link href="/" className="flex items-center gap-2">
           <NavbarBrand>
-            <p className="font-bold  text-xl text-inherit ml-2">Minimapppk</p>
+            <p className="font-bold text-2xl tracking-tighter text-inherit">Minimapppk</p>
           </NavbarBrand>
         </Link>
       </NavbarContent>
 
-      <NavbarContent className="hidden sm:flex gap-4" justify="center">
-        <Link href="/" className="flex items-center">
-          <NavbarBrand className="mr-6">
-            <p className="font-bold text-xl  text-inherit ml-2">Minimapppk</p>
+      <NavbarContent className="hidden sm:flex gap-8" justify="center">
+        <Link href="/" className="flex items-center mr-4">
+          <NavbarBrand>
+            <p className="font-bold text-2xl tracking-tighter text-inherit">Minimapppk</p>
           </NavbarBrand>
         </Link>
 
@@ -101,10 +135,10 @@ const Header = () => {
             <Link
               href={item.href}
               className={cn(
-                "flex items-center gap-1.5",
+                "flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary",
                 pathname === item.href
-                  ? "text-foreground font-semibold"
-                  : "text-muted-foreground hover:text-foreground/80"
+                  ? "text-primary"
+                  : "text-muted-foreground"
               )}
             >
               {item.label}
@@ -113,20 +147,19 @@ const Header = () => {
         ))}
       </NavbarContent>
 
-      <NavbarContent justify="end">
-        <NavbarItem className="hidden sm:flex">
-          <form onSubmit={handleSearch} className="flex items-center">
+      <NavbarContent justify="end" className="gap-4">
+        <NavbarItem className="hidden lg:flex">
+          <form onSubmit={handleSearch} className="relative">
             <Input
               placeholder="Search..."
-              color="secondary"
               size="sm"
-              startContent={<Search className="h-4 w-4" />}
+              startContent={<Search className="h-4 w-4 text-muted-foreground" />}
               type="search"
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
               classNames={{
-                inputWrapper:
-                  "bg-secondary text-secondary-foreground rounded-lg",
+                input: "text-sm",
+                inputWrapper: "bg-secondary/50 hover:bg-secondary/80 transition-colors rounded-full h-9 w-[200px] focus-within:w-[300px] transition-all duration-300",
               }}
               spellCheck={false}
             />
@@ -142,55 +175,48 @@ const Header = () => {
             as={Link}
             href="/cart"
             isIconOnly
-            variant="ghost"
-            className="text-foreground relative"
+            variant="light"
+            className="text-foreground relative overflow-visible hover:bg-secondary/50 rounded-full"
           >
             {cartInitialized && currentItemCount > 0 && (
-              <Chip
-                size="sm"
-                color="danger"
-                className="bg-primary text-primary-foreground rounded-full z-10 absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center text-xs"
-              >
+              <span className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center bg-primary text-primary-foreground text-[10px] font-bold rounded-full shadow-sm animate-in zoom-in duration-300">
                 {currentItemCount}
-              </Chip>
+              </span>
             )}
             <ShoppingCart className="h-5 w-5" />
           </Button>
         </NavbarItem>
       </NavbarContent>
 
-      <NavbarMenu className="bg-background/95 text-foreground">
-        <NavbarMenuItem className="mt-4">
+      <NavbarMenu className="bg-background/95 backdrop-blur-xl pt-8">
+        <NavbarMenuItem className="mb-8">
           <form onSubmit={handleSearch} className="flex gap-2">
             <Input
               placeholder="Search products..."
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
-              variant="flat"
-              color="secondary"
+              startContent={<Search className="h-4 w-4 text-muted-foreground" />}
               classNames={{
-                inputWrapper:
-                  "bg-secondary text-secondary-foreground rounded-lg",
+                inputWrapper: "bg-secondary/50 rounded-full",
               }}
               spellCheck={false}
             />
-            <Button type="submit" variant="flat" isIconOnly aria-label="Search">
-              <Search className="h-5 w-5" />
-            </Button>
           </form>
         </NavbarMenuItem>
-        <Divider className="my-2" />
-        {[...navItems].map((item, index) => (
-          <NavbarMenuItem key={`${item.href}-${index}`}>
+        
+        {navItems.map((item, index) => (
+          <NavbarMenuItem key={`${item.href}-${index}`} className="mb-4">
             <Link
-              className="w-full flex items-center gap-2 my-1"
+              className={cn(
+                "w-full flex items-center gap-4 text-lg font-medium p-2 rounded-lg transition-colors",
+                pathname === item.href ? "bg-secondary text-primary" : "text-muted-foreground hover:text-foreground"
+              )}
               href={item.href}
               onClick={() => setIsMenuOpen(false)}
             >
-              {item.icon &&
-                React.cloneElement(item.icon as React.ReactElement<any>, {
-                  className: "h-5 w-5",
-                })}
+              <span className="p-2 bg-background rounded-full shadow-sm">
+                {item.icon}
+              </span>
               {item.label}
             </Link>
           </NavbarMenuItem>
