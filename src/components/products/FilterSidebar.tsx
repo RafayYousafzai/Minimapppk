@@ -32,6 +32,7 @@ interface FilterSidebarProps {
   };
   paginatedProducts: any[];
   filteredProducts: any[];
+  totalCount?: number;
 }
 
 const FilterSidebar: React.FC<FilterSidebarProps> = ({
@@ -39,6 +40,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
   initialFilters,
   paginatedProducts,
   filteredProducts,
+  totalCount,
 }) => {
   const [availableCategories, setAvailableCategories] = useState<string[]>([]);
   const [globalMinPrice, setGlobalMinPrice] = useState(0);
@@ -56,9 +58,10 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
   useEffect(() => {
     const fetchFilterData = async () => {
       setIsLoading(true);
+      // Use optimized functions that don't fetch all products
       const [categories, priceRangeData] = await Promise.all([
-        productService.getAllCategories(),
-        productService.getPriceRange(),
+        productService.getAllCategoriesOptimized(),
+        productService.getPriceRangeOptimized(),
       ]);
       setAvailableCategories(categories);
       setGlobalMinPrice(priceRangeData.min);
@@ -175,7 +178,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
   const filterContent = (
     <div className="w-full h-full flex flex-col">
       {/* Header */}
-      <div className="flex items-center gap-2 p-4 border-b lg:border-none">
+      <div className="flex items-center gap-2 p-4 pb-2">
         <Filter className="w-5 h-5 text-primary" />
         <h2 className="text-lg font-semibold">Filters</h2>
       </div>
@@ -210,7 +213,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
           </div>
         </div>
 
-        <div className="border-t pt-6">
+        <div className="pt-2">
           {/* Price Range Section */}
           <div className="space-y-3">
             <div className="flex items-center gap-2">
@@ -256,7 +259,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
           </div>
         </div>
 
-        <div className="border-t pt-6">
+        <div className="pt-2">
           {/* Rating Section */}
           <div className="space-y-3">
             <div className="flex items-center gap-2">
@@ -282,7 +285,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
       </div>
 
       {/* Action Buttons */}
-      <div className="p-4 border-t mt-auto space-y-2">
+      <div className="p-4 mt-auto space-y-2">
         <Button onClick={applyFilters} className="w-full h-9" size="sm">
           <Filter className="mr-2 h-4 w-4" />
           Apply Filters
@@ -346,7 +349,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
                     </SheetContent>
                   </Sheet> */}
 
-      <aside className="hidden lg:block w-80 bg-card border rounded-lg h-fit sticky top-4">
+      <aside className="hidden lg:block w-80 bg-card/50 backdrop-blur-sm rounded-3xl h-fit sticky top-24 p-2">
         {filterContent}
       </aside>
     </>

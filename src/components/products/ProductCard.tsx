@@ -11,63 +11,75 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
   return (
-    <div className="group bg-transparent border-none rounded-2xl transition-all duration-300 overflow-hidden transform hover:-translate-y-1 h-full flex flex-col">
-      <div className="relative overflow-hidden">
+    <div className="group relative bg-card rounded-3xl overflow-hidden transition-all duration-300  flex flex-col h-full">
+      <div className="relative aspect-[4/5] overflow-hidden bg-secondary/20">
         <Link href={`/products/${product.id}`}>
-          <div className="relative h-64 bg-secondary">
-            <Image
-              src={product.images[0] || "/placeholder.svg"}
-              alt={product.name}
-              fill
-              className="object-cover transition-transform duration-500 group-hover:scale-110 rounded-xl"
-            />
-          </div>
+          <Image
+            src={product.images[0] || "/placeholder.svg"}
+            alt={product.name}
+            fill
+            className="object-cover transition-transform duration-700 group-hover:scale-110"
+          />
         </Link>
 
         {product.originalPrice && product.originalPrice > product.price && (
           <Badge
             variant="destructive"
-            className="absolute top-4 left-4 text-sm font-semibold"
+            className="absolute top-3 left-3 z-10 px-3 py-1 text-xs font-bold uppercase tracking-wider shadow-sm"
           >
             Sale
           </Badge>
         )}
+
+        {/* Quick Action Button Overlay */}
+        <div className="absolute bottom-4 left-0 right-0 px-4 opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+          <Button
+            className="w-full rounded-full font-medium shadow-lg bg-white text-black hover:bg-white/90 dark:bg-black dark:text-white dark:hover:bg-black/90"
+            asChild
+          >
+            <Link href={`/products/${product.id}`}>View Details</Link>
+          </Button>
+        </div>
       </div>
 
-      <div className="py-4 px-1 flex flex-col flex-grow">
-        <div className="flex-grow">
-          <Link href={`/products/${product.id}`}>
-            <h3 className="font-semibold text-lg text-foreground mb-1 line-clamp-2">
-              {product.name}
-            </h3>
-          </Link>
-
-          <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
-            {product.description}
+      <div className="p-5 flex flex-col flex-grow">
+        <div className="mb-2">
+          <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
+            {product.category}
           </p>
         </div>
 
-        <div className="flex items-center justify-between mt-auto">
-          <div className="space-y-1">
-            {product.originalPrice && product.originalPrice > product.price ? (
-              <div className="flex items-center gap-2">
-                <span className="text-xl font-bold text-foreground">
-                  Rs. {product.price.toFixed(2)}
-                </span>
-                <span className="text-sm text-muted-foreground line-through">
-                  Rs. {product.originalPrice.toFixed(2)}
-                </span>
-              </div>
-            ) : (
-              <span className="text-xl font-bold text-foreground">
-                Rs. {product.price.toFixed(2)}
+        <Link
+          href={`/products/${product.id}`}
+          className="block group-hover:text-primary transition-colors"
+        >
+          <h3 className="font-semibold text-lg leading-tight mb-2 line-clamp-1">
+            {product.name}
+          </h3>
+        </Link>
+
+        <p className="text-sm text-muted-foreground line-clamp-2 mb-4 flex-grow">
+          {product.description}
+        </p>
+
+        <div className="flex items-center justify-between mt-auto pt-4 border-t border-border/40">
+          <div className="flex flex-col">
+            {product.originalPrice && product.originalPrice > product.price && (
+              <span className="text-xs text-muted-foreground line-through mb-0.5">
+                ${product.originalPrice.toFixed(2)}
               </span>
             )}
+            <span className="text-lg font-bold text-primary">
+              ${product.price.toFixed(2)}
+            </span>
           </div>
 
-          <Button size="sm" asChild>
-            <Link href={`/products/${product.id}`}>View</Link>
-          </Button>
+          <div className="flex items-center gap-1 text-amber-500">
+            <Star className="w-4 h-4 fill-current" />
+            <span className="text-sm font-medium text-foreground">
+              {product.rating}
+            </span>
+          </div>
         </div>
       </div>
     </div>
