@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useCart } from "@/hooks/useCart";
@@ -16,9 +15,9 @@ export default function CartPage() {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="container mx-auto px-4 py-16">
-          <div className="text-center max-w-md mx-auto">
-            <div className="mx-auto w-32 h-32 bg-secondary rounded-full flex items-center justify-center mb-8">
-              <ShoppingCart className="w-16 h-16 text-muted-foreground" />
+          <div className="text-center max-w-md mx-auto bg-muted/30 p-12 rounded-[3rem]">
+            <div className="mx-auto w-32 h-32 bg-background rounded-full flex items-center justify-center mb-8 shadow-sm">
+              <ShoppingCart className="w-16 h-16 text-muted-foreground/50" />
             </div>
             <h1 className="text-4xl font-bold text-foreground mb-4">
               Your Cart is Empty
@@ -30,7 +29,7 @@ export default function CartPage() {
             <Link href="/products" passHref>
               <Button
                 size="lg"
-                className="h-14 px-8 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+                className="h-14 px-8 text-lg font-semibold rounded-2xl shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300 transform hover:-translate-y-1"
               >
                 <Sparkles className="mr-2 h-6 w-6" />
                 Start Shopping
@@ -47,15 +46,19 @@ export default function CartPage() {
       <div className="container mx-auto px-4 py-8 lg:py-12">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-foreground">Shopping Cart</h1>
+            <h1 className="text-4xl font-bold text-foreground">
+              Shopping Cart
+            </h1>
             <p className="text-lg text-muted-foreground mt-2">
-              {cartItems.length} item{cartItems.length !== 1 ? 's' : ''} in your cart
+              {cartItems.length} item{cartItems.length !== 1 ? "s" : ""} in your
+              cart
             </p>
           </div>
           <Button
             onClick={clearCart}
             disabled={cartItems.length === 0}
-            variant="outline"
+            variant="ghost"
+            className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl"
           >
             <Trash2 className="mr-2 h-5 w-5" />
             Clear Cart

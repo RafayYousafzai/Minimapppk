@@ -1,18 +1,9 @@
-
 "use client";
 
 import type React from "react";
 
 import { useCart } from "@/hooks/useCart";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { ShoppingBag, Truck, ShieldCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
@@ -30,47 +21,47 @@ const CartSummary: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <Card className="shadow-lg border bg-card">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-2xl font-bold text-card-foreground flex items-center gap-2">
-            <ShoppingBag className="w-6 h-6 text-primary" />
-            Order Summary
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">Subtotal ({totalItems} items)</span>
-            <span className="font-semibold text-foreground">
+      <div className="bg-muted/30 rounded-[2rem] p-8">
+        <h2 className="text-2xl font-bold text-foreground mb-8 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+            <ShoppingBag className="w-5 h-5 text-primary" />
+          </div>
+          Order Summary
+        </h2>
+
+        <div className="space-y-4">
+          <div className="flex justify-between items-center text-muted-foreground">
+            <span>Subtotal ({totalItems} items)</span>
+            <span className="font-medium text-foreground">
               ₨{subtotal.toFixed(2)}
             </span>
           </div>
 
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <Truck className="w-4 h-4 text-muted-foreground" />
-              <span className="text-muted-foreground">Shipping</span>
-            </div>
-            <div className="text-right">
-              {shipping > 0 ? (
-                <span className="font-semibold text-foreground">
-                  ₨{shipping.toFixed(2)}
-                </span>
-              ) : subtotal > 2000 ? (
-                <Badge variant="secondary">
-                    FREE
+          <div className="flex justify-between items-center text-muted-foreground">
+            <span className="flex items-center gap-2">
+              Shipping
+              {subtotal > 2000 && (
+                <Badge
+                  variant="secondary"
+                  className="text-[10px] bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                >
+                  FREE
                 </Badge>
-              ) : (
-                <span className="text-sm text-muted-foreground">
-                  Calculated at checkout
-                </span>
               )}
-            </div>
+            </span>
+            <span className="font-medium text-foreground">
+              {shipping > 0
+                ? `₨${shipping.toFixed(2)}`
+                : subtotal > 2000
+                ? "Free"
+                : "Calculated at checkout"}
+            </span>
           </div>
 
           {savings > 0 && (
-            <div className="flex justify-between items-center text-green-600">
-              <span className="font-medium">You saved</span>
-              <span className="font-semibold">-₨{savings.toFixed(2)}</span>
+            <div className="flex justify-between items-center text-green-600 bg-green-50 dark:bg-green-900/10 p-3 rounded-xl">
+              <span className="font-medium text-sm">Total Savings</span>
+              <span className="font-bold">-₨{savings.toFixed(2)}</span>
             </div>
           )}
 
@@ -83,48 +74,44 @@ const CartSummary: React.FC = () => {
             </div>
           )}
 
-          <Separator className="my-4" />
+          <div className="h-px bg-border/50 my-6" />
 
-          <div className="flex justify-between items-center">
-            <span className="text-xl font-bold text-foreground">Total</span>
-            <span className="text-2xl font-bold text-foreground">
+          <div className="flex justify-between items-end">
+            <span className="text-lg font-semibold text-muted-foreground">
+              Total
+            </span>
+            <span className="text-4xl font-bold text-foreground">
               ₨{total.toFixed(2)}
             </span>
           </div>
 
           {subtotal < 2000 && subtotal > 0 && (
-            <div className="bg-secondary border rounded-xl p-4">
-              <p className="text-sm text-secondary-foreground">
-                <Truck className="w-4 h-4 inline mr-1" />
-                Add ₨{(2000 - subtotal).toFixed(2)} more for FREE shipping!
+            <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/10 rounded-xl text-sm text-blue-700 dark:text-blue-300 flex items-start gap-3">
+              <Truck className="w-5 h-5 flex-shrink-0 mt-0.5" />
+              <p>
+                Add <strong>₨{(2000 - subtotal).toFixed(2)}</strong> more to
+                unlock <span className="font-bold">FREE Shipping</span>!
               </p>
             </div>
           )}
-        </CardContent>
+        </div>
 
-        <CardFooter className="pt-6">
+        <div className="mt-8">
           <Button
             size="lg"
-            className="w-full h-14 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+            className="w-full h-14 text-lg font-bold rounded-xl shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all duration-300"
             disabled={totalItems === 0}
             asChild
           >
-            <Link href="/checkout">
-              <ShoppingBag className="mr-2 h-6 w-6" />
-              Proceed to Checkout
-            </Link>
+            <Link href="/checkout">Proceed to Checkout</Link>
           </Button>
-        </CardFooter>
-      </Card>
+        </div>
+      </div>
 
       {/* Trust Indicators */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-3 p-3 bg-secondary rounded-xl border">
-          <ShieldCheck className="w-5 h-5 text-green-600 flex-shrink-0" />
-          <span className="text-sm font-medium text-secondary-foreground">
-            Secure checkout guaranteed
-          </span>
-        </div>
+      <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+        <ShieldCheck className="w-4 h-4" />
+        Secure checkout guaranteed
       </div>
     </div>
   );

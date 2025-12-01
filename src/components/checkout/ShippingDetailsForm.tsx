@@ -1,4 +1,3 @@
-
 "use client";
 
 import type React from "react";
@@ -28,65 +27,41 @@ interface ShippingDetailsFormProps {
 
 const ShippingDetailsForm: React.FC<ShippingDetailsFormProps> = ({ form }) => {
   return (
-    <div className="bg-card border rounded-lg p-6 shadow-sm">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center">
-            <Truck className="w-4 h-4" />
-          </div>
-          <h3 className="text-lg font-bold text-foreground">Shipping Details</h3>
-        </div>
-
+    <div className="space-y-6">
       {/* Personal Information */}
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormField
-            control={form.control}
-            name="shippingFirstName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>First name *</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Jane"
-                    {...field}
-                    value={field.value ?? ""}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="shippingLastName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Last name *</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Doe"
-                    {...field}
-                    value={field.value ?? ""}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <FormField
           control={form.control}
-          name="shippingCompanyName"
+          name="shippingFirstName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="flex items-center gap-2">
-                <Building className="w-4 h-4 text-muted-foreground" />
-                Company name (optional)
+              <FormLabel className="text-base font-semibold text-foreground">
+                First name *
               </FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Acme Corp"
+                  placeholder="Jane"
+                  className="h-12 bg-background border-transparent focus:border-primary rounded-xl shadow-sm transition-all"
+                  {...field}
+                  value={field.value ?? ""}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="shippingLastName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-base font-semibold text-foreground">
+                Last name *
+              </FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Doe"
+                  className="h-12 bg-background border-transparent focus:border-primary rounded-xl shadow-sm transition-all"
                   {...field}
                   value={field.value ?? ""}
                 />
@@ -97,14 +72,36 @@ const ShippingDetailsForm: React.FC<ShippingDetailsFormProps> = ({ form }) => {
         />
       </div>
 
+      <FormField
+        control={form.control}
+        name="shippingCompanyName"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-base font-semibold text-foreground flex items-center gap-2">
+              <Building className="w-4 h-4 text-muted-foreground" />
+              Company name (optional)
+            </FormLabel>
+            <FormControl>
+              <Input
+                placeholder="Acme Corp"
+                className="h-12 bg-background border-transparent focus:border-primary rounded-xl shadow-sm transition-all"
+                {...field}
+                value={field.value ?? ""}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
       {/* Address Information */}
-      <div className="space-y-6 mt-8">
+      <div className="space-y-6">
         <FormField
           control={form.control}
           name="shippingCountry"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="flex items-center gap-2">
+              <FormLabel className="text-base font-semibold text-foreground flex items-center gap-2">
                 <Globe className="w-4 h-4 text-muted-foreground" />
                 Country / Region *
               </FormLabel>
@@ -113,16 +110,13 @@ const ShippingDetailsForm: React.FC<ShippingDetailsFormProps> = ({ form }) => {
                 defaultValue={field.value ?? "PK"}
               >
                 <FormControl>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-12 bg-background border-transparent focus:border-primary rounded-xl shadow-sm transition-all">
                     <SelectValue placeholder="Select a country" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
                   {countries.map((country) => (
-                    <SelectItem
-                      key={country.value}
-                      value={country.value}
-                    >
+                    <SelectItem key={country.value} value={country.value}>
                       {country.label}
                     </SelectItem>
                   ))}
@@ -138,13 +132,14 @@ const ShippingDetailsForm: React.FC<ShippingDetailsFormProps> = ({ form }) => {
           name="shippingStreetAddress1"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="flex items-center gap-2">
+              <FormLabel className="text-base font-semibold text-foreground flex items-center gap-2">
                 <Home className="w-4 h-4 text-muted-foreground" />
                 Street address *
               </FormLabel>
               <FormControl>
                 <Input
                   placeholder="House number and street name"
+                  className="h-12 bg-background border-transparent focus:border-primary rounded-xl shadow-sm transition-all"
                   {...field}
                   value={field.value ?? ""}
                 />
@@ -159,13 +154,14 @@ const ShippingDetailsForm: React.FC<ShippingDetailsFormProps> = ({ form }) => {
           name="shippingStreetAddress2"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="flex items-center gap-2">
+              <FormLabel className="text-base font-semibold text-foreground flex items-center gap-2">
                 <Building className="w-4 h-4 text-muted-foreground" />
                 Apartment, suite, unit, etc. (optional)
               </FormLabel>
               <FormControl>
                 <Input
                   placeholder="Apartment, suite, unit, etc."
+                  className="h-12 bg-background border-transparent focus:border-primary rounded-xl shadow-sm transition-all"
                   {...field}
                   value={field.value ?? ""}
                 />
@@ -181,13 +177,14 @@ const ShippingDetailsForm: React.FC<ShippingDetailsFormProps> = ({ form }) => {
             name="shippingCity"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="flex items-center gap-2">
+                <FormLabel className="text-base font-semibold text-foreground flex items-center gap-2">
                   <MapPin className="w-4 h-4 text-muted-foreground" />
                   Town / City *
                 </FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Lahore"
+                    className="h-12 bg-background border-transparent focus:border-primary rounded-xl shadow-sm transition-all"
                     {...field}
                     value={field.value ?? ""}
                   />
@@ -202,7 +199,7 @@ const ShippingDetailsForm: React.FC<ShippingDetailsFormProps> = ({ form }) => {
             name="shippingState"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="flex items-center gap-2">
+                <FormLabel className="text-base font-semibold text-foreground flex items-center gap-2">
                   <Globe className="w-4 h-4 text-muted-foreground" />
                   State / County *
                 </FormLabel>
@@ -211,16 +208,13 @@ const ShippingDetailsForm: React.FC<ShippingDetailsFormProps> = ({ form }) => {
                   defaultValue={field.value ?? "Punjab"}
                 >
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger className="h-12 bg-background border-transparent focus:border-primary rounded-xl shadow-sm transition-all">
                       <SelectValue placeholder="Select a state" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
                     {pakistanStates.map((state) => (
-                      <SelectItem
-                        key={state}
-                        value={state}
-                      >
+                      <SelectItem key={state} value={state}>
                         {state}
                       </SelectItem>
                     ))}
@@ -237,13 +231,14 @@ const ShippingDetailsForm: React.FC<ShippingDetailsFormProps> = ({ form }) => {
           name="shippingPostcode"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="flex items-center gap-2">
+              <FormLabel className="text-base font-semibold text-foreground flex items-center gap-2">
                 <Mail className="w-4 h-4 text-muted-foreground" />
                 Postcode / ZIP *
               </FormLabel>
               <FormControl>
                 <Input
                   placeholder="54000"
+                  className="h-12 bg-background border-transparent focus:border-primary rounded-xl shadow-sm transition-all"
                   {...field}
                   value={field.value ?? ""}
                 />

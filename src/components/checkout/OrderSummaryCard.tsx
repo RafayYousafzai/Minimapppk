@@ -1,4 +1,3 @@
-
 "use client";
 
 import type React from "react";
@@ -50,22 +49,21 @@ const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({
   const total = subtotal + shippingCharges;
 
   return (
-    <Card className="bg-card border rounded-lg shadow-sm">
+    <div className="bg-muted/30 rounded-[2rem] p-8">
       {/* Header */}
-      <CardHeader className="bg-primary text-primary-foreground p-6 rounded-lg">
-        <CardTitle className="text-2xl font-bold flex items-center gap-3">
-          <div className="w-8 h-8 bg-primary-foreground/20 rounded-full flex items-center justify-center">
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold flex items-center gap-3 mb-2">
+          <div className="w-10 h-10 bg-primary text-primary-foreground rounded-full flex items-center justify-center shadow-lg shadow-primary/20">
             <ShoppingBag className="w-5 h-5" />
           </div>
           Your Order
-          <Sparkles className="w-5 h-5 ml-auto" />
-        </CardTitle>
-        <p className="text-primary-foreground/80 text-sm">
+        </h2>
+        <p className="text-muted-foreground ml-14">
           Review your amazing selections! ✨
         </p>
-      </CardHeader>
+      </div>
 
-      <CardContent className="p-6 space-y-6">
+      <div className="space-y-6">
         {cartItems.length > 0 ? (
           <>
             {/* Order Items */}
@@ -78,14 +76,16 @@ const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({
                 {cartItems.map((item) => (
                   <div
                     key={item.id}
-                    className="flex justify-between items-center p-3 bg-secondary rounded-lg border"
+                    className="flex justify-between items-center p-4 bg-background rounded-2xl shadow-sm"
                   >
                     <div className="flex-1">
-                      <span className="font-medium text-foreground">
+                      <span className="font-medium text-foreground block mb-1">
                         {item.name}
                       </span>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <span>Qty: {item.quantity}</span>
+                        <span className="bg-muted px-2 py-0.5 rounded-md text-xs font-medium">
+                          Qty: {item.quantity}
+                        </span>
                         <span>•</span>
                         <span>₨{item.price.toFixed(2)} each</span>
                       </div>
@@ -99,50 +99,51 @@ const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({
             </div>
 
             {/* Order Summary */}
-            <div className="bg-secondary p-4 rounded-lg border">
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Subtotal</span>
-                  <span className="font-semibold text-foreground">
-                    ₨{subtotal.toFixed(2)}
-                  </span>
+            <div className="bg-background p-6 rounded-2xl shadow-sm space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Subtotal</span>
+                <span className="font-semibold text-foreground">
+                  ₨{subtotal.toFixed(2)}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <Truck className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">Shipping</span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2">
-                    <Truck className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-muted-foreground">Shipping</span>
-                  </div>
-                  <span className="font-semibold text-foreground">
-                    {shippingCharges > 0
-                      ? `₨${shippingCharges.toFixed(2)}`
-                      : "Free! 🎉"}
-                  </span>
-                </div>
-                <div className="h-px bg-border"></div>
-                <div className="flex justify-between items-center text-lg">
-                  <span className="font-bold text-foreground">Total</span>
-                  <span className="font-bold text-primary text-xl">
-                    ₨{total.toFixed(2)}
-                  </span>
-                </div>
+                <span className="font-semibold text-foreground">
+                  {shippingCharges > 0
+                    ? `₨${shippingCharges.toFixed(2)}`
+                    : "Free! 🎉"}
+                </span>
+              </div>
+              <div className="h-px bg-border/50"></div>
+              <div className="flex justify-between items-center text-lg">
+                <span className="font-bold text-foreground">Total</span>
+                <span className="font-bold text-primary text-2xl">
+                  ₨{total.toFixed(2)}
+                </span>
               </div>
             </div>
 
             {/* Payment Info */}
-             <div className="bg-secondary p-4 rounded-lg border text-center">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                    <MessageSquare className="w-5 h-5 text-green-600" />
-                    <h3 className="font-semibold text-foreground">Payment via WhatsApp</h3>
-                </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                    After confirming your order, you will be redirected to WhatsApp to complete your payment with one of our agents.
-                </p>
+            <div className="bg-green-50 p-6 rounded-2xl border border-green-100 text-center">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <MessageSquare className="w-5 h-5 text-green-600" />
+                <h3 className="font-semibold text-green-900">
+                  Payment via WhatsApp
+                </h3>
+              </div>
+              <p className="text-sm text-green-700 leading-relaxed">
+                After confirming your order, you will be redirected to WhatsApp
+                to complete your payment with one of our agents.
+              </p>
             </div>
 
             {/* Privacy Notice */}
-            <div className="bg-secondary p-4 rounded-lg border">
-              <div className="flex items-start gap-2">
-                <Shield className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+            <div className="bg-background p-4 rounded-2xl shadow-sm">
+              <div className="flex items-start gap-3">
+                <Shield className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   Your personal data will be used to process your order, support
                   your experience throughout this website, and for other
@@ -163,13 +164,13 @@ const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({
               control={form.control}
               name="agreeToTerms"
               render={({ field }) => (
-                <FormItem className="bg-card border rounded-lg p-4">
+                <FormItem className="bg-background rounded-2xl p-4 shadow-sm">
                   <div className="flex items-start space-x-3 space-y-0">
                     <FormControl>
                       <Checkbox
                         checked={field.value}
                         onCheckedChange={field.onChange}
-                        className="mt-1"
+                        className="mt-1 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none flex-1">
@@ -191,23 +192,25 @@ const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({
             />
           </>
         ) : (
-          <div className="text-center py-8">
-            <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto mb-4">
-              <ShoppingBag className="w-8 h-8 text-muted-foreground" />
+          <div className="text-center py-12 bg-background rounded-3xl shadow-sm">
+            <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+              <ShoppingBag className="w-10 h-10 text-muted-foreground" />
             </div>
-            <p className="text-muted-foreground">Your cart is empty! 🛒</p>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-lg font-medium text-foreground">
+              Your cart is empty! 🛒
+            </p>
+            <p className="text-muted-foreground mt-2">
               Add some amazing products to get started!
             </p>
           </div>
         )}
-      </CardContent>
+      </div>
 
-      <CardFooter className="p-6 bg-secondary border-t">
+      <div className="mt-8 pt-6 border-t border-border/50">
         <Button
           type="submit"
           size="lg"
-          className="w-full rounded-full py-6 text-lg font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+          className="w-full rounded-xl py-7 text-lg font-bold shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300 transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
           disabled={cartItems.length === 0 || isSubmitting}
         >
           {isSubmitting ? (
@@ -224,8 +227,8 @@ const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({
             </div>
           )}
         </Button>
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   );
 };
 
